@@ -1,4 +1,3 @@
-from openpose import pyopenpose as op
 from .pose import PoseBody135, PoseBody25, PoseBody25All, PoseBundle
 
 
@@ -52,6 +51,7 @@ def mode_conf(mode):
 
 
 def gen_poses(model_folder, mode, video):
+    from openpose import pyopenpose as op
     op_wrap = op.WrapperPython(op.ThreadManagerMode.AsynchronousOut)
     # 2 => synchronous input => OpenPose handles reads internally
     # & asynchrnous output => We can handle the output here
