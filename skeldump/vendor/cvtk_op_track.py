@@ -57,7 +57,8 @@ class PoseMatcher(SGCN_Processor):
         print("_____ Pose Matching: [dist: {:04.2f}]". format(distance))
         if dist >= margin:
             return False, distance  # Do not match
-        else:            return True, distance # Match
+        else:
+            return True, distance  # Match
 
 
 class PoseTrack():
@@ -87,15 +88,7 @@ class PoseTrack():
         num_dets = len(human_candidates)
         print("num_dets", num_dets)
         if num_dets <= 0:
-            dets_list = []
-            det_dict = {"img_id":self.img_id,
-                                "det_id":  0,
-                                "track_id": None,
-                                "openpose_kps": [],
-                                "bbox": [0, 0, 2, 2],
-                                "keypoints": []}
-            dets_list.append(det_dict)
-            self.dets_list_q.append(dets_list)
+            self.dets_list_q.append([])
             return
 
         print("self.img_id", self.img_id)
@@ -109,7 +102,6 @@ class PoseTrack():
         untracked_dets_ids = list(range(len(human_candidates)))
         for i in range(len(self.dets_list_q)):
             index = -(i+1)
-            print("index", index)
             dets_list_prev_frame = self.dets_list_q[index]
             if len(untracked_dets_ids) > 0:
                 self.traverse_each_prev_frame(human_candidates, dets_list_prev_frame, tracked_dets_list,tracked_dets_ids,  untracked_dets_ids)
