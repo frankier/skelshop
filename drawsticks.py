@@ -1,71 +1,24 @@
+from pprint import pformat
 import numpy as np
-
-import h5sparse
+import logging
+import h5py
 import cv2
 import opencv_wrapper as cvw
 import click
-from more_itertools.recipes import grouper, pairwise
+import click_log
+from more_itertools.recipes import grouper
 from skeldump.io import ShotSegmentedReader
 from skeldump.pose import PoseBody25
+from skeldump.skelgraphs import (
+    iter_joints,
+    MODE_GRAPHS,
+    POSETRACK18_GRAPH,
+    POSETRACK18_JOINTS,
+    BODY_25_JOINTS,
+)
 
-
-# From https://github.com/CMU-Perceptual-Computing-Lab/openpose/blob/20d8eca4b43fe28cefc02d341476b04c6a6d6ff2/doc/output.md#pose-output-format-body_25
-BODY_25_LINES = [
-    [17, 15, 0, 1, 8, 9, 10, 11, 22, 23],  # Right eye down to right leg
-    [11, 24],  # Right heel
-    [0, 16, 18],  # Left eye
-    [4, 3, 2, 1, 5, 6, 7],  # Arms
-    [8, 12, 13, 14, 18, 20],  # Left leg
-    [14, 21]  # Left heel
-]
-
-
-def build_graph(lines):
-    graph = {}
-    for line in lines:
-        for n1, n2 in pairwise(line):
-            if n1 > n2:
-                n1, n2 = n2, n1
-            graph.setdefault(n1, set()).add(n2)
-    return graph
-
-
-BODY_25_GRAPH = build_graph(BODY_25_LINES)
-
-
-def max_dim(doc, dim):
-    return max((
-        val
-        for person in doc["people"]
-        for numarr in person.values()
-        for val in numarr[dim::3]
-    ))
-
-
-"""
-def draw_kpts(im, candidates):
-    for candidate in candidates:
-        bbox = candidate['bbox']
-        track_id = candidate['track_id']
-        pose_keypoints_2d = candidate["openpose_kps"]
-        kpt = reshape_keypoints_into_joints(pose_keypoints_2d)
-        kpt = convert18_item(kpt)
-        for item in kpt:
-            score = item[-1]
-            if score > 0.2:
-                x, y = int(item[0]), int(item[1])
-                cv2.circle(im, (x, y), 1, (255, 0, 0), 5)
-
-        for pair in joint_pairs:
-            j, j_parent = pair
-            score = min(kpt[j][-1], kpt[j_parent][-1])
-            if score < 0.1:
-                continue
-            pt1 = (int(kpt[j][0]), int(kpt[j][1]))
-            pt2 = (int(kpt[j_parent][0]), int(kpt[j_parent][1]))
-            cv2.line(im, pt1, pt2, (255,255,0), 2)
-    return im
-"""
+logger = logging.getLogger(__name__)
+click_log.basic_config()
 
 
 def rnd(x):
@@ -79,19 +32,26 @@ class VideoSticksWriter:
         width,
         height,
         fps,
+        graph,
+        joint_names,
         add_cuts=True,
         number_joints=False,
         conv_to_posetrack=False,
-        ann_ids=False,
+        ann_ids=True,
+        scale=1,
     ):
         self.out = cvw.VideoWriter(out, fps=fps, fourcc="mp4v")
         self.width = width
         self.height = height
         self.fps = fps
+        self.graph = graph
+        self.joint_names = joint_names
         self.add_cuts = add_cuts
         self.number_joints = number_joints
         self.conv_to_posetrack = conv_to_posetrack
         self.ann_ids = ann_ids
+        self.scale = scale
+
         self.cut_img = self.get_cut_img()
 
     def draw(self, frame, bundle=None):
@@ -99,31 +59,57 @@ class VideoSticksWriter:
             self.draw_bundle(frame, bundle)
         self.out.write(frame)
 
+    def draw_skel(self, frame, numarr):
+        for (x1, y1, c1), (x2, y2, c2) in iter_joints(self.graph, numarr):
+            c = min(c1, c2)
+            if c == 0:
+                continue
+            cv2.line(
+                frame,
+                (rnd(x1), rnd(y1)),
+                (rnd(x2), rnd(y2)),
+                (255, rnd(255 * (1 - c)), rnd(255 * (1 - c))),
+                1
+            )
+
+    def draw_ann(self, frame, pers_id, numarr):
+        if not self.ann_ids:
+            return
+        left_idx = self.joint_names.index("left shoulder")
+        right_idx = self.joint_names.index("right shoulder")
+        if numarr[right_idx][0] > numarr[left_idx][0]:
+            # Right shoulder
+            anchor = numarr[right_idx]
+        else:
+            # Left shoulder
+            anchor = numarr[left_idx]
+        x, y, c = anchor
+        if c == 0:
+            return
+        cvw.put_text(
+            frame,
+            str(pers_id),
+            (rnd(x + 2), rnd(y + 2)),
+            (0, 0, 255),
+            scale=0.5
+        )
+
     def draw_bundle(self, frame, bundle):
-        for id, person in bundle:
+        for pers_id, person in bundle:
             assert isinstance(person, PoseBody25)
             if self.conv_to_posetrack:
                 flat = person.as_posetrack()
             else:
                 flat = person.flat()
-            print("flat", flat, type(flat))
-            numarr = list(grouper(flat, 3))
-            print("numarr")
-            for idx in range(len(numarr)):
-                for other_idx in BODY_25_GRAPH.get(idx, set()):
-                    print("numarr", len(numarr), idx, other_idx)
-                    x1, y1, c1 = numarr[idx]
-                    x2, y2, c2 = numarr[other_idx]
-                    c = min(c1, c2)
-                    if c == 0:
-                        continue
-                    cv2.line(
-                        frame,
-                        (rnd(x1), rnd(y1)),
-                        (rnd(x2), rnd(y2)),
-                        (0, 0, 0),
-                        2
-                    )
+            numarr = []
+            for point in grouper(flat, 3):
+                numarr.append([
+                    point[0] * self.scale,
+                    point[1] * self.scale,
+                    point[2],
+                ])
+            self.draw_skel(frame, numarr)
+            self.draw_ann(frame, pers_id, numarr)
 
     def add_cut(self):
         if not self.add_cuts:
@@ -138,12 +124,14 @@ class VideoSticksWriter:
         cvw.put_text(blank_image, "Shot cut", (30, height // 2), (255, 255, 255))
 
 
-def drawsticks(vid_read, stick_read, vid_write):
+def drawsticks(vid_read, stick_read, vid_write, scale=1):
     shots_it = iter(stick_read)
     shot = next(shots_it, None)
     shot_it = iter(shot)
     bundle = None
     for frame_idx, frame in enumerate(vid_read):
+        if scale != 1:
+            frame = cv2.resize(frame, fx=scale, fy=scale)
         if shot is not None:
             bundle = next(shot_it, None)
             if bundle is None:
@@ -159,16 +147,34 @@ def drawsticks(vid_read, stick_read, vid_write):
 @click.argument("h5fn", type=click.Path(exists=True))
 @click.argument("videoin", type=click.Path(exists=True))
 @click.argument("videoout", type=click.Path())
-def main(h5fn, videoin, videoout):
-    with h5sparse.File(h5fn, "r") as h5f, cvw.load_video(videoin) as vid_read:
+@click.option("--posetrack/--no-posetrack")
+@click.option("--scale", type=int, default=1)
+@click_log.simple_verbosity_option()
+def main(h5fn, videoin, videoout, posetrack, scale):
+    with h5py.File(h5fn, "r") as h5f, cvw.load_video(videoin) as vid_read:
+        if logger.isEnabledFor(logging.INFO):
+            logging.info(
+                "Opened HDF5 pose file with metadata: %s",
+                pformat(dict(h5f.attrs.items()))
+            )
+        mode = h5f.attrs["mode"]
+        if posetrack:
+            graph = POSETRACK18_GRAPH
+            joint_names = POSETRACK18_JOINTS
+        else:
+            graph = MODE_GRAPHS[mode]
+            joint_names = BODY_25_JOINTS
         vid_write = VideoSticksWriter(
             videoout,
-            vid_read.width,
-            vid_read.height,
-            vid_read.fps
+            vid_read.width * scale,
+            vid_read.height * scale,
+            vid_read.fps,
+            graph,
+            joint_names,
+            conv_to_posetrack=posetrack,
         )
         stick_read = ShotSegmentedReader(h5f)
-        drawsticks(vid_read, stick_read, vid_write)
+        drawsticks(vid_read, stick_read, vid_write, scale)
 
 
 if __name__ == "__main__":

@@ -1,9 +1,15 @@
+import numpy as np
+from .skelgraphs import BODY_25_TO_POSETRACK, keypoints_to_posetrack
+
+
 class PoseBundle:
     def __init__(self, datum, cls):
         self.datum = datum
         self.cls = cls
 
     def __iter__(self):
+        if self.datum.poseScores is None:
+            return
         for idx in range(len(self.datum.poseScores)):
             yield self.cls.from_datum(self.datum, idx)
 
@@ -42,7 +48,6 @@ class PoseBase:
 
     @classmethod
     def from_keypoints(cls, keypoints):
-        print("from_keypoints", keypoints)
         self = cls()
         self.keypoints = keypoints
         return self
@@ -54,26 +59,23 @@ class PoseBase:
         return self.all().reshape(-1)
 
 
-class PoseBody25All(PoseBase):
-    def all(self):
-        raise NotImplementedError()
-
-    def as_posetrack(self):
-        raise NotImplementedError()
-
-
 class PoseBody25(PoseBase):
     def as_posetrack(self):
-        kpts = []
-        list_pose_track = [14, 13, 12, 9, 10, 11, 7, 6, 5, 2, 3, 4, 0, 0, 0]
-        for i in list_pose_track:
-            kpts.extend(self.keypoints[i])
-        return kpts
+        return keypoints_to_posetrack(BODY_25_TO_POSETRACK, self.keypoints, "proj25")
 
 
-class PoseBody135(PoseBase):
-    def all(self):
-        return self.datum.keypoints
+class PoseBody25All(PoseBody25):
+    @classmethod
+    def from_datum(cls, datum, idx):
+        self = cls()
+        self.keypoints = np.vstack([
+            datum.poseKeypoints[idx],
+            datum.handKeypoints[0][idx][1:],
+            datum.handKeypoints[1][idx][1:],
+            datum.faceKeypoints[idx],
+        ])
+        return self
 
-    def as_posetrack(self):
-        raise NotImplementedError()
+
+class PoseBody135(PoseBody25):
+    pass

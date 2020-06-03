@@ -1,4 +1,7 @@
+import logging
 from .pose import PoseBody135, PoseBody25, PoseBody25All, PoseBundle
+
+logger = logging.getLogger(__name__)
 
 
 MODES = [
@@ -22,10 +25,10 @@ LIMBS = {
 }
 
 
-def print_all(datum):
-    print(" *** ", datum.frameNumber, " *** ")
+def print_all(datum, print=print):
+    print(" *** OpenPose datum: ", datum.frameNumber, " *** ")
     for k in dir(datum):
-        if k.startswith("_") or k in ("poseIds",):
+        if k.startswith("_"):
             continue
         print(k)
         print(getattr(datum, k))
@@ -72,8 +75,8 @@ def gen_poses(model_folder, mode, video):
         if not res:
             break
         datum = vec_datum[0]
+        if logger.isEnabledFor(logging.DEBUG):
+            print_all(datum, logger.debug)
         assert i == datum.frameNumber
-        #ensure_dataset(h5f, "")
-
         yield PoseBundle(datum, pose_cls)
         i += 1

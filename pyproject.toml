@@ -11,12 +11,12 @@ h5py = "^2.10.0"
 imutils = "^0.5.3"
 click = "^7.1.2"
 opencv-python-headless = "^4.2.0"
-h5sparse = "^0.1.0"
 snakemake = "^5.18.1"
 torch = "^1.5.0"
 torchvision = "^0.6.0"
 torchlight = { path = "./submodules/lighttrack/graph/torchlight" }
 more_itertools = "^8.3.0"
+click_log = "^0.3.2"
 
 [tool.poetry.dev-dependencies]
 black = "^19.10b0"

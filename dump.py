@@ -1,11 +1,14 @@
 from os.path import basename
 import click
+import click_log
 from imutils.video.count_frames import count_frames
 import h5py
-import h5sparse
 from skeldump.openpose import MODES, gen_poses, LIMBS
 from skeldump.bbtrack import filter_poses
 from skeldump.io import ShotSegmentedWriter
+
+
+click_log.basic_config()
 
 
 CHUNK_SIZE = 10000
@@ -47,6 +50,7 @@ def write_shots(h5f, limbs, frame_iter):
 @click.option("--track/--no-track")
 @click.option("--model-folder", envvar="MODEL_FOLDER", required=True)
 @click.option("--pose-matcher-config", envvar="POSE_MATCHER_CONFIG")
+@click_log.simple_verbosity_option()
 def main(video, h5fn, mode, track, model_folder, pose_matcher_config):
     if track and pose_matcher_config is None:
         raise click.BadOptionUsage(
@@ -56,7 +60,7 @@ def main(video, h5fn, mode, track, model_folder, pose_matcher_config):
     conf = h5py.get_config()
     conf.track_order = True
     num_frames = count_frames(video)
-    with h5sparse.File(h5fn, "w") as h5f:
+    with h5py.File(h5fn, "w") as h5f:
         frame_iter = gen_poses(model_folder, mode, video)
         if track:
             frame_iter = filter_poses(pose_matcher_config, frame_iter)
