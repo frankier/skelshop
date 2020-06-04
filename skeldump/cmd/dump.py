@@ -1,7 +1,7 @@
 import click
 from imutils.video.count_frames import count_frames
 import h5py
-from skeldump.dump import add_metadata, write_shots, add_post_proc
+from skeldump.dump import add_metadata, write_shots, add_post_proc, get_shotseg
 from skeldump.openpose import MODES, LIMBS, OpenPoseStage
 from skeldump.io import ShotSegmentedWriter, UnsegmentedWriter
 
@@ -13,7 +13,8 @@ from skeldump.io import ShotSegmentedWriter, UnsegmentedWriter
 @click.option("--post-proc/--no-post-proc")
 @click.option("--model-folder", envvar="MODEL_FOLDER", required=True)
 @click.option("--pose-matcher-config", envvar="POSE_MATCHER_CONFIG")
-def dump(video, h5fn, mode, post_proc, model_folder, pose_matcher_config):
+@click.option("--shot-csv", type=click.Path(exists=True))
+def dump(video, h5fn, mode, post_proc, model_folder, pose_matcher_config, shot_csv):
     if post_proc and pose_matcher_config is None:
         raise click.BadOptionUsage(
             "--pose-matcher-config",
@@ -26,10 +27,10 @@ def dump(video, h5fn, mode, post_proc, model_folder, pose_matcher_config):
         limbs = LIMBS[mode]
         stage = OpenPoseStage(model_folder, mode, video)
         if post_proc:
-            frame_iter = add_post_proc(stage, pose_matcher_config)
+            frame_iter = add_post_proc(stage, pose_matcher_config, shot_csv)
             writer_cls = ShotSegmentedWriter
         else:
             frame_iter = (enumerate(frame) for frame in stage)
             writer_cls = UnsegmentedWriter
-        add_metadata(h5f, video, num_frames, mode, post_proc, limbs)
+        add_metadata(h5f, video, num_frames, mode, post_proc, get_shotseg(post_proc, shot_csv), limbs)
         write_shots(h5f, limbs, frame_iter, writer_cls=writer_cls)
