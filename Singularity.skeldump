@@ -1,0 +1,24 @@
+Bootstrap: shub
+From: frankier/gsoc2020:frankier_gsoc2020
+
+%files
+    . /opt/redhen/skeldump
+    ../.gitmodules /opt/redhen
+    ../.git /opt/redhen
+
+%post
+    curl -sSL \
+        https://raw.githubusercontent.com/python-poetry/poetry/master/get-poetry.py \
+        | python
+    export PATH=$HOME/.poetry/bin/:$PATH
+    poetry config virtualenvs.create false
+    cd /opt/skeldump && \
+        ./install.sh && \
+        snakemake
+
+%runscript
+    cd /opt/skeldump && snakemake "$@"
+
+%environment
+    export LD_LIBRARY_PATH=$OPENPOSE/src/openpose/:$LD_LIBRARY_PATH
+    export MODEL_FOLDER=$OPENPOSE_SRC/models
