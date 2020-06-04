@@ -68,8 +68,11 @@ class PoseTrack():
         self.next_id = 0
         self.img_id = 0
         self.dets_list_q = collections.deque(maxlen=5)
-        self.kps_records = {}
-        self.queue_length = 60 # the histoty coco keypoins max length
+
+    def reset(self):
+        self.next_id = 0
+        self.img_id = 0
+        self.dets_list_q.clear()
 
     # MAIN FUNCTION
     def pose_track(self, kps):

@@ -16,13 +16,13 @@ class PoseBundle:
 
 class IdPoseBundle:
     def __init__(self, dets_list, datum, cls):
-        self.dets_list = dets_list
+        self.tracks = [(person["track_id"], person["det_id"]) for person in dets_list]
         self.datum = datum
         self.cls = cls
 
     def __iter__(self):
-        for person in self.dets_list:
-            yield person["track_id"], self.cls.from_datum(self.datum, person["det_id"])
+        for track_id, det_id in self.tracks:
+            yield track_id, self.cls.from_datum(self.datum, det_id)
 
 
 class DumpReaderPoseBundle:

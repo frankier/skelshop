@@ -1,5 +1,6 @@
 import logging
 from .pose import PoseBody135, PoseBody25, PoseBody25All, PoseBundle
+from .pipebase import PipelineStageBase
 
 logger = logging.getLogger(__name__)
 
@@ -53,30 +54,33 @@ def mode_conf(mode):
         assert False
 
 
-def gen_poses(model_folder, mode, video):
-    from openpose import pyopenpose as op
-    op_wrap = op.WrapperPython(op.ThreadManagerMode.AsynchronousOut)
-    # 2 => synchronous input => OpenPose handles reads internally
-    # & asynchrnous output => We can handle the output here
-    conf = {
-        "video": video,
-        "model_folder": model_folder,
-        #"tracking": 0,
-        **mode_conf(mode),
-    }
-    op_wrap.configure(conf)
-    op_wrap.start()
-    i = 0
-    pose_cls = POSE_CLASSES[mode]
-    while 1:
-        print(f"i: {i}")
+class OpenPoseStage(PipelineStageBase):
+    def __init__(self, model_folder, mode, video):
+        from openpose import pyopenpose as op
+        self.op_wrap = op.WrapperPython(op.ThreadManagerMode.AsynchronousOut)
+        # 2 => synchronous input => OpenPose handles reads internally
+        # & asynchrnous output => We can handle the output here
+        conf = {
+            "video": video,
+            "model_folder": model_folder,
+            #"tracking": 0,
+            **mode_conf(mode),
+        }
+        self.op_wrap.configure(conf)
+        self.op_wrap.start()
+        self.i = 0
+        self.pose_cls = POSE_CLASSES[mode]
+
+    def __next__(self):
+        from openpose import pyopenpose as op
+        print(f"i: {self.i}")
         vec_datum = op.VectorDatum()
-        res = op_wrap.waitAndPop(vec_datum)
+        res = self.op_wrap.waitAndPop(vec_datum)
         if not res:
-            break
+            raise StopIteration()
         datum = vec_datum[0]
         if logger.isEnabledFor(logging.DEBUG):
             print_all(datum, logger.debug)
-        assert i == datum.frameNumber
-        yield PoseBundle(datum, pose_cls)
-        i += 1
+        assert self.i == datum.frameNumber
+        self.i += 1
+        return PoseBundle(datum, self.pose_cls)

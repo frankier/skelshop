@@ -52,7 +52,6 @@ class ShotSegmentedWriter:
             pose_group = create_csr(
                 self.h5f,
                 f"/timeline/{self.shot_idx}/{pose_id}",
-                (),
                 data,
                 indices,
                 indptr

@@ -1,7 +1,7 @@
 import numpy as np
 
 
-def create_csr(h5f, path, shape, data, indices, indptr):
+def create_csr(h5f, path, data, indices, indptr):
     group = h5f.create_group(path)
     group.create_dataset("data", data=data, dtype=np.float32)
     # Column indices should always be able to fit in 2 bytes
