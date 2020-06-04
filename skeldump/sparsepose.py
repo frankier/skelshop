@@ -1,6 +1,15 @@
 import numpy as np
 
 
+def create_growable_csr(h5f, path):
+    group = h5f.create_group(path)
+    group.create_dataset("data", (0, 3), dtype=np.float32, maxshape=(None, 3))
+    # Column indices should always be able to fit in 2 bytes
+    group.create_dataset("indices", (0,), dtype=np.int16, maxshape=(None,))
+    group.create_dataset("indptr", (0,), dtype=np.int32, maxshape=(None,))
+    return group
+
+
 def create_csr(h5f, path, data, indices, indptr):
     group = h5f.create_group(path)
     group.create_dataset("data", data=data, dtype=np.float32)

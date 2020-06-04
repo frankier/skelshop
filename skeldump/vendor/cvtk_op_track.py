@@ -66,12 +66,12 @@ class PoseTrack():
         self.pose_matcher = pose_matcher
         self.enlarge_scale = enlarge_scale
         self.next_id = 0
-        self.img_id = 0
+        self.started = False
         self.dets_list_q = collections.deque(maxlen=5)
 
     def reset(self):
         self.next_id = 0
-        self.img_id = 0
+        self.started = False
         self.dets_list_q.clear()
 
     # MAIN FUNCTION
@@ -84,7 +84,6 @@ class PoseTrack():
                 self.next_id = max(max(next_ids)+1, self.next_id)
 
         self.posetrack(kps)
-        self.img_id += 1
 
     def posetrack(self, kps):
         human_candidates = self.get_human_bbox_and_keypoints(kps)
@@ -94,9 +93,9 @@ class PoseTrack():
             self.dets_list_q.append([])
             return
 
-        print("self.img_id", self.img_id)
-        if self.img_id == 0:
+        if not self.started:
             self.first_frame(human_candidates)
+            self.started = True
             return
 
         ##### traverse all prev frame dicts #####
@@ -113,8 +112,7 @@ class PoseTrack():
         ##handle all unmatched item
 
         for det_id in untracked_dets_ids:
-            det_dict = {"img_id":self.img_id,
-                                "det_id": 0,
+            det_dict = {"det_id": 0,
                                 "track_id": -1,
                                 "bbox":[0,0,2,2],
                                 "openpose_kps": [],
@@ -133,7 +131,7 @@ class PoseTrack():
 
             self.next_id += 1
             tracked_dets_list.append(det_dict)
-            
+
         self.dets_list_q.append(tracked_dets_list)
 
     def traverse_each_prev_frame(self, human_candidates, dets_list_prev_frame, tracked_dets_list, tracked_dets_ids, untracked_dets_ids):
@@ -146,8 +144,7 @@ class PoseTrack():
             bbox_det = x1y1x2y2_to_xywh(bbox_in_xywh)
             openpose_kps = human_candidates[det_id][1]
             keypoints = openpose_kps.as_posetrack()
-            det_dict = {"img_id":self.img_id,
-                                "det_id":det_id,
+            det_dict = {"det_id":det_id,
                                 "bbox":bbox_det,
                                 "track_id": -1,
                                 "openpose_kps": openpose_kps,
@@ -171,8 +168,7 @@ class PoseTrack():
             bbox_det = x1y1x2y2_to_xywh(bbox_in_xywh)
             openpose_kps = human_candidates[det_id][1]
             keypoints = openpose_kps.as_posetrack()
-            det_dict = {"img_id":self.img_id,
-                                "det_id":det_id,
+            det_dict = {"det_id":det_id,
                                 "bbox":bbox_det,
                                 "track_id": -1,
                                 "openpose_kps": openpose_kps,
@@ -199,8 +195,7 @@ class PoseTrack():
             bbox = candidate[0]
             openpose_kps = candidate[1] 
             keypoints = openpose_kps.as_posetrack()
-            det_dict = {"img_id":self.img_id,
-                                "det_id":  i,
+            det_dict = {"det_id":  i,
                                 "track_id": self.next_id,
                                 "bbox": bbox,
                                 "openpose_kps": openpose_kps,

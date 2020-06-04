@@ -1,6 +1,68 @@
+from functools import partial
 from .openpose import POSE_CLASSES
-from .sparsepose import create_csr, get_row_csr
-from .pose import DumpReaderPoseBundle
+from .sparsepose import create_csr, create_growable_csr, get_row_csr
+from .pose import DumpReaderPoseBundle, UnorderedDumpReaderPoseBundle
+
+
+def get_pose_nz(pose):
+    for limb_idx, limb in enumerate(pose):
+        if not limb[2]:
+            continue
+        yield limb_idx, limb
+
+
+def grow_ds(ds, extra):
+    ds.resize(len(ds) + extra, axis=0)
+
+
+def add_empty_rows_grp(pose_grp, new_rows):
+    grow_ds(pose_grp["indptr"], new_rows)
+    pose_grp["indptr"][-new_rows:] = len(pose_grp["data"])
+
+
+class UnsegmentedWriter:
+    def __init__(self, h5f):
+        self.h5f = h5f
+        self.shot_grp = self.h5f.create_group("/timeline/0")
+        self.pose_last_frames = {}
+
+    def add_pose(self, frame_num, pose_id, pose):
+        path = f"/timeline/0/{pose_id}"
+        if path in self.h5f:
+            pose_grp = self.h5f[path]
+            last_frame_num = self.pose_last_frames[pose_id]
+        else:
+            pose_grp = create_growable_csr(self.h5f, path)
+            pose_grp.attrs["start_frame"] = frame_num
+            last_frame_num = frame_num - 1
+        new_rows = frame_num - last_frame_num
+        add_empty_rows_grp(pose_grp, new_rows)
+        data = []
+        indices = []
+        for limb_idx, limb in get_pose_nz(pose):
+            data.append(limb)
+            indices.append(limb_idx)
+        grow_ds(pose_grp["data"], len(data))
+        grow_ds(pose_grp["indices"], len(indices))
+        pose_grp["data"][-len(data):] = data
+        pose_grp["indices"][-len(indices):] = indices
+        self.pose_last_frames[pose_id] = frame_num
+
+    def start_shot(self):
+        pass
+
+    def end_shot(self):
+        self.shot_grp.attrs["start_frame"] = 0
+        self.shot_grp.attrs["end_frame"] = max(self.pose_last_frames.values()) + 1
+        pose_id = 0
+        while 1:
+            path = f"/timeline/0/{pose_id}"
+            if path not in self.h5f:
+                break
+            pose_grp = self.h5f[path]
+            add_empty_rows_grp(pose_grp, 1)
+            pose_grp.attrs["end_frame"] = self.pose_last_frames[pose_id] + 1
+            pose_id += 1
 
 
 class ShotSegmentedWriter:
@@ -28,8 +90,9 @@ class ShotSegmentedWriter:
             indices = []
             indptr = []
             try:
-                pose_first_frame = next(iter(poses.keys()))
-                pose_last_frame = next(iter(reversed(poses.keys()))) + 1
+                frames = poses.keys()
+                pose_first_frame = next(iter(frames))
+                pose_last_frame = next(iter(reversed(frames))) + 1
             except StopIteration:
                 continue
             last_frame_num = pose_first_frame - 1
@@ -40,9 +103,7 @@ class ShotSegmentedWriter:
 
             for frame_num, pose in poses.items():
                 add_empty_rows(frame_num - last_frame_num)
-                for limb_idx, limb in enumerate(pose):
-                    if not limb[2]:
-                        continue
+                for limb_idx, limb in get_pose_nz(pose):
                     data.append(limb)
                     indices.append(limb_idx)
                 last_frame_num = frame_num
@@ -58,25 +119,26 @@ class ShotSegmentedWriter:
             )
             pose_group.attrs["start_frame"] = pose_first_frame
             pose_group.attrs["end_frame"] = pose_last_frame
+        self.pose_data = {}
         self.shot_idx += 1
         self.shot_start = self.last_frame + 1
 
 
 class ShotSegmentedReader:
-    def __init__(self, h5f):
+    def __init__(self, h5f, bundle_cls=DumpReaderPoseBundle):
         self.h5f = h5f
-        self.cls = POSE_CLASSES[self.h5f.attrs["mode"]]
+        self.mk_bundle = partial(bundle_cls, cls=POSE_CLASSES[self.h5f.attrs["mode"]])
 
     def __iter__(self):
         for shot_name, shot_grp in self.h5f["/timeline"].items():
-            yield ShotReader(shot_grp, self.h5f.attrs["limbs"], self.cls)
+            yield ShotReader(shot_grp, self.h5f.attrs["limbs"], self.mk_bundle)
 
 
 class ShotReader:
-    def __init__(self, shot_grp, num_limbs, cls):
+    def __init__(self, shot_grp, num_limbs, mk_bundle):
         self.shot_grp = shot_grp
         self.num_limbs = num_limbs
-        self.cls = cls
+        self.mk_bundle = mk_bundle
 
     def __iter__(self):
         for frame in range(
@@ -90,5 +152,10 @@ class ShotReader:
                 if start_frame <= frame < end_frame:
                     row_num = frame - start_frame
                     bundle.append(get_row_csr(pose_grp, self.num_limbs, row_num))
-            yield DumpReaderPoseBundle(bundle, self.cls)
+            yield self.mk_bundle(bundle)
 
+
+def read_flat_unordered(h5f):
+    for shot in ShotSegmentedReader(h5f, bundle_cls=UnorderedDumpReaderPoseBundle):
+        for bundle in shot:
+            yield bundle

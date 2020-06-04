@@ -1,24 +1,12 @@
-from pprint import pformat
 import numpy as np
 import logging
-import h5py
 import cv2
 import opencv_wrapper as cvw
-import click
-import click_log
 from more_itertools.recipes import grouper
-from skeldump.io import ShotSegmentedReader
 from skeldump.pose import PoseBody25
-from skeldump.skelgraphs import (
-    iter_joints,
-    MODE_GRAPHS,
-    POSETRACK18_GRAPH,
-    POSETRACK18_JOINTS,
-    BODY_25_JOINTS,
-)
+from skeldump.skelgraphs import iter_joints
 
 logger = logging.getLogger(__name__)
-click_log.basic_config()
 
 
 def rnd(x):
@@ -114,14 +102,14 @@ class VideoSticksWriter:
     def add_cut(self):
         if not self.add_cuts:
             return
-        for _ in range(self.fps // 2):
-            self.out.write(self.cut_img)
+        self.out.write(self.cut_img)
 
     def get_cut_img(self):
         height = int(self.height)
         width = int(self.width)
-        blank_image = np.zeros((height, width, 3), np.uint8)
-        cvw.put_text(blank_image, "Shot cut", (30, height // 2), (255, 255, 255))
+        img = np.zeros((height, width, 3), np.uint8)
+        cvw.put_text(img, "Shot cut", (30, height // 2), (255, 255, 255))
+        return img
 
 
 def drawsticks(vid_read, stick_read, vid_write, scale=1):
@@ -141,41 +129,3 @@ def drawsticks(vid_read, stick_read, vid_write, scale=1):
                     vid_write.add_cut()
                     bundle = next(shot_it, None)
         vid_write.draw(frame, bundle)
-
-
-@click.command()
-@click.argument("h5fn", type=click.Path(exists=True))
-@click.argument("videoin", type=click.Path(exists=True))
-@click.argument("videoout", type=click.Path())
-@click.option("--posetrack/--no-posetrack")
-@click.option("--scale", type=int, default=1)
-@click_log.simple_verbosity_option()
-def main(h5fn, videoin, videoout, posetrack, scale):
-    with h5py.File(h5fn, "r") as h5f, cvw.load_video(videoin) as vid_read:
-        if logger.isEnabledFor(logging.INFO):
-            logging.info(
-                "Opened HDF5 pose file with metadata: %s",
-                pformat(dict(h5f.attrs.items()))
-            )
-        mode = h5f.attrs["mode"]
-        if posetrack:
-            graph = POSETRACK18_GRAPH
-            joint_names = POSETRACK18_JOINTS
-        else:
-            graph = MODE_GRAPHS[mode]
-            joint_names = BODY_25_JOINTS
-        vid_write = VideoSticksWriter(
-            videoout,
-            vid_read.width * scale,
-            vid_read.height * scale,
-            vid_read.fps,
-            graph,
-            joint_names,
-            conv_to_posetrack=posetrack,
-        )
-        stick_read = ShotSegmentedReader(h5f)
-        drawsticks(vid_read, stick_read, vid_write, scale)
-
-
-if __name__ == "__main__":
-    main()

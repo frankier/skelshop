@@ -364,6 +364,22 @@ socks = ["PySocks (>=1.5.6,<1.5.7 || >1.5.7)", "win-inet-pton"]
 
 [[package]]
 category = "main"
+description = "A cross-platform, OpenCV-based video scene detection program and Python library."
+name = "scenedetect"
+optional = false
+python-versions = "*"
+version = "0.5.2"
+
+[package.dependencies]
+Click = "*"
+numpy = "*"
+
+[package.extras]
+opencv = ["opencv-python"]
+progress_bar = ["tqdm"]
+
+[[package]]
+category = "main"
 description = "Python 2 and 3 compatibility utilities"
 name = "six"
 optional = false
@@ -523,7 +539,7 @@ docs = ["sphinx", "jaraco.packaging (>=3.2)", "rst.linker (>=1.9)"]
 testing = ["jaraco.itertools", "func-timeout"]
 
 [metadata]
-content-hash = "6a9d6148a6d6bdae955d55500c6de1df940bc372822a16c1d1a4d8f56ee8fad2"
+content-hash = "281b66ed64624d15649f58d8d0474cf19b99e442c50a297ba879bfaae6cf9ec6"
 python-versions = "^3.7"
 
 [metadata.files]
@@ -815,6 +831,11 @@ regex = [
 requests = [
     {file = "requests-2.23.0-py2.py3-none-any.whl", hash = "sha256:43999036bfa82904b6af1d99e4882b560e5e2c68e5c4b0aa03b655f3d7d73fee"},
     {file = "requests-2.23.0.tar.gz", hash = "sha256:b3f43d496c6daba4493e7c431722aeb7dbc6288f52a6e04e7b6023b0247817e6"},
+]
+scenedetect = [
+    {file = "scenedetect-0.5.2-py2-none-any.whl", hash = "sha256:e41f51e7126a85be63d990b2117ce82c327ba521f99f21cbcbc8260be5be6551"},
+    {file = "scenedetect-0.5.2-py3-none-any.whl", hash = "sha256:451d17f43d1b5a18b0742c4ea35fc54ff368872a7bd9b874e7c64e5a3b09daa5"},
+    {file = "scenedetect-0.5.2.tar.gz", hash = "sha256:0f9df52ba571e1913a431e3c5d91256566c4c6c06aa02ed862d130156cb1e6ba"},
 ]
 six = [
     {file = "six-1.15.0-py2.py3-none-any.whl", hash = "sha256:8b74bedcbbbaca38ff6d7491d76f2b06b3592611af620f8426e82dddb04a5ced"},

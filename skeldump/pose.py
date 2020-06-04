@@ -15,14 +15,14 @@ class PoseBundle:
 
 
 class IdPoseBundle:
-    def __init__(self, dets_list, datum, cls):
+    def __init__(self, dets_list, prev):
         self.tracks = [(person["track_id"], person["det_id"]) for person in dets_list]
-        self.datum = datum
-        self.cls = cls
+        self.prevs = [pose.all() for pose in prev]
+        self.cls = prev.cls
 
     def __iter__(self):
         for track_id, det_id in self.tracks:
-            yield track_id, self.cls.from_datum(self.datum, det_id)
+            yield track_id, self.cls.from_keypoints(self.prevs[det_id])
 
 
 class DumpReaderPoseBundle:
@@ -34,6 +34,11 @@ class DumpReaderPoseBundle:
     def __iter__(self):
         for idx, pose in enumerate(self.bundle):
             yield idx, self.cls.from_keypoints(pose)
+
+
+class UnorderedDumpReaderPoseBundle(DumpReaderPoseBundle):
+    def __iter__(self):
+        return (val for _, val in super().__iter__())
 
 
 class PoseBase:

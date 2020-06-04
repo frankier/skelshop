@@ -19,7 +19,7 @@ class RewindStage(PipelineStageBase):
         self.rewinded = 0
 
     def __next__(self):
-        if self.rewinded:
+        if self.rewinded > 0:
             res = self.buf[-self.rewinded]
             self.rewinded -= 1
             return res
@@ -33,3 +33,10 @@ class RewindStage(PipelineStageBase):
         if self.rewinded > len(self.buf):
             raise Exception("Can't rewind that far")
 
+
+class IterStage(PipelineStageBase):
+    def __init__(self, wrapped):
+        self.wrapped = wrapped
+
+    def __next__(self):
+        return next(self.wrapped)
