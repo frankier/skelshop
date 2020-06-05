@@ -52,6 +52,9 @@ class UnsegmentedWriter:
     def start_shot(self):
         pass
 
+    def register_frame(self, frame_num):
+        pass
+
     def end_shot(self):
         self.shot_grp.attrs["start_frame"] = 0
         self.shot_grp.attrs["end_frame"] = max(self.pose_last_frames.values()) + 1
@@ -80,6 +83,9 @@ class ShotSegmentedWriter:
 
     def add_pose(self, frame_num, pose_id, pose):
         self.pose_data.setdefault(pose_id, {})[frame_num] = pose
+        self.last_frame = frame_num
+
+    def register_frame(self, frame_num):
         self.last_frame = frame_num
 
     def end_shot(self):

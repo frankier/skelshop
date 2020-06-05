@@ -7,9 +7,9 @@ from .pipebase import PipelineStageBase
 def get_cuts_from_csv(shot_csv):
     res = []
     with open(shot_csv) as shot_f:
-        it = islice(iter(shot_f), start=3)
+        it = islice(iter(shot_f), 3, None)
         for line in it:
-            res.append(line.split(",", 2)[1])
+            res.append(int(line.split(",", 2)[1]))
     return res
 
 
@@ -22,6 +22,7 @@ class CsvShotSegStage(PipelineStageBase):
 
     def __next__(self):
         if self.cut_idx < len(self.cuts) and self.cuts[self.cut_idx] == self.frame_id:
+            self.send_back("cut")
             self.cut_idx += 1
             return SHOT_CHANGE
         self.frame_id += 1

@@ -35,6 +35,7 @@ def write_shots(h5f, limbs, frame_iter, writer_cls=ShotSegmentedWriter):
             writer.end_shot()
             writer.start_shot()
         else:
+            writer.register_frame(frame_num)
             for pose_id, pose in frame:
                 writer.add_pose(frame_num, pose_id, pose.all())
             frame_num += 1
