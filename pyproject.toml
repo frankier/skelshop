@@ -21,6 +21,8 @@ scenedetect = "^0.5.2"
 
 [tool.poetry.dev-dependencies]
 black = "^19.10b0"
+isort = {extras = ["pyproject"], version = "^4.3.21"}
+pre-commit = "^2.4.0"
 
 [build-system]
 requires = ["poetry-core>=1.0.0a5"]
