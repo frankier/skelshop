@@ -12,8 +12,8 @@ class TrackStage(PipelineStageBase):
 
     def __next__(self):
         pose_bundle = next(self.prev)
-        self.tracker.pose_track(pose_bundle)
-        return IdPoseBundle(self.tracker.dets_list_q[-1], pose_bundle)
+        tracks = self.tracker.pose_track(pose_bundle)
+        return IdPoseBundle(tracks, pose_bundle)
 
     def cut(self):
         self.tracker.reset()

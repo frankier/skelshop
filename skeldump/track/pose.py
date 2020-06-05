@@ -93,8 +93,7 @@ def get_track_id_SGCN_plus(
     if min_index is None:
         return -1, None, 0
     else:
-        track_id = dets_list_prev_frame[min_index]["track_id"]
-        print("match score is ", min_matching_score)
+        track_id = dets_list_prev_frame[min_index].track_id
         return track_id, min_index, min_matching_score
 
 

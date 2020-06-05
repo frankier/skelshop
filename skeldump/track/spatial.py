@@ -7,7 +7,7 @@ def get_track_id_SpatialConsistency(bbox_cur_frame, bbox_list_prev_frame):
     max_index = -1
 
     for bbox_index, bbox_det_dict in enumerate(bbox_list_prev_frame):
-        bbox_prev_frame = bbox_det_dict["bbox"]
+        bbox_prev_frame = bbox_det_dict.bbox
 
         boxA = xywh_to_x1y1x2y2(bbox_cur_frame)
         boxB = xywh_to_x1y1x2y2(bbox_prev_frame)
@@ -17,7 +17,7 @@ def get_track_id_SpatialConsistency(bbox_cur_frame, bbox_list_prev_frame):
             max_index = bbox_index
 
     if max_iou_score > thresh:
-        track_id = bbox_list_prev_frame[max_index]["track_id"]
+        track_id = bbox_list_prev_frame[max_index].track_id
         return track_id, max_index
     else:
         return -1, None

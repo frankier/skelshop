@@ -16,8 +16,8 @@ class PoseBundle:
 
 
 class IdPoseBundle:
-    def __init__(self, dets_list, prev):
-        self.tracks = [(person["track_id"], person["det_id"]) for person in dets_list]
+    def __init__(self, tracks, prev):
+        self.tracks = tracks
         self.prevs = [pose.all() for pose in prev]
         self.cls = prev.cls
 

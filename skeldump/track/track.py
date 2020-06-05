@@ -41,7 +41,7 @@ class PoseTrack:
         self.dets_list_q.clear()
 
     def assignments(self):
-        dets_list = self.tracker.dets_list_q[-1]
+        dets_list = self.dets_list_q[-1]
         return [(person.track_id, person.det_id) for person in dets_list]
 
     def pose_track(self, kps):
