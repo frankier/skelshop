@@ -1,12 +1,10 @@
 repos:
--   repo: https://github.com/ambv/black
-    rev: cb67a322423cb2b4bcfb2faa68fb769326741d6a
+-   repo: https://github.com/psf/black
+    rev: 19.10b0
     hooks:
     - id: black
-      args: []
-      python_version: python3.8
--   repo: git://github.com/pre-commit/pre-commit-hooks
-    rev: master
+-   repo: git://github.com/pycqa/flake8
+    rev: 3.8.2
     hooks:
     -   id: flake8
 -   repo: git://github.com/timothycrosley/isort 
