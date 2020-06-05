@@ -1,6 +1,8 @@
 ## Environment variables
 import os
-from os.path import join as pjoin, dirname
+from os.path import dirname
+from os.path import join as pjoin
+
 
 def cnf(name, val):
     globals()[name] = config.setdefault(name, val)
