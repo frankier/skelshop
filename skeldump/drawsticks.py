@@ -117,8 +117,8 @@ def drawsticks(vid_read, stick_read, vid_write, scale=1):
             bundle = next(shot_it, None)
             if bundle is None:
                 shot = next(shots_it, None)
-                shot_it = iter(shot)
                 if shot is not None:
                     vid_write.add_cut()
+                    shot_it = iter(shot)
                     bundle = next(shot_it, None)
         vid_write.draw(frame, bundle)
