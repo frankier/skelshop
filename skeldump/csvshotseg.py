@@ -1,6 +1,7 @@
-from .pipebase import PipelineStageBase
-from .bbshotseg import SHOT_CHANGE
 from itertools import islice
+
+from .bbshotseg import SHOT_CHANGE
+from .pipebase import PipelineStageBase
 
 
 def get_cuts_from_csv(shot_csv):
@@ -20,8 +21,7 @@ class CsvShotSegStage(PipelineStageBase):
         self.cut_idx = 0
 
     def __next__(self):
-        if self.cut_idx < len(self.cuts) and \
-                self.cuts[self.cut_idx] == self.frame_id:
+        if self.cut_idx < len(self.cuts) and self.cuts[self.cut_idx] == self.frame_id:
             self.cut_idx += 1
             return SHOT_CHANGE
         self.frame_id += 1

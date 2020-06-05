@@ -1,4 +1,4 @@
-from .bbox import xywh_to_x1y1x2y2, iou
+from .bbox import iou, xywh_to_x1y1x2y2
 
 
 def get_track_id_SpatialConsistency(bbox_cur_frame, bbox_list_prev_frame):

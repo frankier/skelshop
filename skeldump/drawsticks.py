@@ -1,6 +1,7 @@
-import numpy as np
 import logging
+
 import cv2
+import numpy as np
 import opencv_wrapper as cvw
 from more_itertools.recipes import grouper
 from skeldump.pose import PoseBody25
@@ -57,7 +58,7 @@ class VideoSticksWriter:
                 (rnd(x1), rnd(y1)),
                 (rnd(x2), rnd(y2)),
                 (255, rnd(255 * (1 - c)), rnd(255 * (1 - c))),
-                1
+                1,
             )
 
     def draw_ann(self, frame, pers_id, numarr):
@@ -75,11 +76,7 @@ class VideoSticksWriter:
         if c == 0:
             return
         cvw.put_text(
-            frame,
-            str(pers_id),
-            (rnd(x + 2), rnd(y + 2)),
-            (0, 0, 255),
-            scale=0.5
+            frame, str(pers_id), (rnd(x + 2), rnd(y + 2)), (0, 0, 255), scale=0.5
         )
 
     def draw_bundle(self, frame, bundle):
@@ -91,11 +88,7 @@ class VideoSticksWriter:
                 flat = person.flat()
             numarr = []
             for point in grouper(flat, 3):
-                numarr.append([
-                    point[0] * self.scale,
-                    point[1] * self.scale,
-                    point[2],
-                ])
+                numarr.append([point[0] * self.scale, point[1] * self.scale, point[2]])
             self.draw_skel(frame, numarr)
             self.draw_ann(frame, pers_id, numarr)
 

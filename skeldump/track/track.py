@@ -1,10 +1,18 @@
 import collections
-import numpy as np
 from dataclasses import dataclass, field
+from typing import List
 
-from .bbox import get_bbox_from_keypoints, enlarge_bbox, x1y1x2y2_to_xywh, xywh_to_x1y1x2y2
-from .spatial import get_track_id_SpatialConsistency
+import numpy as np
+
+from ..pose import PoseBase
+from .bbox import (
+    enlarge_bbox,
+    get_bbox_from_keypoints,
+    x1y1x2y2_to_xywh,
+    xywh_to_x1y1x2y2,
+)
 from .pose import get_track_id_SGCN_plus
+from .spatial import get_track_id_SpatialConsistency
 
 
 @dataclass
@@ -13,13 +21,13 @@ class TrackedPose:
     det_id: int
     openpose_kps: PoseBase
     bbox: List[int]
-    self.keypoints: np.ndarray = field(init=False)
+    keypoints: np.ndarray = field(init=False)
 
     def __post_init__(self):
         self.keypoints = self.openpose_kps.as_posetrack()
 
 
-class PoseTrack():
+class PoseTrack:
     def __init__(self, pose_matcher, enlarge_scale=0.2):
         self.pose_matcher = pose_matcher
         self.enlarge_scale = enlarge_scale
@@ -38,7 +46,7 @@ class PoseTrack():
 
     def pose_track(self, kps):
         for i in range(len(self.dets_list_q)):
-            index = -(i+1)
+            index = -(i + 1)
             prev_candidates = list(self.dets_list_q)[index]
             next_ids = [
                 prev_candidates[item].track_id
@@ -46,7 +54,7 @@ class PoseTrack():
                 if prev_candidates[item].track_id is not None
             ]
             if next_ids != []:
-                self.next_id = max(max(next_ids)+1, self.next_id)
+                self.next_id = max(max(next_ids) + 1, self.next_id)
 
         self.pose_track_inner(kps)
         return self.assignments()
@@ -69,7 +77,7 @@ class PoseTrack():
         tracked_dets_ids = []
         untracked_dets_ids = list(range(len(human_candidates)))
         for i in range(len(self.dets_list_q)):
-            index = -(i+1)
+            index = -(i + 1)
             dets_list_prev_frame = self.dets_list_q[index]
             if len(untracked_dets_ids) > 0:
                 self.traverse_each_prev_frame(
@@ -77,7 +85,7 @@ class PoseTrack():
                     dets_list_prev_frame,
                     tracked_dets_list,
                     tracked_dets_ids,
-                    untracked_dets_ids
+                    untracked_dets_ids,
                 )
             untracked_dets_ids = list(set(untracked_dets_ids) - set(tracked_dets_ids))
 
@@ -93,14 +101,21 @@ class PoseTrack():
                 det_id=det_id,
                 openpose_kps=openpose_kps,
                 bbox=bbox_det,
-            }
+            )
 
             self.next_id += 1
             tracked_dets_list.append(det_dict)
 
         self.dets_list_q.append(tracked_dets_list)
 
-    def traverse_each_prev_frame(self, human_candidates, dets_list_prev_frame, tracked_dets_list, tracked_dets_ids, untracked_dets_ids):
+    def traverse_each_prev_frame(
+        self,
+        human_candidates,
+        dets_list_prev_frame,
+        tracked_dets_list,
+        tracked_dets_ids,
+        untracked_dets_ids,
+    ):
         # first travese all bbox candidates
         print("untracked_dets_ids", untracked_dets_ids)
         for det_id in untracked_dets_ids:
@@ -110,23 +125,23 @@ class PoseTrack():
             bbox_det = x1y1x2y2_to_xywh(bbox_in_xywh)
             openpose_kps = human_candidates[det_id][1]
             det_dict = TrackedPose(
-                det_id=det_id,
-                bbox=bbox_det,
-                track_id=-1,
-                openpose_kps=openpose_kps,
-                keypoints=keypoints
+                det_id=det_id, bbox=bbox_det, track_id=-1, openpose_kps=openpose_kps,
             )
 
-            track_id, match_index = get_track_id_SpatialConsistency(bbox_det, dets_list_prev_frame)
+            track_id, match_index = get_track_id_SpatialConsistency(
+                bbox_det, dets_list_prev_frame
+            )
             print("det", det_id, track_id, match_index)
-            if track_id != -1:  # if candidate from prev frame matched, prevent it from matching another
+            if (
+                track_id != -1
+            ):  # if candidate from prev frame matched, prevent it from matching another
                 del dets_list_prev_frame[match_index]
                 det_dict.track_id = track_id
                 tracked_dets_list.append(det_dict)
                 tracked_dets_ids.append(det_id)
                 continue
 
-        untracked_dets_ids = list(set(untracked_dets_ids)-set(tracked_dets_ids))
+        untracked_dets_ids = list(set(untracked_dets_ids) - set(tracked_dets_ids))
         # second travese all pose candidates
         for det_id in untracked_dets_ids:
             bbox_det = human_candidates[det_id][0]
@@ -134,19 +149,14 @@ class PoseTrack():
             bbox_in_xywh = enlarge_bbox(bbox_x1y1x2y2, self.enlarge_scale)
             bbox_det = x1y1x2y2_to_xywh(bbox_in_xywh)
             openpose_kps = human_candidates[det_id][1]
-            keypoints = openpose_kps.as_posetrack()
             det_dict = TrackedPose(
-                det_id=det_id,
-                bbox=bbox_det,
-                track_id=-1,
-                openpose_kps=openpose_kps,
-                keypoints=keypoints,
+                det_id=det_id, bbox=bbox_det, track_id=-1, openpose_kps=openpose_kps,
             )
             track_id, match_index, score = get_track_id_SGCN_plus(
                 self.pose_matcher,
                 det_dict,
                 dets_list_prev_frame,
-                pose_matching_threshold=0.4
+                pose_matching_threshold=0.4,
             )
             # if candidate from prev frame matched, prevent it from matching another
             if track_id != -1:
@@ -163,14 +173,9 @@ class PoseTrack():
             candidate = candidates[i]
             bbox = candidate[0]
             openpose_kps = candidate[1]
-            keypoints = openpose_kps.as_posetrack()
             det_dict = TrackedPose(
-                det_id=i,
-                track_id=self.next_id,
-                bbox=bbox,
-                openpose_kps=openpose_kps,
-                keypoints=keypoints
-            }
+                det_id=i, track_id=self.next_id, bbox=bbox, openpose_kps=openpose_kps,
+            )
             dets_list.append(det_dict)
             self.next_id += 1
         self.dets_list_q.append(dets_list)

@@ -1,8 +1,8 @@
 import click
 import h5py
-from skeldump.dump import write_shots, add_post_proc, get_shotseg
-from skeldump.pipebase import IterStage
+from skeldump.dump import add_post_proc, get_shotseg, write_shots
 from skeldump.io import read_flat_unordered
+from skeldump.pipebase import IterStage
 
 
 @click.command()

@@ -26,32 +26,32 @@ def flip(joint_names, flipable):
     for joint_name in joint_names:
         if joint_name.startswith("left "):
             left_idx = joint_names.index(joint_name)
-            right_idx = joint_names.index(
-                "right " + joint_name.split(" ", 1)[1]
+            right_idx = joint_names.index("right " + joint_name.split(" ", 1)[1])
+            flipable[left_idx], flipable[right_idx] = (
+                flipable[right_idx],
+                flipable[left_idx],
             )
-            flipable[left_idx], flipable[right_idx] = \
-                flipable[right_idx], flipable[left_idx]
     return flipable
 
 
 # Labels from README.md in posetrack18_v0.45_public_labels.tar.gz
 # Order from lighttrack/visualizer/keypoint_visualizer.py
 POSETRACK18_JOINTS = [
-    'right ankle',
-    'right knee',
-    'right pelvis',
-    'left pelvis',
-    'left knee',
-    'left ankle',
-    'right wrist',
-    'right elbow',
-    'right shoulder',
-    'left shoulder',
-    'left elbow',
-    'left wrist',
-    'upper neck',
-    'nose',
-    'head top'
+    "right ankle",
+    "right knee",
+    "right pelvis",
+    "left pelvis",
+    "left knee",
+    "left ankle",
+    "right wrist",
+    "right elbow",
+    "right shoulder",
+    "left shoulder",
+    "left elbow",
+    "left wrist",
+    "upper neck",
+    "nose",
+    "head top",
 ]
 
 
@@ -155,8 +155,7 @@ HAND_LINES = {
 
 
 HAND_NO_WRIST_LINES = {
-    label: [val - 1 for val in vals if val >= 1]
-    for label, vals in HAND_LINES.items()
+    label: [val - 1 for val in vals if val >= 1] for label, vals in HAND_LINES.items()
 }
 
 
@@ -183,11 +182,9 @@ def build_graph(lines):
 
 
 BODY_25_GRAPH = build_graph(BODY_25_LINES.values())
-BODY_135_GRAPH = build_graph((
-    line
-    for part in BODY_135_LINES.values()
-    for line in part.values()
-))
+BODY_135_GRAPH = build_graph(
+    (line for part in BODY_135_LINES.values() for line in part.values())
+)
 POSETRACK18_GRAPH = build_graph(POSETRACK18_LINES.values())
 MODE_GRAPHS = {
     "BODY_25_ALL": BODY_135_GRAPH,

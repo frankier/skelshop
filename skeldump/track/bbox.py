@@ -1,5 +1,5 @@
 def get_bbox_from_keypoints(keypoints_python_data, enlarge_scale=0.2):
-    if keypoints_python_data == [] or keypoints_python_data == 45*[0]:
+    if keypoints_python_data == [] or keypoints_python_data == 45 * [0]:
         return [0, 0, 2, 2]
     x_list = []
     y_list = []
@@ -17,8 +17,8 @@ def get_bbox_from_keypoints(keypoints_python_data, enlarge_scale=0.2):
         return [0, 0, 2, 2]
 
     #  min_y = min_y - 0.05 * (max_y - min_y)
-    scale = enlarge_scale # enlarge bbox by 20% with same center position
-    bbox = enlarge_bbox([min_x, min_y, max_x, max_y], scale*1)
+    scale = enlarge_scale  # enlarge bbox by 20% with same center position
+    bbox = enlarge_bbox([min_x, min_y, max_x, max_y], scale * 1)
     bbox_in_xywh = x1y1x2y2_to_xywh(bbox)
     return bbox_in_xywh
 
@@ -36,12 +36,14 @@ def xywh_to_x1y1x2y2(det):
 
 
 def enlarge_bbox(bbox, scale):
-    assert(scale > 0)
+    assert scale > 0
     min_x, min_y, max_x, max_y = bbox
     margin_x = int(0.5 * scale * (max_x - min_x))
     margin_y = int(0.5 * scale * (max_y - min_y))
-    if margin_x < 0: margin_x = 2
-    if margin_y < 0: margin_y = 2
+    if margin_x < 0:
+        margin_x = 2
+    if margin_y < 0:
+        margin_y = 2
 
     min_x -= margin_x
     max_x += margin_x
@@ -50,11 +52,18 @@ def enlarge_bbox(bbox, scale):
 
     width = max_x - min_x
     height = max_y - min_y
-    if max_y < 0 or max_x < 0 or width <= 0 or height <= 0 or width > 2000 or height > 2000:
-        min_x=0
-        max_x=2
-        min_y=0
-        max_y=2
+    if (
+        max_y < 0
+        or max_x < 0
+        or width <= 0
+        or height <= 0
+        or width > 2000
+        or height > 2000
+    ):
+        min_x = 0
+        max_x = 2
+        min_y = 0
+        max_y = 2
 
     bbox_enlarged = [min_x, min_y, max_x, max_y]
     return bbox_enlarged

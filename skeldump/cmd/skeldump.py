@@ -1,9 +1,9 @@
 import click
 import click_log
-from .dump import dump
-from .drawsticks import drawsticks
-from .filter import filter
 
+from .drawsticks import drawsticks
+from .dump import dump
+from .filter import filter
 
 click_log.basic_config()
 

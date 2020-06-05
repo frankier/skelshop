@@ -1,9 +1,10 @@
 from os.path import basename
-from skeldump.pipebase import RewindStage
+
+from skeldump.bbshotseg import SHOT_CHANGE, ShotSegStage
 from skeldump.bbtrack import TrackStage
-from skeldump.bbshotseg import ShotSegStage, SHOT_CHANGE
 from skeldump.csvshotseg import CsvShotSegStage
 from skeldump.io import ShotSegmentedWriter
+from skeldump.pipebase import RewindStage
 
 
 def add_metadata(h5f, video, num_frames, mode, post_proc, shotseg, limbs):
@@ -42,10 +43,6 @@ def write_shots(h5f, limbs, frame_iter, writer_cls=ShotSegmentedWriter):
 
 def add_post_proc(stage, pose_matcher_config, shot_csv=None):
     if shot_csv:
-        return CsvShotSegStage(
-            TrackStage(pose_matcher_config, stage), shot_csv
-        )
+        return CsvShotSegStage(TrackStage(pose_matcher_config, stage), shot_csv)
     else:
-        return ShotSegStage(
-            TrackStage(pose_matcher_config, RewindStage(20, stage))
-        )
+        return ShotSegStage(TrackStage(pose_matcher_config, RewindStage(20, stage)))

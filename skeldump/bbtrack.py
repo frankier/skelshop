@@ -1,6 +1,7 @@
-from skeldump.track import PoseTrack, PoseMatcher
-from .pose import IdPoseBundle
+from skeldump.track import PoseMatcher, PoseTrack
+
 from .pipebase import PipelineStageBase
+from .pose import IdPoseBundle
 
 
 class TrackStage(PipelineStageBase):

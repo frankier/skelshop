@@ -1,9 +1,13 @@
 import argparse
 import sys
-from lighttrack.graph.gcn_utils.processor_siamese_gcn import SGCN_Processor
-from lighttrack.graph.gcn_utils.io import IO
-import torch
 from pprint import pprint
+
+import torch
+from lighttrack.graph.gcn_utils.io import IO
+from lighttrack.graph.gcn_utils.processor_siamese_gcn import SGCN_Processor
+
+from .bbox import bbox_invalid
+from .utils import graph_pair_to_data, keypoints_to_graph
 
 
 class PoseMatcher(SGCN_Processor):
@@ -21,7 +25,8 @@ class PoseMatcher(SGCN_Processor):
         parser = argparse.ArgumentParser(
             add_help=False,
             parents=[parent_parser],
-            description='Graph Convolution Network for Pose Matching')
+            description="Graph Convolution Network for Pose Matching",
+        )
 
         parser.set_defaults(config=self.config)
         return parser
@@ -47,29 +52,40 @@ class PoseMatcher(SGCN_Processor):
 
         margin = 0.2
         distance = dist.data.cpu().numpy()[0]
-        print("_____ Pose Matching: [dist: {:04.2f}]". format(distance))
+        print("_____ Pose Matching: [dist: {:04.2f}]".format(distance))
         if dist >= margin:
             return False, distance  # Do not match
         else:
             return True, distance  # Match
 
 
-def get_track_id_SGCN_plus(pose_matcher, dets_cur_frame, dets_list_prev_frame, pose_matching_threshold=0.5):
+def get_track_id_SGCN_plus(
+    pose_matcher, dets_cur_frame, dets_list_prev_frame, pose_matching_threshold=0.5
+):
     min_index = None
     min_matching_score = sys.maxsize
-    bbox_cur_frame = dets_cur_frame['bbox']
-    keypoints_cur_frame = dets_cur_frame['keypoints']
+    bbox_cur_frame = dets_cur_frame.bbox
+    keypoints_cur_frame = dets_cur_frame.keypoints
     track_id = -1
     for det_index, det_dict in enumerate(dets_list_prev_frame):
-        bbox_prev_frame = det_dict["bbox"]
-        keypoints_prev_frame = det_dict["keypoints"]
-        pose_matching_score = get_pose_matching_score(pose_matcher, keypoints_cur_frame, keypoints_prev_frame, bbox_cur_frame, bbox_prev_frame)
-        pprint([
-            keypoints_cur_frame, keypoints_prev_frame, bbox_cur_frame, bbox_prev_frame
-        ])
+        bbox_prev_frame = det_dict.bbox
+        keypoints_prev_frame = det_dict.keypoints
+        pose_matching_score = get_pose_matching_score(
+            pose_matcher,
+            keypoints_cur_frame,
+            keypoints_prev_frame,
+            bbox_cur_frame,
+            bbox_prev_frame,
+        )
+        pprint(
+            [keypoints_cur_frame, keypoints_prev_frame, bbox_cur_frame, bbox_prev_frame]
+        )
         print("pose_matching_score", pose_matching_score)
 
-        if pose_matching_score <= pose_matching_threshold and pose_matching_score <= min_matching_score:
+        if (
+            pose_matching_score <= pose_matching_threshold
+            and pose_matching_score <= min_matching_score
+        ):
             # match the target based on the pose matching score
             min_matching_score = pose_matching_score
             min_index = det_index

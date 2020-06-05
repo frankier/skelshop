@@ -1,29 +1,22 @@
 import logging
-from .pose import PoseBody135, PoseBody25, PoseBody25All, PoseBundle
+
 from .pipebase import PipelineStageBase
+from .pose import PoseBody25, PoseBody25All, PoseBody135, PoseBundle
 
 logger = logging.getLogger(__name__)
 
 
-MODES = [
-    "BODY_25_ALL", 
-    "BODY_25", 
-    "BODY_135", 
-]
+MODES = ["BODY_25_ALL", "BODY_25", "BODY_135"]
 
 
 POSE_CLASSES = {
     "BODY_25_ALL": PoseBody25All,
     "BODY_25": PoseBody25,
-    "BODY_135": PoseBody135, 
+    "BODY_135": PoseBody135,
 }
 
 
-LIMBS = {
-    "BODY_25_ALL": 135,
-    "BODY_25": 25,
-    "BODY_135": 135,
-}
+LIMBS = {"BODY_25_ALL": 135, "BODY_25": 25, "BODY_135": 135}
 
 
 def print_all(datum, print=print):
@@ -37,19 +30,11 @@ def print_all(datum, print=print):
 
 def mode_conf(mode):
     if mode == "BODY_25_ALL":
-        return {
-            "model_pose": "BODY_25",
-            "face": True,
-            "hand": True,
-        }
+        return {"model_pose": "BODY_25", "face": True, "hand": True}
     elif mode == "BODY_25":
-        return {
-            "model_pose": "BODY_25",
-        }
+        return {"model_pose": "BODY_25"}
     elif mode == "BODY_135":
-        return {
-            "model_pose": "BODY_135",
-        }
+        return {"model_pose": "BODY_135"}
     else:
         assert False
 
@@ -57,13 +42,14 @@ def mode_conf(mode):
 class OpenPoseStage(PipelineStageBase):
     def __init__(self, model_folder, mode, video):
         from openpose import pyopenpose as op
+
         self.op_wrap = op.WrapperPython(op.ThreadManagerMode.AsynchronousOut)
         # 2 => synchronous input => OpenPose handles reads internally
         # & asynchrnous output => We can handle the output here
         conf = {
             "video": video,
             "model_folder": model_folder,
-            #"tracking": 0,
+            # "tracking": 0,
             **mode_conf(mode),
         }
         self.op_wrap.configure(conf)
@@ -73,6 +59,7 @@ class OpenPoseStage(PipelineStageBase):
 
     def __next__(self):
         from openpose import pyopenpose as op
+
         print(f"i: {self.i}")
         vec_datum = op.VectorDatum()
         res = self.op_wrap.waitAndPop(vec_datum)

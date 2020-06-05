@@ -1,7 +1,8 @@
 from functools import partial
+
 from .openpose import POSE_CLASSES
-from .sparsepose import create_csr, create_growable_csr, get_row_csr
 from .pose import DumpReaderPoseBundle, UnorderedDumpReaderPoseBundle
+from .sparsepose import create_csr, create_growable_csr, get_row_csr
 
 
 def get_pose_nz(pose):
@@ -44,8 +45,8 @@ class UnsegmentedWriter:
             indices.append(limb_idx)
         grow_ds(pose_grp["data"], len(data))
         grow_ds(pose_grp["indices"], len(indices))
-        pose_grp["data"][-len(data):] = data
-        pose_grp["indices"][-len(indices):] = indices
+        pose_grp["data"][-len(data) :] = data
+        pose_grp["indices"][-len(indices) :] = indices
         self.pose_last_frames[pose_id] = frame_num
 
     def start_shot(self):
@@ -111,11 +112,7 @@ class ShotSegmentedWriter:
             add_empty_rows(1)
 
             pose_group = create_csr(
-                self.h5f,
-                f"/timeline/{self.shot_idx}/{pose_id}",
-                data,
-                indices,
-                indptr
+                self.h5f, f"/timeline/{self.shot_idx}/{pose_id}", data, indices, indptr
             )
             pose_group.attrs["start_frame"] = pose_first_frame
             pose_group.attrs["end_frame"] = pose_last_frame
@@ -142,8 +139,7 @@ class ShotReader:
 
     def __iter__(self):
         for frame in range(
-            self.shot_grp.attrs["start_frame"],
-            self.shot_grp.attrs["end_frame"],
+            self.shot_grp.attrs["start_frame"], self.shot_grp.attrs["end_frame"]
         ):
             bundle = []
             for pose_grp in self.shot_grp.values():

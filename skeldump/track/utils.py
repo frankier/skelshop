@@ -1,15 +1,18 @@
+import numpy as np
+
+
 def keypoints_to_graph(keypoints, bbox):
     num_elements = len(keypoints)
-    num_keypoints = num_elements/3
-    assert(num_keypoints == 15)
+    num_keypoints = num_elements / 3
+    assert num_keypoints == 15
 
     x0, y0, w, h = bbox
     flag_pass_check = True
 
-    graph = 15*[(0, 0)]
+    graph = 15 * [(0, 0)]
     for id in range(15):
-        x = keypoints[3*id] - x0
-        y = keypoints[3*id+1] - y0
+        x = keypoints[3 * id] - x0
+        y = keypoints[3 * id + 1] - y0
 
         graph[id] = (int(x), int(y))
     return graph, flag_pass_check

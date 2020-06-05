@@ -1,4 +1,5 @@
 import collections
+
 from .pipebase import PipelineStageBase
 
 
@@ -22,6 +23,7 @@ class ShotSegStage(PipelineStageBase):
                 return self.ahead_buf.popleft()
             except IndexError:
                 raise StopIteration()
+
         if self.drain:
             # Drain
             return shift()
@@ -49,10 +51,9 @@ class ShotSegStage(PipelineStageBase):
             print("behind_union", behind_union, behind_consistent)
             # Criterium #2: Everything in ahead buffer is disjoint from behind
             # union
-            if behind_consistent and all((
-                not behind_union & ex_pose_ids(bundle)
-                for bundle in self.ahead_buf
-            )):
+            if behind_consistent and all(
+                (not behind_union & ex_pose_ids(bundle) for bundle in self.ahead_buf)
+            ):
                 # Cut
                 print("Shot change!")
                 self.send_back("rewind", len(self.ahead_buf))

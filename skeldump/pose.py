@@ -1,4 +1,5 @@
 import numpy as np
+
 from .skelgraphs import BODY_25_TO_POSETRACK, keypoints_to_posetrack
 
 
@@ -73,12 +74,14 @@ class PoseBody25All(PoseBody25):
     @classmethod
     def from_datum(cls, datum, idx):
         self = cls()
-        self.keypoints = np.vstack([
-            datum.poseKeypoints[idx],
-            datum.handKeypoints[0][idx][1:],
-            datum.handKeypoints[1][idx][1:],
-            datum.faceKeypoints[idx],
-        ])
+        self.keypoints = np.vstack(
+            [
+                datum.poseKeypoints[idx],
+                datum.handKeypoints[0][idx][1:],
+                datum.handKeypoints[1][idx][1:],
+                datum.faceKeypoints[idx],
+            ]
+        )
         return self
 
 

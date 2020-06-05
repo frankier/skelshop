@@ -1,9 +1,9 @@
 import click
-from imutils.video.count_frames import count_frames
 import h5py
-from skeldump.dump import add_metadata, write_shots, add_post_proc, get_shotseg
-from skeldump.openpose import MODES, LIMBS, OpenPoseStage
+from imutils.video.count_frames import count_frames
+from skeldump.dump import add_metadata, add_post_proc, get_shotseg, write_shots
 from skeldump.io import ShotSegmentedWriter, UnsegmentedWriter
+from skeldump.openpose import LIMBS, MODES, OpenPoseStage
 
 
 @click.command()
@@ -18,7 +18,7 @@ def dump(video, h5fn, mode, post_proc, model_folder, pose_matcher_config, shot_c
     if post_proc and pose_matcher_config is None:
         raise click.BadOptionUsage(
             "--pose-matcher-config",
-            "--pose-matcher-config required when --post-proc specified"
+            "--pose-matcher-config required when --post-proc specified",
         )
     conf = h5py.get_config()
     conf.track_order = True
@@ -32,5 +32,13 @@ def dump(video, h5fn, mode, post_proc, model_folder, pose_matcher_config, shot_c
         else:
             frame_iter = (enumerate(frame) for frame in stage)
             writer_cls = UnsegmentedWriter
-        add_metadata(h5f, video, num_frames, mode, post_proc, get_shotseg(post_proc, shot_csv), limbs)
+        add_metadata(
+            h5f,
+            video,
+            num_frames,
+            mode,
+            post_proc,
+            get_shotseg(post_proc, shot_csv),
+            limbs,
+        )
         write_shots(h5f, limbs, frame_iter, writer_cls=writer_cls)
