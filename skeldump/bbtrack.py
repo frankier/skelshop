@@ -1,4 +1,4 @@
-from skeldump.vendor.cvtk_op_track import PoseTrack, PoseMatcher
+from skeldump.track import PoseTrack, PoseMatcher
 from .pose import IdPoseBundle
 from .pipebase import PipelineStageBase
 
