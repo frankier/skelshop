@@ -99,7 +99,7 @@ rule skel_filter_bbshotseg:
         "{base}.bbshotseg.h5"
     shell:
         "python skeldump.py filter " +
-        "--pose-matcher-config {inputs.gcn_config} " +
+        "--pose-matcher-config {input.gcn_config} " +
         "{input.unsorted} {output}"
 
 rule skel_filter_csvshotseg:
@@ -111,8 +111,8 @@ rule skel_filter_csvshotseg:
         "{base}.csvshotseg.h5"
     shell:
         "python skeldump.py filter " +
-        "--pose-matcher-config {inputs.gcn_config} " +
-        "--shot-csv {input.scene_csv}  " +
+        "--pose-matcher-config {input.gcn_config} " +
+        "--shot-csv {input.scenes_csv} " +
         "{input.unsorted} {output}"
 
 rule drawsticks:
