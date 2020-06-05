@@ -25,3 +25,8 @@ Draw some skeletons (OpenPose not needed):
 
     poetry run python drawsticks.py \
       pose_data.h5 video_in.mp4 video_out.mp4
+
+## Acknowledgmemnts
+
+Apart from the useful libraries, some of the black box tracking code is based
+on [this repository](https://github.com/lxy5513/cvToolkit).
