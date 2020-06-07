@@ -1,10 +1,8 @@
 Bootstrap: shub
 From: frankier/gsoc2020:frankier_gsoc2020
 
-%files
-    . /opt/redhen/skeldump
-    ../.gitmodules /opt/redhen
-    ../.git /opt/redhen
+%setup
+    git clone .. ${SINGULARITY_ROOTFS}/opt/redhen
 
 %post
     curl -sSL \
