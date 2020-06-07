@@ -1,10 +1,8 @@
 Bootstrap: shub
 From: frankier/gsoc2020:frankier_gsoc2020
 
-%setup
-    git clone .. ${SINGULARITY_ROOTFS}/opt/redhen
-
 %post
+    git clone https://github.com/frankier/gsoc2020/ /opt/redhen
     curl -sSL \
         https://raw.githubusercontent.com/python-poetry/poetry/master/get-poetry.py \
         | python
