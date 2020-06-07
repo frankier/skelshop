@@ -1,7 +1,7 @@
 import click
 import h5py
 from imutils.video.count_frames import count_frames
-from skeldump.dump import add_metadata, write_shots
+from skeldump.dump import add_fmt_metadata, add_metadata, write_shots
 from skeldump.io import ShotSegmentedWriter, UnsegmentedWriter
 from skeldump.openpose import LIMBS, MODES, OpenPoseStage
 from skeldump.pipeline import pipeline_options
@@ -21,11 +21,12 @@ def dump(video, h5fn, mode, model_folder, pipeline):
         if pipeline.stages:
             frame_iter = pipeline(stage)
             writer_cls = ShotSegmentedWriter
+            fmt_type = "trackshots"
         else:
             frame_iter = (enumerate(frame) for frame in stage)
             writer_cls = UnsegmentedWriter
-        add_metadata(
-            h5f, video, num_frames, mode, limbs,
-        )
+            fmt_type = "unseg"
+        add_metadata(h5f, video, num_frames, mode, limbs)
+        add_fmt_metadata(h5f, fmt_type)
         pipeline.apply_metadata(h5f)
         write_shots(h5f, limbs, frame_iter, writer_cls=writer_cls)

@@ -24,12 +24,11 @@ def add_empty_rows_grp(pose_grp, new_rows):
 class UnsegmentedWriter:
     def __init__(self, h5f):
         self.h5f = h5f
-        self.h5f.create_group("/timeline", track_order=True)
-        self.shot_grp = self.h5f.create_group("/timeline/0", track_order=True)
+        self.timeline_grp = self.h5f.create_group("/timeline", track_order=True)
         self.pose_last_frames = {}
 
     def add_pose(self, frame_num, pose_id, pose):
-        path = f"/timeline/0/{pose_id}"
+        path = f"/timeline/pose{pose_id}"
         if path in self.h5f:
             pose_grp = self.h5f[path]
             last_frame_num = self.pose_last_frames[pose_id]
@@ -57,11 +56,11 @@ class UnsegmentedWriter:
         pass
 
     def end_shot(self):
-        self.shot_grp.attrs["start_frame"] = 0
-        self.shot_grp.attrs["end_frame"] = max(self.pose_last_frames.values()) + 1
+        self.timeline_grp.attrs["start_frame"] = 0
+        self.timeline_grp.attrs["end_frame"] = max(self.pose_last_frames.values()) + 1
         pose_id = 0
         while 1:
-            path = f"/timeline/0/{pose_id}"
+            path = f"/timeline/pose{pose_id}"
             if path not in self.h5f:
                 break
             pose_grp = self.h5f[path]
@@ -91,7 +90,9 @@ class ShotSegmentedWriter:
         self.last_frame = frame_num
 
     def end_shot(self):
-        shot_grp = self.h5f.create_group(f"/timeline/{self.shot_idx}", track_order=True)
+        shot_grp = self.h5f.create_group(
+            f"/timeline/shot{self.shot_idx}", track_order=True
+        )
         shot_grp.attrs["start_frame"] = self.shot_start
         shot_grp.attrs["end_frame"] = self.last_frame + 1
         for pose_id, poses in self.pose_data.items():
@@ -120,7 +121,11 @@ class ShotSegmentedWriter:
             add_empty_rows(1)
 
             pose_group = create_csr(
-                self.h5f, f"/timeline/{self.shot_idx}/{pose_id}", data, indices, indptr
+                self.h5f,
+                f"/timeline/shot{self.shot_idx}/pose{pose_id}",
+                data,
+                indices,
+                indptr,
             )
             pose_group.attrs["start_frame"] = pose_first_frame
             pose_group.attrs["end_frame"] = pose_last_frame
@@ -132,11 +137,25 @@ class ShotSegmentedWriter:
 class ShotSegmentedReader:
     def __init__(self, h5f, bundle_cls=DumpReaderPoseBundle):
         self.h5f = h5f
+        assert self.h5f.attrs["fmt_type"] == "trackshots"
         self.mk_bundle = partial(bundle_cls, cls=POSE_CLASSES[self.h5f.attrs["mode"]])
 
     def __iter__(self):
         for shot_name, shot_grp in self.h5f["/timeline"].items():
             yield ShotReader(shot_grp, self.h5f.attrs["limbs"], self.mk_bundle)
+
+
+class UnsegmentedReader:
+    def __init__(self, h5f, bundle_cls=UnorderedDumpReaderPoseBundle):
+        self.h5f = h5f
+        assert self.h5f.attrs["fmt_type"] == "unseg"
+        mk_bundle = partial(bundle_cls, cls=POSE_CLASSES[self.h5f.attrs["mode"]])
+        self.shot_reader = ShotReader(
+            self.h5f["/timeline"], self.h5f.attrs["limbs"], mk_bundle
+        )
+
+    def __iter__(self):
+        return iter(self.shot_reader)
 
 
 class ShotReader:
@@ -157,9 +176,3 @@ class ShotReader:
                     row_num = frame - start_frame
                     bundle.append(get_row_csr(pose_grp, self.num_limbs, row_num))
             yield self.mk_bundle(bundle)
-
-
-def read_flat_unordered(h5f):
-    for shot in ShotSegmentedReader(h5f, bundle_cls=UnorderedDumpReaderPoseBundle):
-        for bundle in shot:
-            yield bundle

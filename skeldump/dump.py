@@ -3,12 +3,19 @@ from os.path import basename
 from skeldump.bbshotseg import SHOT_CHANGE
 from skeldump.io import ShotSegmentedWriter
 
+FMT_VERSION = 1
+
 
 def add_metadata(h5f, video, num_frames, mode, limbs):
     h5f.attrs["video"] = basename(video)
     h5f.attrs["num_frames"] = num_frames
     h5f.attrs["mode"] = mode
     h5f.attrs["limbs"] = limbs
+
+
+def add_fmt_metadata(h5f, fmt_type):
+    h5f.attrs["fmt_type"] = fmt_type
+    h5f.attrs["fmt_ver"] = FMT_VERSION
 
 
 def write_shots(h5f, limbs, frame_iter, writer_cls=ShotSegmentedWriter):
