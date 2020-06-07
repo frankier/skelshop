@@ -39,8 +39,8 @@ rule setup:
 
 rule vid_all:
     input:
-        bbshotseg = "{base}.bbshotseg.sticks.mp4",
-        csvshotseg = "{base}.csvshotseg.sticks.mp4"
+        csvshotseg_reidpt = "{base}.reidpt.sticks.mp4",
+        csvshotseg_reidman = "{base}.reidman.sticks.mp4"
     output:
         "{base}.all"
     shell:
@@ -91,27 +91,35 @@ rule skel_unsorted:
         "{input.video} " + 
         "{output}"
 
-rule skel_filter_bbshotseg:
-    input:
-        gcn_config = GCN_CONFIG,
-        unsorted = "{base}.unsorted.h5"
-    output:
-        "{base}.bbshotseg.h5"
-    shell:
-        "python skeldump.py filter " +
-        "--pose-matcher-config {input.gcn_config} " +
-        "{input.unsorted} {output}"
-
-rule skel_filter_csvshotseg:
+rule skel_filter_csvshotseg_reidpt:
     input:
         gcn_config = GCN_CONFIG,
         unsorted = "{base}.unsorted.h5",
         scenes_csv = "{base}-Scenes.csv"
     output:
-        "{base}.csvshotseg.h5"
+        "{base}.reidpt.h5"
     shell:
         "python skeldump.py filter " +
+        "--track " +
+        "--track-reid-embed=posetrack " +
         "--pose-matcher-config {input.gcn_config} " +
+        "--shot-seg=csv " +
+        "--shot-csv {input.scenes_csv} " +
+        "{input.unsorted} {output}"
+
+rule skel_filter_csvshotseg_reidman:
+    input:
+        gcn_config = GCN_CONFIG,
+        unsorted = "{base}.unsorted.h5",
+        scenes_csv = "{base}-Scenes.csv"
+    output:
+        "{base}.reidman.h5"
+    shell:
+        "python skeldump.py filter " +
+        "--track " +
+        "--track-reid-embed=manual " +
+        "--pose-matcher-config {input.gcn_config} " +
+        "--shot-seg=csv " +
         "--shot-csv {input.scenes_csv} " +
         "{input.unsorted} {output}"
 

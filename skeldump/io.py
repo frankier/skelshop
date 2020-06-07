@@ -24,7 +24,8 @@ def add_empty_rows_grp(pose_grp, new_rows):
 class UnsegmentedWriter:
     def __init__(self, h5f):
         self.h5f = h5f
-        self.shot_grp = self.h5f.create_group("/timeline/0")
+        self.h5f.create_group("/timeline", track_order=True)
+        self.shot_grp = self.h5f.create_group("/timeline/0", track_order=True)
         self.pose_last_frames = {}
 
     def add_pose(self, frame_num, pose_id, pose):
@@ -72,6 +73,7 @@ class UnsegmentedWriter:
 class ShotSegmentedWriter:
     def __init__(self, h5f):
         self.h5f = h5f
+        self.h5f.create_group("/timeline", track_order=True)
 
         self.pose_data = {}
         self.shot_idx = 0
@@ -89,7 +91,7 @@ class ShotSegmentedWriter:
         self.last_frame = frame_num
 
     def end_shot(self):
-        shot_grp = self.h5f.create_group(f"/timeline/{self.shot_idx}")
+        shot_grp = self.h5f.create_group(f"/timeline/{self.shot_idx}", track_order=True)
         shot_grp.attrs["start_frame"] = self.shot_start
         shot_grp.attrs["end_frame"] = self.last_frame + 1
         for pose_id, poses in self.pose_data.items():

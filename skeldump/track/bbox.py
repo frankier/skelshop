@@ -1,24 +1,17 @@
-def get_bbox_from_keypoints(keypoints_python_data, enlarge_scale=0.2):
-    if keypoints_python_data == [] or keypoints_python_data == 45 * [0]:
-        return [0, 0, 2, 2]
-    x_list = []
-    y_list = []
-    for keypoint in keypoints_python_data:
-        x, y, vis = keypoint
-        if vis != 0 and vis != 3:
-            x_list.append(x)
-            y_list.append(y)
-    min_x = min(x_list)
-    min_y = min(y_list)
-    max_x = max(x_list)
-    max_y = max(y_list)
+import numpy as np
+from numpy import ma
+from ufunclab import minmax
 
-    if not x_list or not y_list:
-        return [0, 0, 2, 2]
 
-    #  min_y = min_y - 0.05 * (max_y - min_y)
-    scale = enlarge_scale  # enlarge bbox by 20% with same center position
-    bbox = enlarge_bbox([min_x, min_y, max_x, max_y], scale * 1)
+def mask_keypoints(keypoints, thresh=0):
+    return ma.masked_array(keypoints[:, :2], mask=keypoints[:, 2] > thresh)
+
+
+def get_bbox_from_keypoints(keypoints, enlarge_scale=0.2):
+    # [min_x, min_y, max_x, max_y]
+    bbox = minmax(keypoints[:, :2][np.nonzero(keypoints[:, 2])], axes=[(0,), (1,)])
+    bbox = np.transpose(bbox).reshape(-1)
+    bbox = enlarge_bbox(bbox, enlarge_scale)
     bbox_in_xywh = x1y1x2y2_to_xywh(bbox)
     return bbox_in_xywh
 

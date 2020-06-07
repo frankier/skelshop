@@ -1,8 +1,7 @@
 from .bbox import iou, xywh_to_x1y1x2y2
 
 
-def get_track_id_SpatialConsistency(bbox_cur_frame, bbox_list_prev_frame):
-    thresh = 0.3
+def spatial_track_id(bbox_cur_frame, bbox_list_prev_frame, thresh=0.3):
     max_iou_score = 0
     max_index = -1
 
@@ -19,5 +18,4 @@ def get_track_id_SpatialConsistency(bbox_cur_frame, bbox_list_prev_frame):
     if max_iou_score > thresh:
         track_id = bbox_list_prev_frame[max_index].track_id
         return track_id, max_index
-    else:
-        return -1, None
+    return None

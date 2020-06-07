@@ -7,7 +7,6 @@ def keypoints_to_graph(keypoints, bbox):
     assert num_keypoints == 15
 
     x0, y0, w, h = bbox
-    flag_pass_check = True
 
     graph = 15 * [(0, 0)]
     for id in range(15):
@@ -15,7 +14,7 @@ def keypoints_to_graph(keypoints, bbox):
         y = keypoints[3 * id + 1] - y0
 
         graph[id] = (int(x), int(y))
-    return graph, flag_pass_check
+    return graph
 
 
 def graph_pair_to_data(sample_graph_pair):

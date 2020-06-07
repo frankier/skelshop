@@ -1,13 +1,12 @@
-from skeldump.track import PoseMatcher, PoseTrack
+from skeldump.track import PoseTrack
 
 from .pipebase import PipelineStageBase
 from .pose import IdPoseBundle
 
 
 class TrackStage(PipelineStageBase):
-    def __init__(self, pose_matcher_config, prev):
-        pose_matcher = PoseMatcher(pose_matcher_config)
-        self.tracker = PoseTrack(pose_matcher)
+    def __init__(self, pose_matcher, prev, **kwargs):
+        self.tracker = PoseTrack(pose_matcher, **kwargs)
         self.prev = prev
 
     def __next__(self):

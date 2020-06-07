@@ -6,12 +6,8 @@ import h5py
 import opencv_wrapper as cvw
 from skeldump.drawsticks import VideoSticksWriter
 from skeldump.io import ShotSegmentedReader
-from skeldump.skelgraphs import (
-    BODY_25_JOINTS,
-    MODE_GRAPHS,
-    POSETRACK18_GRAPH,
-    POSETRACK18_JOINTS,
-)
+from skeldump.skelgraphs.openpose import MODE_SKELS
+from skeldump.skelgraphs.posetrack import POSETRACK18_SKEL
 
 logger = logging.getLogger(__name__)
 
@@ -33,18 +29,15 @@ def drawsticks(h5fn, videoin, videoout, posetrack, scale):
             )
         mode = h5f.attrs["mode"]
         if posetrack:
-            graph = POSETRACK18_GRAPH
-            joint_names = POSETRACK18_JOINTS
+            skel = POSETRACK18_SKEL
         else:
-            graph = MODE_GRAPHS[mode]
-            joint_names = BODY_25_JOINTS
+            skel = MODE_SKELS[mode]
         vid_write = VideoSticksWriter(
             videoout,
             vid_read.width * scale,
             vid_read.height * scale,
             vid_read.fps,
-            graph,
-            joint_names,
+            skel,
             conv_to_posetrack=posetrack,
         )
         stick_read = ShotSegmentedReader(h5f)

@@ -5,7 +5,6 @@ import numpy as np
 import opencv_wrapper as cvw
 from more_itertools.recipes import grouper
 from skeldump.pose import PoseBody25
-from skeldump.skelgraphs import iter_joints
 
 logger = logging.getLogger(__name__)
 
@@ -21,8 +20,7 @@ class VideoSticksWriter:
         width,
         height,
         fps,
-        graph,
-        joint_names,
+        skel,
         add_cuts=True,
         number_joints=False,
         conv_to_posetrack=False,
@@ -33,8 +31,7 @@ class VideoSticksWriter:
         self.width = width
         self.height = height
         self.fps = fps
-        self.graph = graph
-        self.joint_names = joint_names
+        self.skel = skel
         self.add_cuts = add_cuts
         self.number_joints = number_joints
         self.conv_to_posetrack = conv_to_posetrack
@@ -49,7 +46,7 @@ class VideoSticksWriter:
         self.out.write(frame)
 
     def draw_skel(self, frame, numarr):
-        for (x1, y1, c1), (x2, y2, c2) in iter_joints(self.graph, numarr):
+        for (x1, y1, c1), (x2, y2, c2) in self.skel.iter_limbs(numarr):
             c = min(c1, c2)
             if c == 0:
                 continue
@@ -64,8 +61,8 @@ class VideoSticksWriter:
     def draw_ann(self, frame, pers_id, numarr):
         if not self.ann_ids:
             return
-        left_idx = self.joint_names.index("left shoulder")
-        right_idx = self.joint_names.index("right shoulder")
+        left_idx = self.skel.names.index("left shoulder")
+        right_idx = self.skel.names.index("right shoulder")
         if numarr[right_idx][0] > numarr[left_idx][0]:
             # Right shoulder
             anchor = numarr[right_idx]

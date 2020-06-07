@@ -1,6 +1,6 @@
 import numpy as np
 
-from .skelgraphs import BODY_25_TO_POSETRACK, keypoints_to_posetrack
+from .skelgraphs.conv import BODY_25_TO_POSETRACK, keypoints_to_posetrack
 
 
 class PoseBundle:

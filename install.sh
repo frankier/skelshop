@@ -8,3 +8,4 @@ echo "`pwd`/submodules/" > $SITE/lighttrack.pth
 echo "`pwd`/submodules/lighttrack" > $SITE/lighttrackinner.pth
 echo "`pwd`/submodules/lighttrack/graph" > $SITE/lighttrackgraph.pth
 echo "`pwd`/submodules/opencv_wrapper" > $SITE/opencv_wrapper.pth
+cd `pwd`/submodules/ufunclab && poetry run python setup.py install

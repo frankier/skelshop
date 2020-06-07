@@ -18,6 +18,7 @@ torchlight = { path = "./submodules/lighttrack/graph/torchlight" }
 more_itertools = "^8.3.0"
 click_log = "^0.3.2"
 scenedetect = "^0.5.2"
+ordered-set = "^4.0.1"
 
 [tool.poetry.dev-dependencies]
 black = "^19.10b0"
