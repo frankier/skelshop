@@ -69,6 +69,8 @@ def process_options(options, allow_empty, kwargs):
             "Cannot perform shot segmentation without tracking or visa-versa",
         )
     for k in PIPELINE_CONF_OPTIONS:
+        if kwargs.get("track") and k.startswith("track_"):
+            continue
         pipeline.add_metadata(k, kwargs.get(k))
     if kwargs.get("shot_seg") == "bbskel":
         pipeline.add_stage(RewindStage, 20)

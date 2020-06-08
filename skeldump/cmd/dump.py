@@ -27,6 +27,6 @@ def dump(video, h5fn, mode, model_folder, pipeline):
             writer_cls = UnsegmentedWriter
             fmt_type = "unseg"
         add_metadata(h5f, video, num_frames, mode, limbs)
-        add_fmt_metadata(h5f, fmt_type)
+        add_fmt_metadata(h5f, fmt_type, True)
         pipeline.apply_metadata(h5f)
         write_shots(h5f, limbs, frame_iter, writer_cls=writer_cls)
