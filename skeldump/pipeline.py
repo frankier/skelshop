@@ -112,9 +112,9 @@ def pipeline_options(allow_empty=True):
             click.option("--track/--no-track", default=False),
             click.option("--track-enlarge-bbox", type=float, default=0.2),
             click.option("--track-buf-size", type=int, default=5),
-            click.option("--track-min-conf-sum", type=int, default=5),
-            click.option("--track-min-iou", type=int, default=0.3),
-            click.option("--track-max-reid-dist", type=int, default=0.3),
+            click.option("--track-min-conf-sum", type=float, default=5),
+            click.option("--track-min-iou", type=float, default=0.3),
+            click.option("--track-max-reid-dist", type=float, default=0.3),
             click.option(
                 "--track-reid-embed",
                 type=click.Choice(["posetrack", "manual", "none"]),
