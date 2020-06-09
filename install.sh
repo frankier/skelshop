@@ -3,9 +3,12 @@
 shopt -s extglob
 git submodule update --init --recursive
 poetry install
-export SITE=$(echo $(poetry env list --full-path)/lib/python*/site-packages)
-if [ -z "$SITE" ]; then
-    export SITE="$(python -c 'import site; print(site.getsitepackages()[0])')"
+
+PKGS="$(echo $(poetry env list --full-path)"
+if [ -z "$PKGS" ]; then
+    SITE="$(python -c 'import site; print(site.getsitepackages()[0])')"
+else
+    SITE="$PKGS/lib/python*/site-packages"
 fi
 echo "$(pwd)/submodules/" > "$SITE/lighttrack.pth"
 echo "$(pwd)/submodules/lighttrack" > "$SITE/lighttrackinner.pth"
