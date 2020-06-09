@@ -1,22 +1,23 @@
 import logging
 
 from .pipebase import PipelineStageBase
-from .pose import PoseBody25, PoseBody25All, PoseBody135, PoseBundle
+from .pose import PoseBody25, PoseBody25All, PoseBody25Hands, PoseBody135, PoseBundle
 
 logger = logging.getLogger(__name__)
 
 
-MODES = ["BODY_25_ALL", "BODY_25", "BODY_135"]
+MODES = ["BODY_25_ALL", "BODY_25_HANDS", "BODY_25", "BODY_135"]
 
 
 POSE_CLASSES = {
     "BODY_25_ALL": PoseBody25All,
+    "BODY_25_HANDS": PoseBody25Hands,
     "BODY_25": PoseBody25,
     "BODY_135": PoseBody135,
 }
 
 
-LIMBS = {"BODY_25_ALL": 135, "BODY_25": 25, "BODY_135": 135}
+LIMBS = {"BODY_25_ALL": 135, "BODY_25_HANDS": 65, "BODY_25": 25, "BODY_135": 135}
 
 
 def print_all(datum, print=print):
@@ -31,6 +32,8 @@ def print_all(datum, print=print):
 def mode_conf(mode):
     if mode == "BODY_25_ALL":
         return {"model_pose": "BODY_25", "face": True, "hand": True}
+    if mode == "BODY_25_HANDS":
+        return {"model_pose": "BODY_25", "hand": True}
     elif mode == "BODY_25":
         return {"model_pose": "BODY_25"}
     elif mode == "BODY_135":

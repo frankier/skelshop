@@ -1,6 +1,7 @@
 import click
 import click_log
 
+from .conv import conv
 from .drawsticks import drawsticks
 from .dump import dump
 from .filter import filter
@@ -17,3 +18,4 @@ def skeldump():
 skeldump.add_command(dump)
 skeldump.add_command(drawsticks)
 skeldump.add_command(filter)
+skeldump.add_command(conv)
