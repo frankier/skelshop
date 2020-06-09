@@ -24,7 +24,7 @@ def add_metadata(h5f, video, num_frames, mode, limbs):
 
 def git_describe_safe(cwd):
     try:
-        return check_output(["git", "describe", "--always"], cwd=cwd).decode()
+        return check_output(["git", "describe", "--always"], cwd=cwd).decode().strip()
     except CalledProcessError:
         return "unknown"
 
