@@ -6,7 +6,7 @@ authors = ["Frankie Robertson <frankie@robertson.name>"]
 license = "MIT"
 
 [tool.poetry.dependencies]
-python = "^3.7"
+python = "^3.6"
 h5py = "^2.10.0"
 imutils = "^0.5.3"
 click = "^7.1.2"
@@ -20,6 +20,7 @@ click_log = "^0.3.2"
 scenedetect = "^0.5.2"
 ordered-set = "^4.0.1"
 orjson = "^3.1.0"
+dataclasses = { version = "^0.7", python = "~3.6" }
 
 [tool.poetry.dev-dependencies]
 black = "^19.10b0"
