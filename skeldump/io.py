@@ -176,3 +176,7 @@ class ShotReader:
                     row_num = frame - start_frame
                     bundle.append(get_row_csr(pose_grp, self.num_limbs, row_num))
             yield self.mk_bundle(bundle)
+
+
+def as_if_segmented(unseg_reader):
+    return (enumerate(frame) for frame in unseg_reader)

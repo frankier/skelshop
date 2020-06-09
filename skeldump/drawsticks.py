@@ -1,4 +1,5 @@
 import logging
+from itertools import zip_longest
 
 import cv2
 import numpy as np
@@ -11,6 +12,13 @@ logger = logging.getLogger(__name__)
 
 def rnd(x):
     return int(x + 0.5)
+
+
+def scale_video(vid_read, scale):
+    for frame in vid_read:
+        if scale != 1:
+            frame = cv2.resize(frame, fx=scale, fy=scale)
+        yield frame
 
 
 class VideoSticksWriter:
@@ -102,14 +110,12 @@ class VideoSticksWriter:
         return img
 
 
-def drawsticks(vid_read, stick_read, vid_write, scale=1):
+def drawsticks_shots(vid_read, stick_read, vid_write):
     shots_it = iter(stick_read)
     shot = next(shots_it, None)
     shot_it = iter(shot)
     bundle = None
     for frame_idx, frame in enumerate(vid_read):
-        if scale != 1:
-            frame = cv2.resize(frame, fx=scale, fy=scale)
         if shot is not None:
             bundle = next(shot_it, None)
             if bundle is None:
@@ -118,4 +124,9 @@ def drawsticks(vid_read, stick_read, vid_write, scale=1):
                     vid_write.add_cut()
                     shot_it = iter(shot)
                     bundle = next(shot_it, None)
+        vid_write.draw(frame, bundle)
+
+
+def drawsticks_unseg(vid_read, stick_read, vid_write):
+    for frame, bundle in zip_longest(vid_read, stick_read):
         vid_write.draw(frame, bundle)

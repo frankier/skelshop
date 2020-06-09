@@ -4,8 +4,13 @@ from pprint import pformat
 import click
 import h5py
 import opencv_wrapper as cvw
-from skeldump.drawsticks import VideoSticksWriter
-from skeldump.io import ShotSegmentedReader
+from skeldump.drawsticks import (
+    VideoSticksWriter,
+    drawsticks_shots,
+    drawsticks_unseg,
+    scale_video,
+)
+from skeldump.io import ShotSegmentedReader, UnsegmentedReader, as_if_segmented
 from skeldump.skelgraphs.openpose import MODE_SKELS
 from skeldump.skelgraphs.posetrack import POSETRACK18_SKEL
 
@@ -19,7 +24,6 @@ logger = logging.getLogger(__name__)
 @click.option("--posetrack/--no-posetrack")
 @click.option("--scale", type=int, default=1)
 def drawsticks(h5fn, videoin, videoout, posetrack, scale):
-    from skeldump.drawsticks import drawsticks
 
     with h5py.File(h5fn, "r") as h5f, cvw.load_video(videoin) as vid_read:
         if logger.isEnabledFor(logging.INFO):
@@ -39,6 +43,12 @@ def drawsticks(h5fn, videoin, videoout, posetrack, scale):
             vid_read.fps,
             skel,
             conv_to_posetrack=posetrack,
+            scale=scale,
         )
-        stick_read = ShotSegmentedReader(h5f)
-        drawsticks(vid_read, stick_read, vid_write, scale)
+        scaled_read = scale_video(vid_read, scale)
+        if h5f.attrs["fmt_type"] == "trackshots":
+            stick_read = ShotSegmentedReader(h5f)
+            drawsticks_shots(scaled_read, stick_read, vid_write)
+        else:
+            stick_read = as_if_segmented(UnsegmentedReader(h5f))
+            drawsticks_unseg(scaled_read, stick_read, vid_write)
