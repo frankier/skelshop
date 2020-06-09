@@ -52,7 +52,7 @@ rule get_gcn_weights:
     shell:
         "mkdir -p " + GCN_WEIGHTS + " && " +
         "cd " + GCN_WEIGHTS + " && " +
-        "wget http://guanghan.info/download/Data/LightTrack/weights/GCN.zip &&" + 
+        "wget http://guanghan.info/download/Data/LightTrack/weights/GCN.zip && " + 
         "unzip GCN.zip"
 
 rule tmpl_gcn_config:
