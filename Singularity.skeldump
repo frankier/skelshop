@@ -10,7 +10,7 @@ From: frankier/gsoc2020:frankier_gsoc2020
     poetry config virtualenvs.create false
     cd /opt/redhen/skeldump && \
         ./install.sh && \
-        snakemake
+        poetry run snakemake
 
 %runscript
     cd /opt/redhen/skeldump && snakemake "$@"
