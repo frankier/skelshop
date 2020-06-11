@@ -1,4 +1,5 @@
 import numpy as np
+import scipy.sparse as ss
 
 
 def create_growable_csr(h5f, path):
@@ -19,12 +20,31 @@ def create_csr(h5f, path, data, indices, indptr):
     return group
 
 
-def get_row_csr(grp, num_limbs, row_num):
+class SparsePose:
+    def __init__(self, grp, num_limbs):
+        self.grp = grp
+        self.num_limbs = num_limbs
+        self.data = grp["data"]
+        self.indices = grp["indices"]
+        self.indptr = grp["indptr"]
+
+    def get_row(self, row_num):
+        row_start = self.indptr[row_num]
+        row_end = self.indptr[row_num + 1]
+        res = np.zeros((self.num_limbs, 3))
+        res[self.indices[row_start:row_end]] = self.data[row_start:row_end]
+        return res
+
+
+def as_scipy_csrs(grp, num_limbs):
     data = grp["data"]
     indices = grp["indices"]
     indptr = grp["indptr"]
-    row_start = indptr[row_num]
-    row_end = indptr[row_num + 1]
-    res = np.zeros((num_limbs, 3))
-    res[indices[row_start:row_end]] = data[row_start:row_end]
-    return res
+    return tuple(
+        (
+            ss.csr_matrix(
+                (data[:, cmp], indices, indptr), shape=(len(indptr) - 1, num_limbs)
+            )
+            for cmp in range(3)
+        )
+    )

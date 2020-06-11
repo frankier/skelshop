@@ -14,11 +14,13 @@ def get_cuts_from_csv(shot_csv):
 
 
 class CsvShotSegStage(PipelineStageBase):
-    def __init__(self, prev, shot_csv):
+    def __init__(self, prev, shot_csv, start_frame):
         self.prev = prev
         self.cuts = get_cuts_from_csv(shot_csv)
-        self.frame_id = 0
+        self.frame_id = start_frame
         self.cut_idx = 0
+        while self.cuts[self.cut_idx] <= self.frame_id:
+            self.cut_idx += 1
 
     def __next__(self):
         if self.cut_idx < len(self.cuts) and self.cuts[self.cut_idx] == self.frame_id:

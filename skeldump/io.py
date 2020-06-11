@@ -2,7 +2,7 @@ from functools import partial
 
 from .openpose import POSE_CLASSES
 from .pose import DumpReaderPoseBundle, UnorderedDumpReaderPoseBundle
-from .sparsepose import create_csr, create_growable_csr, get_row_csr
+from .sparsepose import SparsePose, create_csr, create_growable_csr
 
 
 def get_pose_nz(pose):
@@ -157,26 +157,43 @@ class UnsegmentedReader:
     def __iter__(self):
         return iter(self.shot_reader)
 
+    def iter_from(self, start_frame):
+        return self.shot_reader.iter_from(start_frame)
+
 
 class ShotReader:
     def __init__(self, shot_grp, num_limbs, mk_bundle):
         self.shot_grp = shot_grp
         self.num_limbs = num_limbs
         self.mk_bundle = mk_bundle
+        self.start_frame = self.shot_grp.attrs["start_frame"]
+        self.end_frame = self.shot_grp.attrs["end_frame"]
+        self.poses = []
+        for pose_grp in self.shot_grp.values():
+            start_frame = pose_grp.attrs["start_frame"]
+            end_frame = pose_grp.attrs["end_frame"]
+            sparse_pose = SparsePose(pose_grp, num_limbs)
+            self.poses.append((start_frame, end_frame, sparse_pose))
 
     def __iter__(self):
-        for frame in range(
-            self.shot_grp.attrs["start_frame"], self.shot_grp.attrs["end_frame"]
-        ):
+        return self.iter_from(self.start_frame)
+
+    def iter_from(self, start_frame):
+        for frame in range(start_frame, self.end_frame):
             bundle = []
-            for pose_grp in self.shot_grp.values():
-                start_frame = pose_grp.attrs["start_frame"]
-                end_frame = pose_grp.attrs["end_frame"]
+            for start_frame, end_frame, sparse_pose in self.poses:
                 if start_frame <= frame < end_frame:
                     row_num = frame - start_frame
-                    bundle.append(get_row_csr(pose_grp, self.num_limbs, row_num))
+                    bundle.append(sparse_pose.get_row(row_num))
             yield self.mk_bundle(bundle)
 
 
-def as_if_segmented(unseg_reader):
-    return (enumerate(frame) for frame in unseg_reader)
+class AsIfOrdered:
+    def __init__(self, wrapped):
+        self.wrapped = wrapped
+
+    def __iter__(self):
+        return (enumerate(frame) for frame in iter(self.wrapped))
+
+    def iter_from(self, start_frame):
+        return (enumerate(frame) for frame in self.wrapped.iter_from(start_frame))

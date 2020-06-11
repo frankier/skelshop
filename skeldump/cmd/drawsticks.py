@@ -1,4 +1,5 @@
 import logging
+from itertools import repeat
 from pprint import pformat
 
 import click
@@ -8,11 +9,10 @@ from skeldump.drawsticks import (
     VideoSticksWriter,
     drawsticks_shots,
     drawsticks_unseg,
+    get_skel,
     scale_video,
 )
-from skeldump.io import ShotSegmentedReader, UnsegmentedReader, as_if_segmented
-from skeldump.skelgraphs.openpose import MODE_SKELS
-from skeldump.skelgraphs.posetrack import POSETRACK18_SKEL
+from skeldump.io import AsIfOrdered, ShotSegmentedReader, UnsegmentedReader
 
 logger = logging.getLogger(__name__)
 
@@ -23,19 +23,15 @@ logger = logging.getLogger(__name__)
 @click.argument("videoout", type=click.Path())
 @click.option("--posetrack/--no-posetrack")
 @click.option("--scale", type=int, default=1)
-def drawsticks(h5fn, videoin, videoout, posetrack, scale):
-
+@click.option("--overlay/--no-overlay", default=True)
+def drawsticks(h5fn, videoin, videoout, posetrack, scale, overlay):
     with h5py.File(h5fn, "r") as h5f, cvw.load_video(videoin) as vid_read:
         if logger.isEnabledFor(logging.INFO):
             logging.info(
                 "Opened HDF5 pose file with metadata: %s",
                 pformat(dict(h5f.attrs.items())),
             )
-        mode = h5f.attrs["mode"]
-        if posetrack:
-            skel = POSETRACK18_SKEL
-        else:
-            skel = MODE_SKELS[mode]
+        skel = get_skel(h5f, posetrack)
         vid_write = VideoSticksWriter(
             videoout,
             vid_read.width * scale,
@@ -45,10 +41,13 @@ def drawsticks(h5fn, videoin, videoout, posetrack, scale):
             conv_to_posetrack=posetrack,
             scale=scale,
         )
-        scaled_read = scale_video(vid_read, scale)
+        if overlay:
+            frames = scale_video(vid_read, scale)
+        else:
+            frames = repeat(None, h5f.attrs["num_frames"])
         if h5f.attrs["fmt_type"] == "trackshots":
             stick_read = ShotSegmentedReader(h5f)
-            drawsticks_shots(scaled_read, stick_read, vid_write)
+            drawsticks_shots(frames, stick_read, vid_write)
         else:
-            stick_read = as_if_segmented(UnsegmentedReader(h5f))
-            drawsticks_unseg(scaled_read, stick_read, vid_write)
+            stick_read = AsIfOrdered(UnsegmentedReader(h5f))
+            drawsticks_unseg(frames, stick_read, vid_write)

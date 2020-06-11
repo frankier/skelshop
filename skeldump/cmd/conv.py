@@ -7,13 +7,13 @@ import h5py
 from skeldump.dump import add_fmt_metadata, add_metadata, write_shots
 from skeldump.infmt.tar import iter_json_sources
 from skeldump.infmt.zip import zip_json_source
-from skeldump.io import UnsegmentedWriter, as_if_segmented
+from skeldump.io import AsIfOrdered, UnsegmentedWriter
 from skeldump.openpose import LIMBS, MODES
 
 
 def write_conv(h5f, mode, basename, json_source, input_fmt):
     limbs = LIMBS[mode]
-    frame_iter = as_if_segmented(json_source)
+    frame_iter = AsIfOrdered(json_source)
     write_shots(h5f, limbs, frame_iter, writer_cls=UnsegmentedWriter)
     video = basename.rsplit("/", 1)[-1] + ".mp4"
     add_metadata(h5f, video, json_source.num_frames, mode, limbs)

@@ -6,6 +6,8 @@ import numpy as np
 import opencv_wrapper as cvw
 from more_itertools.recipes import grouper
 from skeldump.pose import PoseBody25
+from skeldump.skelgraphs.openpose import MODE_SKELS
+from skeldump.skelgraphs.posetrack import POSETRACK18_SKEL
 
 logger = logging.getLogger(__name__)
 
@@ -21,37 +23,14 @@ def scale_video(vid_read, scale):
         yield frame
 
 
-class VideoSticksWriter:
+class SkelDraw:
     def __init__(
-        self,
-        out,
-        width,
-        height,
-        fps,
-        skel,
-        add_cuts=True,
-        number_joints=False,
-        conv_to_posetrack=False,
-        ann_ids=True,
-        scale=1,
+        self, skel, conv_to_posetrack=False, ann_ids=True, scale=1,
     ):
-        self.out = cvw.VideoWriter(out, fps=fps, fourcc="mp4v")
-        self.width = width
-        self.height = height
-        self.fps = fps
         self.skel = skel
-        self.add_cuts = add_cuts
-        self.number_joints = number_joints
         self.conv_to_posetrack = conv_to_posetrack
         self.ann_ids = ann_ids
         self.scale = scale
-
-        self.cut_img = self.get_cut_img()
-
-    def draw(self, frame, bundle=None):
-        if bundle is not None:
-            self.draw_bundle(frame, bundle)
-        self.out.write(frame)
 
     def draw_skel(self, frame, numarr):
         for (x1, y1, c1), (x2, y2, c2) in self.skel.iter_limbs(numarr):
@@ -97,15 +76,56 @@ class VideoSticksWriter:
             self.draw_skel(frame, numarr)
             self.draw_ann(frame, pers_id, numarr)
 
+
+class VideoSticksWriter:
+    def __init__(
+        self,
+        out,
+        width,
+        height,
+        fps,
+        skel,
+        add_cuts=True,
+        number_joints=False,
+        add_frame_number=False,
+        conv_to_posetrack=False,
+        ann_ids=True,
+        scale=1,
+    ):
+        self.out = cvw.VideoWriter(out, fps=fps, fourcc="mp4v")
+        self.width = width
+        self.height = height
+        self.fps = fps
+        self.skel = skel
+        self.add_cuts = add_cuts
+        self.number_joints = number_joints
+        self.conv_to_posetrack = conv_to_posetrack
+        self.ann_ids = ann_ids
+        self.scale = scale
+        self.skel_draw = SkelDraw(skel, conv_to_posetrack, ann_ids, scale)
+        self.cut_img = self.get_cut_img()
+
+    def draw(self, frame, bundle=None):
+        if frame is None:
+            frame = self.get_empty_frame()
+        if bundle is not None:
+            self.skel_draw.draw_bundle(frame, bundle)
+        self.out.write(frame)
+
     def add_cut(self):
         if not self.add_cuts:
             return
         self.out.write(self.cut_img)
 
-    def get_cut_img(self):
+    def get_empty_frame(self):
         height = int(self.height)
         width = int(self.width)
         img = np.zeros((height, width, 3), np.uint8)
+        return img
+
+    def get_cut_img(self):
+        img = self.get_empty_frame()
+        height = int(self.height)
         cvw.put_text(img, "Shot cut", (30, height // 2), (255, 255, 255))
         return img
 
@@ -115,7 +135,7 @@ def drawsticks_shots(vid_read, stick_read, vid_write):
     shot = next(shots_it, None)
     shot_it = iter(shot)
     bundle = None
-    for frame_idx, frame in enumerate(vid_read):
+    for frame in vid_read:
         if shot is not None:
             bundle = next(shot_it, None)
             if bundle is None:
@@ -130,3 +150,11 @@ def drawsticks_shots(vid_read, stick_read, vid_write):
 def drawsticks_unseg(vid_read, stick_read, vid_write):
     for frame, bundle in zip_longest(vid_read, stick_read):
         vid_write.draw(frame, bundle)
+
+
+def get_skel(h5f, posetrack):
+    mode = h5f.attrs["mode"]
+    if posetrack:
+        return POSETRACK18_SKEL
+    else:
+        return MODE_SKELS[mode]

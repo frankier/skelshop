@@ -5,6 +5,7 @@ from .conv import conv
 from .drawsticks import drawsticks
 from .dump import dump
 from .filter import filter
+from .playsticks import playsticks
 
 click_log.basic_config()
 
@@ -17,5 +18,6 @@ def skeldump():
 
 skeldump.add_command(dump)
 skeldump.add_command(drawsticks)
+skeldump.add_command(playsticks)
 skeldump.add_command(filter)
 skeldump.add_command(conv)

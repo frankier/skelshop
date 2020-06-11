@@ -51,6 +51,7 @@ ALL_OPTIONS = PIPELINE_CONF_OPTIONS + [
 
 def process_options(options, allow_empty, kwargs):
     pipeline = Pipeline()
+    # Check argument validity
     if kwargs.get("shot_seg") == "csv" and not kwargs.get("shot_csv"):
         raise click.BadOptionUsage(
             "--shot-csv", "--shot-csv required when --shot-seg=csv",
@@ -68,10 +69,13 @@ def process_options(options, allow_empty, kwargs):
         raise click.UsageError(
             "Cannot perform shot segmentation without tracking or visa-versa",
         )
+    # Add metadata
     for k in PIPELINE_CONF_OPTIONS:
         if kwargs.get("track") and k.startswith("track_"):
             continue
         pipeline.add_metadata(k, kwargs.get(k))
+    # Add stages
+    start_frame = kwargs.get("start_frame", 0)
     if kwargs.get("shot_seg") == "bbskel":
         pipeline.add_stage(RewindStage, 20)
     if kwargs.get("track"):
@@ -95,7 +99,9 @@ def process_options(options, allow_empty, kwargs):
     if kwargs.get("shot_seg") == "bbskel":
         pipeline.add_stage(ShotSegStage)
     elif kwargs.get("shot_seg") == "csv":
-        pipeline.add_stage(CsvShotSegStage, shot_csv=kwargs.get("shot_csv"))
+        pipeline.add_stage(
+            CsvShotSegStage, shot_csv=kwargs.get("shot_csv"), start_frame=start_frame
+        )
     if not allow_empty and not pipeline.stages:
         raise click.UsageError("Cannot construct empty pipeline",)
     for option in ALL_OPTIONS:
