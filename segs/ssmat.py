@@ -7,6 +7,7 @@ from numba import jit
 from scipy.ndimage import median_filter
 from skeldump.skelgraphs.openpose import BODY_25
 from skeldump.sparsepose import as_scipy_csrs
+from sklearn.preprocessing import normalize
 
 JOINT_IDXS = (
     BODY_25.names.index("left wrist"),
@@ -130,6 +131,7 @@ def main():
                 nan_aware_median_filter(trajectory, kernel_size)
             )
             trajectory = trajectory.reshape(trajectory.shape[0], -1)
+            normalize(trajectory)
             sm = ssm(trajectory.transpose())
             heatmap2d(sm)
 
