@@ -2,6 +2,7 @@ Bootstrap: shub
 From: frankier/gsoc2020:frankier_gsoc2020
 
 %post
+    apt-get install -y --no-install-recommends python3-venv
     git clone https://github.com/frankier/gsoc2020/ /opt/redhen
     curl -sSL \
         https://raw.githubusercontent.com/python-poetry/poetry/master/get-poetry.py \
@@ -10,7 +11,7 @@ From: frankier/gsoc2020:frankier_gsoc2020
     poetry config virtualenvs.create false
     cd /opt/redhen/skeldump && \
         ./install.sh && \
-        poetry run snakemake
+        snakemake
 
 %runscript
     cd /opt/redhen/skeldump && snakemake "$@"
