@@ -1,11 +1,12 @@
 import os
 from collections import Counter
+from multiprocessing import Pool
 from os.path import join as pjoin
 
 import click
 import h5py
 from skeldump.dump import add_fmt_metadata, add_metadata, write_shots
-from skeldump.infmt.tar import iter_json_sources
+from skeldump.infmt.tar import ShardedJsonDumpSource, iter_tarinfos
 from skeldump.infmt.zip import zip_json_source
 from skeldump.io import AsIfOrdered, UnsegmentedWriter
 from skeldump.openpose import LIMBS, MODES
@@ -27,12 +28,62 @@ def write_conv(h5f, mode, basename, json_source, input_fmt):
         h5f.attrs["end_fail"] = json_source.end_fail
 
 
+class TarInfosProcessor:
+    def __init__(
+        self, mode, tar_path, suppress_end_fail, out, tarinfos_it, *args, **kwargs
+    ):
+        self.mode = mode
+        self.tar_path = tar_path
+        self.suppress_end_fail = suppress_end_fail
+        self.out = out
+        self.tarinfos_it = tarinfos_it
+        self.args = args
+        self.kwargs = kwargs
+
+    def __getstate__(self):
+        """
+        This is the state we want to get pickled to be passed to the worker
+        process.
+        """
+        return {
+            "mode": self.mode,
+            "out": self.out,
+            "tar_path": self.tar_path,
+            "suppress_end_fail": self.suppress_end_fail,
+        }
+
+    def __iter__(self):
+        with Pool(*self.args, **self.kwargs) as pool:
+            yield from pool.imap_unordered(self, self.tarinfos_it)
+
+    def __call__(self, tarinfos_pair):
+        basename, tarinfos = tarinfos_pair
+        json_source = ShardedJsonDumpSource(
+            self.mode, self.tar_path, tarinfos, self.suppress_end_fail
+        )
+        path = pjoin(self.out, basename + ".unsorted.h5")
+        os.makedirs(os.path.dirname(path), exist_ok=True)
+        stats = Counter()
+        with h5py.File(path, "w") as h5f:
+            write_conv(h5f, self.mode, basename, json_source, "monolithic-tar")
+            stats["total_dumps"] += 1
+            stats["total_frames"] += json_source.num_frames
+            stats["total_corrupt_frames"] += json_source.corrupt_frames
+            stats["total_corrupt_shards"] += json_source.corrupt_shards
+            stats["total_remaining_heaps"] += json_source.remaining_heaps
+            if json_source.end_fail:
+                stats["total_end_fail"] += 1
+        return stats
+
+
 @click.command()
 @click.argument("input_fmt", type=click.Choice(["monolithic-tar", "single-zip"]))
 @click.argument("legacy_dump", type=click.Path(exists=True))
 @click.argument("out", type=click.Path(), required=False)
 @click.option("--mode", type=click.Choice(MODES), required=True)
-def conv(input_fmt, legacy_dump, out, mode):
+@click.option("--cores", type=int, default=1)
+@click.option("--suppress_end_fail/--no-suppress-end-fail", default=True)
+def conv(input_fmt, legacy_dump, out, mode, cores, suppress_end_fail):
     """
     Convert a LEGACY_DUMP in a given format into unsegmented hdf5 format OUT.
 
@@ -43,18 +94,15 @@ def conv(input_fmt, legacy_dump, out, mode):
         if out is None:
             out = ""
         stats = Counter()
-        for basename, json_source in iter_json_sources(mode, legacy_dump):
-            path = pjoin(out, basename + ".unsorted.h5")
-            os.makedirs(os.path.dirname(path), exist_ok=True)
-            with h5py.File(path, "w") as h5f:
-                write_conv(h5f, mode, basename, json_source, "monolithic-tar")
-                stats["total_corrupt_frames"] += json_source.corrupt_frames
-                stats["total_corrupt_shards"] += json_source.corrupt_shards
-                stats["total_remaining_heaps"] += json_source.remaining_heaps
-                if json_source.end_fail:
-                    stats["total_end_fail"] += 1
+        processor = TarInfosProcessor(
+            mode, legacy_dump, suppress_end_fail, out, iter_tarinfos(legacy_dump)
+        )
+        for new_stats in processor:
+            stats += new_stats
         print("Stats", stats)
     elif input_fmt == "single-zip":
+        if cores != 1:
+            raise click.UsageError("--cores must be 1 for single-zip")
         if out is None:
             raise click.UsageError("Out required when run with single-zip")
         with h5py.File(out, "w") as h5f, zip_json_source(

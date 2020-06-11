@@ -74,7 +74,7 @@ def consume_ordered(tar_path, tarinfo, shard_idx):
 
 
 class ShardedJsonDumpSource(PipelineStageBase):
-    def __init__(self, mode, tar_path, tarinfos, supress_end_fail=True):
+    def __init__(self, mode, tar_path, tarinfos, suppress_end_fail=True):
         self.pose_cls = POSE_CLASSES[mode]
         self.tar_path = tar_path
         self.tarinfos = tarinfos
@@ -84,7 +84,7 @@ class ShardedJsonDumpSource(PipelineStageBase):
         self.corrupt_frames = 0
         self.corrupt_shards = 0
         self.remaining_heaps = 0
-        self.supress_end_fail = True
+        self.suppress_end_fail = suppress_end_fail
         self.end_fail = False
 
     def corrupt_frame(self):
@@ -178,15 +178,15 @@ class ShardedJsonDumpSource(PipelineStageBase):
             assert len(exhausted | corrupt) == SHARDS
         except Exception:
             self.end_fail = True
-            if not self.self.supress_end_fail:
+            if not self.suppress_end_fail:
                 raise
 
     def __next__(self):
         return next(self.iter)
 
 
-def iter_json_sources(mode, tar_path):
+def iter_tarinfos(tar_path):
     for basename, tarinfos in thread_wrap_iter(
         iter_shard_complete_infos, tar_path, maxsize=SHARD_COLLECTION_QLEN,
     ):
-        yield basename, ShardedJsonDumpSource(mode, tar_path, tarinfos)
+        yield basename, tarinfos
