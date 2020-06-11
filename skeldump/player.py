@@ -1,4 +1,6 @@
-import os
+import os  # isort:skip
+
+os.environ["PYGAME_HIDE_SUPPORT_PROMPT"] = "hide"
 import sys
 import time
 
@@ -6,8 +8,6 @@ import cv2
 import opencv_wrapper as cvw
 import pygame as pg
 from more_itertools import peekable
-
-os.environ["PYGAME_HIDE_SUPPORT_PROMPT"] = "hide"
 
 
 def imdisplay(imarray, screen):
