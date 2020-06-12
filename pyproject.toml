@@ -11,21 +11,31 @@ h5py = "^2.10.0"
 imutils = "^0.5.3"
 click = "^7.1.2"
 opencv-python-headless = "^4.2.0"
-snakemake = "^5.18.1"
 torch = "^1.5.0"
 torchvision = "^0.6.0"
 torchlight = { path = "./submodules/lighttrack/graph/torchlight" }
 more_itertools = "^8.3.0"
 click_log = "^0.3.2"
-scenedetect = "^0.5.2"
 ordered-set = "^4.0.1"
 orjson = "^3.1.0"
 dataclasses = { version = "^0.7", python = "~3.6" }
-pygame = "^1.9.6"
-numba = "^0.49.1"
-matplotlib = "^3.2.1"
-scikit-learn = "^0.23.1"
-scipy = "^1.4.1"
+numpy = "^1.18.5"
+
+snakemake = { version = "^5.18.1", optional = true}
+scenedetect = { version = "^0.5.2", optional = true}
+pygame = { version = "^1.9.6", optional = true }
+numba = { version = "^0.49.1", optional = true }
+matplotlib = { version = "^3.2.1", optional = true }
+scikit-learn = { version = "^0.23.1", optional = true }
+scipy = { version = "^1.4.1", optional = true }
+wcmatch = "^6.0.1"
+
+[tool.poetry.extras]
+pipeline = ["scenedetect", "snakemake"]
+play = ["pygame"]
+ssmat = ["numba", "matplotlib", "scikit-learn", "scipy"]
+embedtrain = ["wcmatch", "snakemake"]
+embedvis = ["tensorboard"]
 
 [tool.poetry.dev-dependencies]
 black = "^19.10b0"

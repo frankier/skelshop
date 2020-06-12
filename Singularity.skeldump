@@ -10,7 +10,7 @@ From: frankier/gsoc2020:frankier_gsoc2020
     export PATH=$HOME/.poetry/bin/:$PATH
     poetry config virtualenvs.create false
     cd /opt/redhen/skeldump && \
-        ./install.sh && \
+        ./install.sh -E pipeline && \
         snakemake --cores 4
 
 %runscript

@@ -2,7 +2,7 @@
 
 shopt -s extglob
 git submodule update --init --recursive
-poetry install
+poetry install $@
 
 PKGS="$(poetry env list --full-path)"
 if [ -z "$PKGS" ]; then
