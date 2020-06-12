@@ -1,4 +1,6 @@
 import os
+import sys
+import traceback
 from collections import Counter
 from multiprocessing import Pool
 from os.path import join as pjoin
@@ -65,14 +67,21 @@ class TarInfosProcessor:
         os.makedirs(os.path.dirname(path), exist_ok=True)
         stats = Counter()
         with h5py.File(path, "w") as h5f:
-            write_conv(h5f, self.mode, basename, json_source, "monolithic-tar")
-            stats["total_dumps"] += 1
-            stats["total_frames"] += json_source.num_frames
-            stats["total_corrupt_frames"] += json_source.corrupt_frames
-            stats["total_corrupt_shards"] += json_source.corrupt_shards
-            stats["total_remaining_heaps"] += json_source.remaining_heaps
-            if json_source.end_fail:
-                stats["total_end_fail"] += 1
+            try:
+                write_conv(h5f, self.mode, basename, json_source, "monolithic-tar")
+            except Exception:
+                print(f"Exception while dumping to {path}", file=sys.stderr)
+                h5f.attrs["fatal_exception"] = True
+                traceback.print_exc(file=sys.stderr)
+                stats["total_fatal_exceptions"] += 1
+            else:
+                stats["total_dumps"] += 1
+                stats["total_frames"] += json_source.num_frames
+                stats["total_corrupt_frames"] += json_source.corrupt_frames
+                stats["total_corrupt_shards"] += json_source.corrupt_shards
+                stats["total_remaining_heaps"] += json_source.remaining_heaps
+                if json_source.end_fail:
+                    stats["total_end_fail"] += 1
         return stats
 
 

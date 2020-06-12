@@ -73,6 +73,13 @@ def consume_ordered(tar_path, tarinfo, shard_idx):
                 yield e
 
 
+class FrameOutOfSyncError(Exception):
+    def __init__(self, expected, actual):
+        super().__init__(msg=f"Got a good frame {actual} when expecting {expected}")
+        self.expected = expected
+        self.actual = actual
+
+
 class ShardedJsonDumpSource(PipelineStageBase):
     def __init__(self, mode, tar_path, tarinfos, suppress_end_fail=True):
         self.pose_cls = POSE_CLASSES[mode]
@@ -93,7 +100,8 @@ class ShardedJsonDumpSource(PipelineStageBase):
         return JsonPoseBundle({"people": []}, self.pose_cls)
 
     def good_frame(self, frame_idx, datum_bytes):
-        assert frame_idx == self.num_frames
+        if frame_idx != self.num_frames:
+            raise FrameOutOfSyncError(self.num_frames, frame_idx)
         datum = orjson.loads(datum_bytes)
         if self.version is None:
             self.version = str(datum["version"])
