@@ -1,13 +1,25 @@
+## Features
+
+ * Dump OpenPose skeletons to a fast-to-read HDF5 file format
+ * Apply black box person tracking on OpenPose skeletons
+ * Draw skeletons over video and...
+   * View the result in real time
+   * Output the result to another video
+ * Convert from some existing JSON based dump formats
+ * More coming soon...
+
 ## Setup
 
-Either use the Singularity container (coming soon) or...
+Either use the [Singularity
+container](https://singularity-hub.org/collections/4403), which contains enough
+things to dump or convert skeletons.
 
 ### Manual setup
 
 You need to install Poetry and [my OpenPose
 fork](https://github.com/frankier/openpose/tree/enable-identification).
 
-    $ ./install.sh
+    $ ./install.sh -E pipeline -E play -E ssmat -E embedtrain -E embedvis
     $ poetry run snakemake
 
 ## Usage
