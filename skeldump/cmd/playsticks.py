@@ -6,7 +6,6 @@ import h5py
 import opencv_wrapper as cvw
 from skeldump.drawsticks import SkelDraw, get_skel
 from skeldump.io import AsIfOrdered, UnsegmentedReader
-from skeldump.player import Player
 
 logger = logging.getLogger(__name__)
 
@@ -18,6 +17,8 @@ logger = logging.getLogger(__name__)
 @click.option("--seek-time", type=float)
 @click.option("--seek-frame", type=int)
 def playsticks(h5fn, videoin, posetrack, seek_time, seek_frame):
+    from skeldump.player import Player
+
     with h5py.File(h5fn, "r") as h5f, cvw.load_video(videoin) as vid_read:
         if logger.isEnabledFor(logging.INFO):
             logging.info(
