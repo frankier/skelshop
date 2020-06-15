@@ -174,12 +174,12 @@ class ShardedJsonDumpSource(PipelineStageBase):
                 ):
                     yield self.corrupt_frame()
                 if self.num_frames != frame_idx:
-                    if all(
-                        (
-                            not orjson.loads(datum_bytes)["person"]
-                            for _, datum_bytes in last_ones
-                        )
-                    ):
+                    all_empty = True
+                    for _, datum_bytes in last_ones:
+                        obj = orjson.loads(datum_bytes)
+                        if "person" in obj and obj["person"]:
+                            all_empty = False
+                    if all_empty:
                         # Well they're all empty any way so let's not worry about it...
                         return
                 yield self.good_frame(frame_idx, datum_bytes)
