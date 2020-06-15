@@ -16,38 +16,49 @@ def grow_ds(ds, extra):
     ds.resize(len(ds) + extra, axis=0)
 
 
-def add_empty_rows_grp(pose_grp, new_rows):
-    grow_ds(pose_grp["indptr"], new_rows)
-    pose_grp["indptr"][-new_rows:] = len(pose_grp["data"])
+def add_empty_rows_grp(indptr, data, new_rows):
+    grow_ds(indptr, new_rows)
+    indptr[-new_rows:] = len(data)
 
 
 class UnsegmentedWriter:
     def __init__(self, h5f):
         self.h5f = h5f
         self.timeline_grp = self.h5f.create_group("/timeline", track_order=True)
-        self.pose_last_frames = {}
+        self.pose_grps = {}
+
+    def pose_grp(self, pose_id, frame_num):
+        if pose_id in self.pose_grps:
+            return self.pose_grps[pose_id]
+        path = f"/timeline/pose{pose_id}"
+        pose_grp = create_growable_csr(self.h5f, path)
+        pose_grp.attrs["start_frame"] = frame_num
+        last_frame_num = frame_num - 1
+        self.pose_grps[pose_id] = [
+            pose_grp,
+            pose_grp["data"],
+            pose_grp["indices"],
+            pose_grp["indptr"],
+            last_frame_num,
+        ]
+        return self.pose_grps[pose_id]
 
     def add_pose(self, frame_num, pose_id, pose):
-        path = f"/timeline/pose{pose_id}"
-        if path in self.h5f:
-            pose_grp = self.h5f[path]
-            last_frame_num = self.pose_last_frames[pose_id]
-        else:
-            pose_grp = create_growable_csr(self.h5f, path)
-            pose_grp.attrs["start_frame"] = frame_num
-            last_frame_num = frame_num - 1
+        pose_grp, data, indices, indptr, last_frame_num = self.pose_grp(
+            pose_id, frame_num
+        )
         new_rows = frame_num - last_frame_num
-        add_empty_rows_grp(pose_grp, new_rows)
-        data = []
-        indices = []
+        add_empty_rows_grp(indptr, data, new_rows)
+        new_data = []
+        new_indices = []
         for limb_idx, limb in get_pose_nz(pose):
-            data.append(limb)
-            indices.append(limb_idx)
-        grow_ds(pose_grp["data"], len(data))
-        grow_ds(pose_grp["indices"], len(indices))
-        pose_grp["data"][-len(data) :] = data
-        pose_grp["indices"][-len(indices) :] = indices
-        self.pose_last_frames[pose_id] = frame_num
+            new_data.append(limb)
+            new_indices.append(limb_idx)
+        grow_ds(data, len(new_data))
+        grow_ds(indices, len(new_indices))
+        data[-len(new_data) :] = new_data
+        indices[-len(new_indices) :] = new_indices
+        self.pose_grps[pose_id][-1] = frame_num
 
     def start_shot(self):
         pass
@@ -57,16 +68,12 @@ class UnsegmentedWriter:
 
     def end_shot(self):
         self.timeline_grp.attrs["start_frame"] = 0
-        self.timeline_grp.attrs["end_frame"] = max(self.pose_last_frames.values()) + 1
-        pose_id = 0
-        while 1:
-            path = f"/timeline/pose{pose_id}"
-            if path not in self.h5f:
-                break
-            pose_grp = self.h5f[path]
-            add_empty_rows_grp(pose_grp, 1)
-            pose_grp.attrs["end_frame"] = self.pose_last_frames[pose_id] + 1
-            pose_id += 1
+        timeline_last_frame_num = 0
+        for pose_grp, data, indices, indptr, last_frame_num in self.pose_grps.values():
+            add_empty_rows_grp(indptr, data, 1)
+            pose_grp.attrs["end_frame"] = last_frame_num + 1
+            timeline_last_frame_num = max(timeline_last_frame_num, last_frame_num)
+        self.timeline_grp.attrs["end_frame"] = timeline_last_frame_num + 1
 
 
 class ShotSegmentedWriter:
