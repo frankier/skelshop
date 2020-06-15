@@ -43,7 +43,7 @@ def mode_conf(mode):
 
 
 class OpenPoseStage(PipelineStageBase):
-    def __init__(self, model_folder, mode, video):
+    def __init__(self, model_folder, mode, video, debug=False):
         from openpose import pyopenpose as op
 
         self.op_wrap = op.WrapperPython(op.ThreadManagerMode.AsynchronousOut)
@@ -52,9 +52,14 @@ class OpenPoseStage(PipelineStageBase):
         conf = {
             "video": video,
             "model_folder": model_folder,
-            # "tracking": 0,
             **mode_conf(mode),
         }
+        if debug:
+            conf = {
+                **conf,
+                "logging_level": 0,
+                "disable_multi_thread": True,
+            }
         self.op_wrap.configure(conf)
         self.op_wrap.start()
         self.i = 0

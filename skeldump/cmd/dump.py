@@ -12,12 +12,13 @@ from skeldump.pipeline import pipeline_options
 @click.argument("h5fn", type=click.Path())
 @click.option("--mode", type=click.Choice(MODES), default="BODY_25_ALL")
 @click.option("--model-folder", envvar="MODEL_FOLDER", required=True)
+@click.option("--debug/--no-debug")
 @pipeline_options(allow_empty=True)
-def dump(video, h5fn, mode, model_folder, pipeline):
+def dump(video, h5fn, mode, model_folder, pipeline, debug):
     num_frames = count_frames(video)
     with h5py.File(h5fn, "w") as h5f:
         limbs = LIMBS[mode]
-        stage = OpenPoseStage(model_folder, mode, video)
+        stage = OpenPoseStage(model_folder, mode, video, debug)
         if pipeline.stages:
             frame_iter = pipeline(stage)
             writer_cls = ShotSegmentedWriter
