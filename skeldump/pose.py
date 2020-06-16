@@ -79,6 +79,10 @@ class PoseBase:
         return self.all().reshape(-1)
 
 
+class GenericPose(PoseBase):
+    pass
+
+
 def json_to_np(joint_list):
     assert len(joint_list) % 3 == 0
     return np.asarray(joint_list, dtype=np.float32).reshape(len(joint_list) // 3, 3)

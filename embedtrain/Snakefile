@@ -1,0 +1,115 @@
+from shutil import unpack_archive
+
+
+def cnf(name, val):
+    globals()[name] = config.setdefault(name, val)
+
+
+class DataSet:
+    by_zip = {}
+    by_ex = {}
+    by_name = {}
+
+    def __init__(self, name, downloads):
+        self.name = name
+        name_upper = name.upper()
+        self.base = config.setdefault(name_upper, WORK + "/" + name + "_ds")
+        self.zips = config.setdefault(name_upper + "_ZIPS", self.base + "/zips")
+        self.ex_dir = config.setdefault(name_upper + "_DS", self.base + "/extracted")
+        self.by_zip[self.zips] = self
+        self.by_ex[self.ex_dir] = self
+        self.by_name[name] = self
+
+        self.downloads = downloads
+        self.base_map = {ds.rsplit("/", 1)[1]: ds for ds in downloads}
+        self.bare_map = {ds.split(".", 1)[0]: ds for ds in self.base_map}
+
+    def __repr__(self):
+        return f"<DataSet name={self.name}>"
+
+
+# Intermediate dirs
+cnf("WORK", "work")
+cnf("HAND_H5", WORK + "/hand.h5")
+cnf("BODY_H5", WORK + "/body.h5")
+
+
+DataSet("hand", [
+    # https://www.idiap.ch/resource/gestures/
+    "https://www.idiap.ch/resource/gestures/data/shp_triesch.tar.gz",
+    "https://www.idiap.ch/resource/gestures/data/BochumGestures1998.tar.gz",
+    "https://www.idiap.ch/resource/gestures/data/shp_marcel_train.tar.gz",
+    "https://www.idiap.ch/resource/gestures/data/shp_marcel_test.tar.gz",
+    # https://www.ece.nus.edu.sg/stfpage/elepv/NUS-HandSet/
+    "https://www.ece.nus.edu.sg/stfpage/elepv/NUS-HandSet/NUS-Hand-Posture-Dataset-I.zip",
+    "https://www.ece.nus.edu.sg/stfpage/elepv/NUS-HandSet/NUS-Hand-Posture-Dataset-II.zip",
+    # https://empslocal.ex.ac.uk/people/staff/np331/index.php?section=FingerSpellingDataset
+    "http://www.cvssp.org/FingerSpellingKinect2011/fingerspelling5.tar.bz2",
+])
+
+DataSet("body", [
+    # http://human-pose.mpi-inf.mpg.de/#overview
+    "https://datasets.d2.mpi-inf.mpg.de/andriluka14cvpr/mpii_human_pose_v1.tar.gz",
+    "https://datasets.d2.mpi-inf.mpg.de/andriluka14cvpr/mpii_human_pose_v1_u12_2.zip",
+])
+
+rule all:
+    input:
+        HAND_H5,
+        BODY_H5
+
+
+for zip_dir, ds in DataSet.by_zip.items():
+    rule:
+        output:
+            zip_dir + "/{basename}"
+        run:
+            shell(
+                "mkdir -p " + zip_dir + " && " +
+                "cd " + zip_dir + " && " +
+                "wget --retry-connrefused --waitretry=1 --read-timeout=20 " +
+                "--timeout=15 -t 64 " + ds.base_map[wildcards.basename]
+            )
+
+
+for ex_dir, ds in DataSet.by_ex.items():
+    rule:
+        output:
+            directory(ds.ex_dir + "/{barename}")
+        input:
+            (lambda ds: lambda wc: ancient(ds.zips + "/" + ds.bare_map[wc.barename]))(ds)
+        run:
+            unpack_archive(input[0], output[0])
+
+
+rule ds_extracted:
+    input:
+        lambda wc: [ancient(wc.ex_dir + "/" + ds) for ds in DataSet.by_ex[wc.ex_dir].bare_map.keys()]
+    output:
+        touch("{ex_dir}.done")
+
+
+rule openpose_hands:
+    input:
+        DataSet.by_name["hand"].ex_dir + ".done"
+    output:
+        HAND_H5
+    shell:
+        "python prep_images.py hand" +
+        " --exclude 'fingerspelling5/**/depth_*' " +
+        " --exclude '**/NUS Hand Posture Dataset/BW/*'" +
+        " --exclude '**/BochumGestures1998/sih/*'" +
+        " --left-hands 'fingerspelling5/**'" +
+        " " + DataSet.by_name["hand"].ex_dir + " " + HAND_H5
+
+
+rule openpose_body:
+    input:
+        DataSet.by_name["body"].ex_dir + ".done"
+    output:
+        BODY_H5
+    shell:
+        "python prep_images.py body" +
+        " " + DataSet.by_name["body"].ex_dir +
+	"/mpii_human_pose_v1/images/ " +
+	BODY_H5
