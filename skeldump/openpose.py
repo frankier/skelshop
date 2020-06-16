@@ -43,17 +43,22 @@ def mode_conf(mode):
 
 
 class OpenPoseStage(PipelineStageBase):
-    def __init__(self, model_folder, mode, video, debug=False):
+    def __init__(self, model_folder, mode, video=None, image_dir=None, debug=False):
         from openpose import pyopenpose as op
+
+        assert (video is not None) + (image_dir is not None) == 1
 
         self.op_wrap = op.WrapperPython(op.ThreadManagerMode.AsynchronousOut)
         # 2 => synchronous input => OpenPose handles reads internally
         # & asynchrnous output => We can handle the output here
         conf = {
-            "video": video,
             "model_folder": model_folder,
             **mode_conf(mode),
         }
+        if video is not None:
+            conf["video"] = video
+        elif image_dir is not None:
+            conf["image_dir"] = image_dir
         if debug:
             conf = {
                 **conf,
