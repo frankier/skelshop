@@ -194,7 +194,12 @@ class ShardedJsonDumpSource(PipelineStageBase):
 
 
 def iter_tarinfos(tar_path):
+    seen_basenames = set()
     for basename, tarinfos in thread_wrap_iter(
         iter_shard_complete_infos, tar_path, maxsize=SHARD_COLLECTION_QLEN,
     ):
+        if basename in seen_basenames:
+            print("Skipping duplicate", basename)
+            continue
+        seen_basenames.add(basename)
         yield basename, tarinfos
