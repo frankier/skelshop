@@ -6,12 +6,12 @@ from multiprocessing import Pool
 from os.path import join as pjoin
 
 import click
-import h5py
 from skeldump.dump import add_fmt_metadata, add_metadata, write_shots
 from skeldump.infmt.tar import ShardedJsonDumpSource, iter_tarinfos
 from skeldump.infmt.zip import zip_json_source
 from skeldump.io import AsIfOrdered, UnsegmentedWriter
 from skeldump.openpose import LIMBS, MODES
+from skeldump.utils.h5py import h5out
 
 
 def write_conv(h5f, mode, basename, json_source, input_fmt):
@@ -66,7 +66,9 @@ class TarInfosProcessor:
         path = pjoin(self.out, basename + ".unsorted.h5")
         os.makedirs(os.path.dirname(path), exist_ok=True)
         stats = Counter()
-        with h5py.File(path, "w") as h5f:
+        h5ctx = h5out(path)
+        h5f = h5ctx.__enter__()
+        try:
             try:
                 write_conv(h5f, self.mode, basename, json_source, "monolithic-tar")
             except Exception:
@@ -82,6 +84,12 @@ class TarInfosProcessor:
                 stats["total_remaining_heaps"] += json_source.remaining_heaps
                 if json_source.end_fail:
                     stats["total_end_fail"] += 1
+        finally:
+            try:
+                h5f.__exit__(None, None, None)
+            except Exception:
+                print(f"Exception while trying to close {path}", file=sys.stderr)
+                traceback.print_exc(file=sys.stderr)
         return stats
 
 
@@ -114,9 +122,7 @@ def conv(input_fmt, legacy_dump, out, mode, cores, suppress_end_fail):
             raise click.UsageError("--cores must be 1 for single-zip")
         if out is None:
             raise click.UsageError("Out required when run with single-zip")
-        with h5py.File(out, "w") as h5f, zip_json_source(
-            mode, legacy_dump
-        ) as json_source:
+        with h5out(out) as h5f, zip_json_source(mode, legacy_dump) as json_source:
             write_conv(h5f, mode, json_source.basename, json_source, "single-zip")
     else:
         assert False
