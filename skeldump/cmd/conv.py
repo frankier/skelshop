@@ -32,11 +32,20 @@ def write_conv(h5f, mode, basename, json_source, input_fmt):
 
 class TarInfosProcessor:
     def __init__(
-        self, mode, tar_path, suppress_end_fail, out, tarinfos_it, *args, **kwargs
+        self,
+        mode,
+        tar_path,
+        suppress_end_fail,
+        skip_existing,
+        out,
+        tarinfos_it,
+        *args,
+        **kwargs,
     ):
         self.mode = mode
         self.tar_path = tar_path
         self.suppress_end_fail = suppress_end_fail
+        self.skip_existing = skip_existing
         self.out = out
         self.tarinfos_it = tarinfos_it
         self.args = args
@@ -52,6 +61,7 @@ class TarInfosProcessor:
             "out": self.out,
             "tar_path": self.tar_path,
             "suppress_end_fail": self.suppress_end_fail,
+            "skip_existing": self.skip_existing,
         }
 
     def __iter__(self):
@@ -64,8 +74,10 @@ class TarInfosProcessor:
             self.mode, self.tar_path, tarinfos, self.suppress_end_fail
         )
         path = pjoin(self.out, basename + ".unsorted.h5")
-        os.makedirs(os.path.dirname(path), exist_ok=True)
         stats = Counter()
+        if self.skip_existing and os.path.exists(path):
+            return stats
+        os.makedirs(os.path.dirname(path), exist_ok=True)
         h5ctx = h5out(path)
         h5f = h5ctx.__enter__()
         try:
@@ -100,7 +112,8 @@ class TarInfosProcessor:
 @click.option("--mode", type=click.Choice(MODES), required=True)
 @click.option("--cores", type=int, default=1)
 @click.option("--suppress_end_fail/--no-suppress-end-fail", default=True)
-def conv(input_fmt, legacy_dump, out, mode, cores, suppress_end_fail):
+@click.option("--skip-existing/--overwrite-existing", default=False)
+def conv(input_fmt, legacy_dump, out, mode, cores, suppress_end_fail, skip_existing):
     """
     Convert a LEGACY_DUMP in a given format into unsegmented hdf5 format OUT.
 
@@ -112,7 +125,12 @@ def conv(input_fmt, legacy_dump, out, mode, cores, suppress_end_fail):
             out = ""
         stats = Counter()
         processor = TarInfosProcessor(
-            mode, legacy_dump, suppress_end_fail, out, iter_tarinfos(legacy_dump)
+            mode,
+            legacy_dump,
+            suppress_end_fail,
+            skip_existing,
+            out,
+            iter_tarinfos(legacy_dump),
         )
         for new_stats in processor:
             stats += new_stats
