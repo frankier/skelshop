@@ -4,9 +4,9 @@ from os.path import join as pjoin
 
 import click
 import cv2
-import h5py
 import imagesize
 from skeldump.openpose import LIMBS, MODES, OpenPoseStage
+from skeldump.utils.h5py import h5out as mk_h5out
 from wcmatch.glob import globmatch
 
 
@@ -108,7 +108,7 @@ def prep_images():
 @click.option("--model-folder", envvar="MODEL_FOLDER", required=True)
 def hand(input_dir, h5out, exclude, left_hands, model_folder):
     hand_op = SingleHandOpenPose(model_folder)
-    with h5py.File(h5out, "w") as h5f:
+    with mk_h5out(h5out) as h5f:
         for root, _dirs, files in os.walk(input_dir):
             assert root.startswith(input_dir)
             rel_root = root[len(input_dir) :]
@@ -141,7 +141,7 @@ def body(input_dir, h5out, mode, model_folder):
     stage = OpenPoseStage(model_folder, mode, image_dir=input_dir)
     paths = op.get_images_on_directory(input_dir)
     limbs = LIMBS[mode]
-    with h5py.File(h5out, "w") as h5f:
+    with mk_h5out(h5out) as h5f:
         h5f.attrs["mode"] = mode
         h5f.attrs["limbs"] = limbs
         h5f.attrs["fmt_type"] = "images_multipose"

@@ -1,10 +1,10 @@
 import click
-import h5py
 from imutils.video.count_frames import count_frames
 from skeldump.dump import add_fmt_metadata, add_metadata, write_shots
 from skeldump.io import AsIfOrdered, ShotSegmentedWriter, UnsegmentedWriter
 from skeldump.openpose import LIMBS, MODES, OpenPoseStage
 from skeldump.pipeline import pipeline_options
+from skeldump.utils.h5py import h5out
 
 
 @click.command()
@@ -16,7 +16,7 @@ from skeldump.pipeline import pipeline_options
 @pipeline_options(allow_empty=True)
 def dump(video, h5fn, mode, model_folder, pipeline, debug):
     num_frames = count_frames(video)
-    with h5py.File(h5fn, "w") as h5f:
+    with h5out(h5fn) as h5f:
         limbs = LIMBS[mode]
         stage = OpenPoseStage(model_folder, mode, video, debug)
         if pipeline.stages:
