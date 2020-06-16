@@ -5,7 +5,6 @@ import cv2
 import numpy as np
 import opencv_wrapper as cvw
 from more_itertools.recipes import grouper
-from skeldump.pose import PoseBody25
 from skeldump.skelgraphs.openpose import MODE_SKELS
 from skeldump.skelgraphs.posetrack import POSETRACK18_SKEL
 
@@ -50,6 +49,8 @@ class SkelDraw:
             return
         left_idx = self.skel.names.index("left shoulder")
         right_idx = self.skel.names.index("right shoulder")
+        if left_idx == -1 or right_idx == -1:
+            return
         if numarr[right_idx][0] > numarr[left_idx][0]:
             # Right shoulder
             anchor = numarr[right_idx]
@@ -65,7 +66,6 @@ class SkelDraw:
 
     def draw_bundle(self, frame, bundle):
         for pers_id, person in bundle:
-            assert isinstance(person, PoseBody25)
             if self.conv_to_posetrack:
                 flat = person.as_posetrack()
             else:
