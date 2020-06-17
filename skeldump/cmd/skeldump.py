@@ -6,6 +6,7 @@ from .drawsticks import drawsticks
 from .dump import dump
 from .filter import filter
 from .playsticks import playsticks
+from .stats import stats
 
 click_log.basic_config()
 
@@ -21,3 +22,4 @@ skeldump.add_command(drawsticks)
 skeldump.add_command(playsticks)
 skeldump.add_command(filter)
 skeldump.add_command(conv)
+skeldump.add_command(stats)
