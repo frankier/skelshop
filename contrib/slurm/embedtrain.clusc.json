@@ -1,0 +1,17 @@
+{
+    "__default__": {
+        "mail-user" : "frankie@robertson.name",
+        "time" : "05:00:00",
+        "nodes" : 1
+    },
+    "openpose_hands": {
+        "time" : "2-00:00:00",
+        "partition": "gpu",
+        "gres": "gpu:1"
+    },
+    "openpose_body": {
+        "time" : "4-00:00:00",
+        "partition": "gpu",
+        "gres": "gpu:4"
+    }
+}
