@@ -59,34 +59,47 @@ rule all:
         BODY_H5
 
 
-for zip_dir, ds in DataSet.by_zip.items():
-    rule:
-        output:
-            zip_dir + "/{basename}"
-        run:
-            shell(
-                "mkdir -p " + zip_dir + " && " +
-                "cd " + zip_dir + " && " +
-                "wget --retry-connrefused --waitretry=1 --read-timeout=20 " +
-                "--timeout=15 -t 64 " + ds.base_map[wildcards.basename]
-            )
+rule ds_download:
+    output:
+        "{zip_dir}/{basename}"
+    wildcard_constraints:
+        zip_dir = "|".join((ds.zips for ds in DataSet.by_name.values()))
+    params:
+        url=lambda wc: DataSet.by_zip[wc.zip_dir].base_map[wc.basename]
+    shell:
+        "mkdir -p {wildcards.zip_dir} && " +
+        "cd {wildcards.zip_dir} && " +
+        "wget --retry-connrefused --waitretry=1 --read-timeout=20 " +
+        "--timeout=15 -t 64 {params.url}"
 
 
-for ex_dir, ds in DataSet.by_ex.items():
-    rule:
-        output:
-            directory(ds.ex_dir + "/{barename}")
-        input:
-            (lambda ds: lambda wc: ancient(ds.zips + "/" + ds.bare_map[wc.barename]))(ds)
-        run:
-            unpack_archive(input[0], output[0])
+def ds_extract_inp(wc):
+    ds = DataSet.by_ex[wc.ex_dir]
+    return ancient(ds.zips + "/" + ds.bare_map[wc.barename])
+
+
+rule ds_extract:
+    output:
+        directory("{ex_dir}/{barename}")
+    wildcard_constraints:
+        ex_dir = "|".join((ds.ex_dir for ds in DataSet.by_name.values()))
+    input:
+        ds_extract_inp
+    run:
+        unpack_archive(input[0], output[0])
 
 
 rule ds_extracted:
     input:
-        lambda wc: [ancient(wc.ex_dir + "/" + ds) for ds in DataSet.by_ex[wc.ex_dir].bare_map.keys()]
+        lambda wc: [
+            ancient(wc.ex_dir + "/" + ds)
+            for ds in DataSet.by_ex[wc.ex_dir].bare_map.keys()
+        ]
     output:
         touch("{ex_dir}.done")
+
+
+PREP_IMAGES = "python " + workflow.basedir + "/prep_images.py"
 
 
 rule openpose_hands:
@@ -95,7 +108,7 @@ rule openpose_hands:
     output:
         HAND_H5
     shell:
-        "python prep_images.py hand" +
+        PREP_IMAGES + " hand" +
         " --exclude 'fingerspelling5/**/depth_*' " +
         " --exclude '**/NUS Hand Posture Dataset/BW/*'" +
         " --exclude '**/BochumGestures1998/sih/*'" +
@@ -109,7 +122,6 @@ rule openpose_body:
     output:
         BODY_H5
     shell:
-        "python prep_images.py body" +
-        " " + DataSet.by_name["body"].ex_dir +
-	"/mpii_human_pose_v1/images/ " +
+        PREP_IMAGES + " body " +
+        DataSet.by_name["body"].ex_dir + "/mpii_human_pose_v1/images/ " +
 	BODY_H5
