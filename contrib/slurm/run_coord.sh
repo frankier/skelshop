@@ -50,7 +50,7 @@ chmod +x run_snakemake.sh
 cat << JOBSCRIPT > singslurm/slurm-jobscript.sh
 #!/bin/bash
 # properties = {properties}
-cat << EXECJOB | singularity shell --nv $SIF_PATH 
+cat << EXECJOB | singularity shell $SING_EXTRA_ARGS --nv $SIF_PATH 
 {exec_job}
 EXECJOB
 JOBSCRIPT
