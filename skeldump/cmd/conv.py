@@ -2,7 +2,7 @@ import os
 import sys
 import traceback
 from collections import Counter
-from multiprocessing import Pool
+from multiprocessing import Pool, set_start_method
 from os.path import join as pjoin
 
 import click
@@ -121,6 +121,7 @@ def conv(input_fmt, legacy_dump, out, mode, cores, suppress_end_fail, skip_exist
     directory tree which will be created during processing.
     """
     if input_fmt == "monolithic-tar":
+        set_start_method("forkserver")
         if out is None:
             out = ""
         stats = Counter()
