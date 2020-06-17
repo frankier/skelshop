@@ -131,6 +131,7 @@ def conv(input_fmt, legacy_dump, out, mode, cores, suppress_end_fail, skip_exist
             skip_existing,
             out,
             iter_tarinfos(legacy_dump),
+            processes=cores,
         )
         for new_stats in processor:
             stats += new_stats
