@@ -53,6 +53,17 @@ DataSet("body", [
     "https://datasets.d2.mpi-inf.mpg.de/andriluka14cvpr/mpii_human_pose_v1_u12_2.zip",
 ])
 
+DataSet("action", [
+    "http://sunai.uoc.edu/chalearn/data/trainning/trainning1.tar.gz",
+    "http://sunai.uoc.edu/chalearn/data/trainning/trainning2.tar.gz",
+    "http://sunai.uoc.edu/chalearn/data/trainning/trainning3.tar.gz",
+    "http://sunai.uoc.edu/chalearn/data/trainning/trainning4.tar.gz",
+    "http://sunai.uoc.edu/chalearn/data/validation/validation1_lab.tar.gz",
+    "http://sunai.uoc.edu/chalearn/data/validation/validation2_lab.tar.gz",
+    "http://sunai.uoc.edu/chalearn/data/validation/validation3_lab.tar.gz",
+    *(f"http://rose1.ntu.edu.sg/Datasets/actionRecognition/download/nturgbd_rgb_s{idx:03d}.zip" for idx in range(1, 33)),
+])
+
 rule all:
     input:
         HAND_H5,
