@@ -64,7 +64,7 @@ chmod +x singslurm/slurm-jobscript.sh
 #      * Snakemake running script
 #   2) At least sinfo/sbatch
 sing_args=""
-if [[ -z "$CLUSC_CONF_ON_HOST" ]]; then
+if [[ -n "$CLUSC_CONF_ON_HOST" ]]; then
     sing_args="--bind $CLUSC_CONF"
 fi
 
