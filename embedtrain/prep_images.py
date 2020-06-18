@@ -63,6 +63,8 @@ class SingleHandOpenPose:
 
         # Read image and face rectangle locations
         img = cv2.imread(image_path)
+        if img is None:
+            return None
         height, width = img.shape[:2]
         top, bottom, left, right = get_square_padding(img)
         img = squarify(img, (top, bottom, left, right))
@@ -100,6 +102,10 @@ def prep_images():
     pass
 
 
+def has_img_ext(filename):
+    return filename.rsplit(".", 1)[-1].lower() in ("jpg", "pgm", "png", "ppm", "tiff")
+
+
 @prep_images.command()
 @click.argument("input_dir")
 @click.argument("h5out")
@@ -115,12 +121,18 @@ def hand(input_dir, h5out, exclude, left_hands, model_folder):
             for fn in files:
                 if fn.startswith("."):
                     continue
+                if not has_img_ext(fn):
+                    continue
                 rel_full_path = pjoin(rel_root, fn)
                 if sane_globmatch(rel_full_path, exclude):
                     continue
                 is_left_hand = sane_globmatch(rel_full_path, left_hands)
                 full_path = pjoin(root, fn)
-                hand_skelarr, width, height = hand_op.hand_skel(full_path, is_left_hand)
+                hand_skel_res = hand_op.hand_skel(full_path, is_left_hand)
+                if hand_skel_res is None:
+                    print("Skipping", full_path, "(could not read)")
+                    continue
+                hand_skelarr, width, height = hand_skel_res
                 h5f[rel_full_path] = hand_skelarr
                 hand_grp = h5f[rel_full_path]
                 hand_grp.attrs["is_left_hand"] = is_left_hand
@@ -147,7 +159,10 @@ def body(input_dir, h5out, mode, model_folder):
         h5f.attrs["fmt_type"] = "images_multipose"
         h5f.attrs["fmt_ver"] = 1
         for pose_bundle, path in zip(stage, paths):
-            width, height = imagesize.get(pjoin(input_dir, path))
+            if pose_bundle is None:
+                print("Skipping", path, "(OpenPose returned null result)")
+                continue
+            width, height = imagesize.get(path)
             img_grp = h5f.create_group(basename(path))
             img_grp.attrs["width"] = width
             img_grp.attrs["height"] = height
