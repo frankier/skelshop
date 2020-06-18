@@ -7,11 +7,13 @@
     "openpose_hands": {
         "time" : "2-00:00:00",
         "partition": "gpu",
-        "gres": "gpu:1"
+        "gres": "gpu:1",
+        "mem": "16gb"
     },
     "openpose_body": {
         "time" : "4-00:00:00",
         "partition": "gpu",
-        "gres": "gpu:4"
+        "gres": "gpu:4",
+        "mem": "40gb"
     }
 }
