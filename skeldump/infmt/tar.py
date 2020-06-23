@@ -75,9 +75,11 @@ def consume_ordered(tar_path, tarinfo, shard_idx):
 
 class FrameOutOfSyncError(Exception):
     def __init__(self, expected, actual):
-        super().__init__(msg=f"Got a good frame {actual} when expecting {expected}")
+        super().__init__(f"Got a good frame {actual} when expecting {expected}")
         self.expected = expected
         self.actual = actual
+
+    __reduce__ = object.__reduce__
 
 
 class ShardedJsonDumpSource(PipelineStageBase):
