@@ -2,7 +2,10 @@
 #
 #SBATCH --job-name=skeldump_conv_2017
 #
-#SBATCH --ntasks=1 --cpus-per-task=40 --mem=40gb
+#SBATCH --ntasks=1
+#SBATCH --cpus-per-task=24
+#SBATCH --mem=50gb
+#SBATCH --time=5-00:00:00
 
 cd /mnt/rds/redhen/gallina
 module load singularity
