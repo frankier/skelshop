@@ -47,6 +47,12 @@ BODY_25_LINES = {
 }
 
 
+UPPER_BODY_25_LINES = {
+    k: v for k, v in BODY_25_LINES.items()
+    if k not in ("pelvis", "right leg", "right foot", "left leg", "left foot")
+}
+
+
 FACE_LINES = {
     # Jaw
     "jaw": lrange(17),
@@ -87,19 +93,36 @@ HAND_LINES = {
 }
 
 
-BODY_135_LINES = {
-    # Body
-    "body": BODY_25_LINES,
-    # Left hand
-    "left hand": root_0_at(HAND_LINES, 7, 25),
-    # Right hand
-    "right hand": root_0_at(HAND_LINES, 4, 45),
-    # Face
-    "face": incr(65, FACE_LINES),
-}
+def compose_body(body, left_hand=None, right_hand=None, face=None):
+    lines = {
+        "body": body
+    }
+    if left_hand is not None:
+        lines["left hand"] = root_0_at(HAND_LINES, 7, 25)
+    if right_hand is not None:
+        lines["right hand"] = root_0_at(HAND_LINES, 4, 45)
+    if face is not None:
+        lines["face"] = incr(65, FACE_LINES)
+    return lines
+
+
+BODY_25_HANDS_LINES = compose_body(BODY_25_LINES, HAND_LINES, HAND_LINES)
+BODY_135_LINES = compose_body(BODY_25_LINES, HAND_LINES, HAND_LINES, FACE_LINES)
+
+UPPER_BODY_25_LEFT_HAND_LINES = compose_body(UPPER_BODY_25_LINES, HAND_LINES)
+UPPER_BODY_25_HANDS_LINES = compose_body(UPPER_BODY_25_LINES, HAND_LINES, HAND_LINES)
+UPPER_BODY_135_LINES = compose_body(UPPER_BODY_25_LINES, HAND_LINES, HAND_LINES, FACE_LINES)
 
 BODY_25 = SkeletonType(BODY_25_LINES, BODY_25_JOINTS)
+HAND = SkeletonType(HAND_LINES)
+
+BODY_25_HANDS = SkeletonType(BODY_25_HANDS_LINES, BODY_25_JOINTS)
 BODY_135 = SkeletonType(BODY_135_LINES, BODY_25_JOINTS)
+
+UPPER_BODY_25 = SkeletonType(UPPER_BODY_25_LINES, BODY_25_JOINTS)
+UPPER_BODY_25_LEFT_HAND = SkeletonType(UPPER_BODY_25_LEFT_HAND_LINES, BODY_25_JOINTS)
+UPPER_BODY_25_HANDS = SkeletonType(UPPER_BODY_25_HANDS_LINES, BODY_25_JOINTS)
+UPPER_BODY_135 = SkeletonType(UPPER_BODY_135_LINES, BODY_25_JOINTS)
 
 MODE_SKELS = {
     "BODY_25_ALL": BODY_135,

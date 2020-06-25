@@ -1,4 +1,16 @@
-from skeldump.skelgraphs.base import SkeletonType
-from skeldump.skelgraphs.openpose import HAND_LINES
+from skeldump.skelgraphs.openpose import (
+    HAND, BODY_25, UPPER_BODY_25, BODY_25_HANDS, UPPER_BODY_25_HANDS, UPPER_BODY_25_LEFT_HAND
+)
 
-EMBED_SKELS = {"HAND": SkeletonType(HAND_LINES)}
+BODY_EMBED_SKELS = {
+    "BODY_25": BODY_25,
+    "UPPER_BODY_25": UPPER_BODY_25,
+    "BODY_25_HANDS": BODY_25_HANDS,
+    "UPPER_BODY_25_HANDS": UPPER_BODY_25_HANDS,
+    "UPPER_BODY_25_LEFT_HAND": UPPER_BODY_25_LEFT_HAND,
+}
+
+EMBED_SKELS = {
+    **BODY_EMBED_SKELS,
+    "HAND": HAND,
+}

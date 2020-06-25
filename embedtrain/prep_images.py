@@ -7,35 +7,6 @@ import cv2
 import imagesize
 from skeldump.openpose import LIMBS, MODES, OpenPoseStage
 from skeldump.utils.h5py import h5out as mk_h5out
-from wcmatch.glob import globmatch
-
-
-def get_pads(pad):
-    top = pad // 2
-    bottom = top + pad % 2
-    return top, bottom
-
-
-def get_square_padding(img):
-    top = bottom = left = right = 0
-    height, width = img.shape[:2]
-    if height < width:
-        top, bottom = get_pads(width - height)
-    else:
-        left, right = get_pads(height - width)
-    return top, bottom, left, right
-
-
-def squarify(img, pad):
-    """
-    >Cropping the Image for Hand/Face Keypoint Detection
-    >If you are using your own hand or face images, you should leave about 10-20% margin between the end of the hand/face and the sides (left, top, right, bottom) of the image. We trained with that configuration, so it should be the ideal one for maximizing detection.
-    >We did not use any solid-color-based padding, we simply cropped from the whole image. Thus, if you can, use the image rather than adding a color-based padding. Otherwise black padding should work good.
-    """
-    top, bottom, left, right = pad
-    return cv2.copyMakeBorder(
-        img, top, bottom, left, right, cv2.BORDER_CONSTANT, None, (0, 0, 0)
-    )
 
 
 class SingleHandOpenPose:
@@ -91,19 +62,9 @@ class SingleHandOpenPose:
         return kps, width, height
 
 
-def sane_globmatch(path, matchers):
-    if len(matchers) == 0:
-        return False
-    return globmatch(path, matchers)
-
-
 @click.group()
 def prep_images():
     pass
-
-
-def has_img_ext(filename):
-    return filename.rsplit(".", 1)[-1].lower() in ("jpg", "pgm", "png", "ppm", "tiff")
 
 
 @prep_images.command()

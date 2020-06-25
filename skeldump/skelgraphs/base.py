@@ -1,6 +1,14 @@
 from more_itertools.recipes import pairwise
 
 
+def flatten(nested):
+    if isinstance(nested, dict):
+        for inner in nested.values():
+            yield from flatten(inner)
+    else:
+        yield nested
+
+
 class SkeletonType:
     def __init__(self, lines, names=None):
         self.lines = lines
@@ -14,11 +22,7 @@ class SkeletonType:
 
     @property
     def lines_flat(self):
-        for part in self.lines.values():
-            if isinstance(part, dict):
-                yield from part.values()
-            else:
-                yield part
+        yield from flatten(self.lines)
 
     def build_graphs(self):
         self.graph = {}

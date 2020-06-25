@@ -24,7 +24,7 @@ def ang_diff(line1, line2):
     return atan2(line2[1], line2[0]) - atan2(line1[1], line1[0])
 
 
-def angle_embed_pose_joints(skel, keypoints, kp_idxs):
+def angle_embed_pose_joints(skel, keypoints, kp_idxs=None):
     # TODO: Filter out joints too close together since angle measurement will
     # be nonsense
     embedding = []

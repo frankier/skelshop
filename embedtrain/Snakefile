@@ -1,31 +1,15 @@
+import re
 from shutil import unpack_archive
+from embedtrain.datasets import DataSet
+from embedtrain.embed_skels import BODY_EMBED_SKELS, EMBED_SKELS
 
 
-def cnf(name, val):
-    globals()[name] = config.setdefault(name, val)
-
-
-class DataSet:
-    by_zip = {}
-    by_ex = {}
-    by_name = {}
-
-    def __init__(self, name, downloads):
-        self.name = name
-        name_upper = name.upper()
-        self.base = config.setdefault(name_upper, WORK + "/" + name + "_ds")
-        self.zips = config.setdefault(name_upper + "_ZIPS", self.base + "/zips")
-        self.ex_dir = config.setdefault(name_upper + "_DS", self.base + "/extracted")
-        self.by_zip[self.zips] = self
-        self.by_ex[self.ex_dir] = self
-        self.by_name[name] = self
-
-        self.downloads = downloads
-        self.base_map = {ds.rsplit("/", 1)[1]: ds for ds in downloads}
-        self.bare_map = {ds.split(".", 1)[0]: ds for ds in self.base_map}
-
-    def __repr__(self):
-        return f"<DataSet name={self.name}>"
+def cnf(name, val=None):
+    if val is None:
+        return config[name]
+    val = config.setdefault(name, val)
+    globals()[name] = val
+    return val
 
 
 # Intermediate dirs
@@ -33,41 +17,21 @@ cnf("WORK", "work")
 cnf("HAND_H5", WORK + "/hand.h5")
 cnf("BODY_H5", WORK + "/body.h5")
 
+SKEL_NAME_MAP = {}
+for embed_skel in EMBED_SKELS.keys():
+    embed_skel_lower = embed_skel.lower()
+    man_tb_dir = cnf(embed_skel + "_MAN_TB", WORK + "/" + embed_skel_lower + "-man-tb")
+    SKEL_NAME_MAP[man_tb_dir] = embed_skel
 
-DataSet("hand", [
-    # https://www.idiap.ch/resource/gestures/
-    "https://www.idiap.ch/resource/gestures/data/shp_triesch.tar.gz",
-    "https://www.idiap.ch/resource/gestures/data/BochumGestures1998.tar.gz",
-    "https://www.idiap.ch/resource/gestures/data/shp_marcel_train.tar.gz",
-    "https://www.idiap.ch/resource/gestures/data/shp_marcel_test.tar.gz",
-    # https://www.ece.nus.edu.sg/stfpage/elepv/NUS-HandSet/
-    "https://www.ece.nus.edu.sg/stfpage/elepv/NUS-HandSet/NUS-Hand-Posture-Dataset-I.zip",
-    "https://www.ece.nus.edu.sg/stfpage/elepv/NUS-HandSet/NUS-Hand-Posture-Dataset-II.zip",
-    # https://empslocal.ex.ac.uk/people/staff/np331/index.php?section=FingerSpellingDataset
-    "http://www.cvssp.org/FingerSpellingKinect2011/fingerspelling5.tar.bz2",
-])
 
-DataSet("body", [
-    # http://human-pose.mpi-inf.mpg.de/#overview
-    "https://datasets.d2.mpi-inf.mpg.de/andriluka14cvpr/mpii_human_pose_v1.tar.gz",
-    "https://datasets.d2.mpi-inf.mpg.de/andriluka14cvpr/mpii_human_pose_v1_u12_2.zip",
-])
+DataSet.config_datasets(cnf)
 
-DataSet("action", [
-    "http://sunai.uoc.edu/chalearn/data/trainning/trainning1.tar.gz",
-    "http://sunai.uoc.edu/chalearn/data/trainning/trainning2.tar.gz",
-    "http://sunai.uoc.edu/chalearn/data/trainning/trainning3.tar.gz",
-    "http://sunai.uoc.edu/chalearn/data/trainning/trainning4.tar.gz",
-    "http://sunai.uoc.edu/chalearn/data/validation/validation1_lab.tar.gz",
-    "http://sunai.uoc.edu/chalearn/data/validation/validation2_lab.tar.gz",
-    "http://sunai.uoc.edu/chalearn/data/validation/validation3_lab.tar.gz",
-    *(f"http://rose1.ntu.edu.sg/Datasets/actionRecognition/download/nturgbd_rgb_s{idx:03d}.zip" for idx in range(1, 33)),
-])
 
 rule all:
     input:
         HAND_H5,
-        BODY_H5
+        BODY_H5,
+        [globals()[skel_name + "_MAN_TB"] for skel_name in EMBED_SKELS.keys()]
 
 
 rule ds_download:
@@ -110,7 +74,8 @@ rule ds_extracted:
         touch("{ex_dir}.done")
 
 
-PREP_IMAGES = "python " + workflow.basedir + "/prep_images.py"
+def runscript(name):
+    return f"python {workflow.basedir}/{name}.py"
 
 
 rule openpose_hands:
@@ -119,11 +84,7 @@ rule openpose_hands:
     output:
         HAND_H5
     shell:
-        PREP_IMAGES + " hand" +
-        " --exclude 'fingerspelling5/**/depth_*' " +
-        " --exclude '**/NUS Hand Posture Dataset/BW/*'" +
-        " --exclude '**/BochumGestures1998/sih/*'" +
-        " --left-hands 'fingerspelling5/**'" +
+        runscript("prep_images") + " hand" +
         " " + DataSet.by_name["hand"].ex_dir + " " + HAND_H5
 
 
@@ -133,6 +94,33 @@ rule openpose_body:
     output:
         BODY_H5
     shell:
-        PREP_IMAGES + " body " +
+        runscript("prep_images") + " body " +
         DataSet.by_name["body"].ex_dir + "/mpii_human_pose_v1/images/ " +
-	BODY_H5
+        BODY_H5
+
+
+rule proj_hands_man:
+    input:
+        skels = HAND_H5,
+        img_base = HAND_DS
+    output:
+        man_tb = directory(HAND_MAN_TB)
+    shell:
+        runscript("embed_vis") + " to-tensorboard " +
+        "--image-base {input.img_base} {input.skels} {output.man_tb} HAND"
+
+rule proj_body_man:
+    input:
+        skels = BODY_H5,
+        img_base = BODY_DS
+    output:
+        man_tb = directory("{outdir}")
+    wildcard_constraints:
+        outdir = "|".join(("(^{}$)".format(re.escape(globals()[skel_name + "_MAN_TB"])) for skel_name in BODY_EMBED_SKELS.keys()))
+    params:
+        skel_name = lambda wildcards, output: SKEL_NAME_MAP[output.man_tb]
+    shell:
+        runscript("embed_vis") + " to-tensorboard " +
+        "--image-base {input.img_base} " +
+        "--body-labels {input.img_base}/mpii_human_pose_v1_u12_2/mpii_human_pose_v1_u12_2/mpii_human_pose_v1_u12_1.mat " +
+        "{input.skels} {output.man_tb} {params.skel_name}"
