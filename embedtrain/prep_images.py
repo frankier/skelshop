@@ -5,6 +5,8 @@ from os.path import join as pjoin
 import click
 import cv2
 import imagesize
+
+from embedtrain.utils import get_square_padding, has_img_ext, sane_globmatch, squarify
 from skeldump.openpose import LIMBS, MODES, OpenPoseStage
 from skeldump.utils.h5py import h5out as mk_h5out
 

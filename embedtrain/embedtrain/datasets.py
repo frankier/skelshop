@@ -1,12 +1,29 @@
+from __future__ import annotations
+
 import re
+from abc import ABC, abstractmethod
+from typing import Dict, List, Optional
+
 import numpy
 from scipy.io import loadmat
 
 
-class DataSet:
-    by_zip = {}
-    by_ex = {}
-    by_name = {}
+class DataSet(ABC):
+    by_zip: Dict[str, DataSet] = {}
+    by_ex: Dict[str, DataSet] = {}
+    by_name: Dict[str, DataSet] = {}
+
+    @property
+    @classmethod
+    @abstractmethod
+    def name(cls) -> str:
+        ...
+
+    @property
+    @classmethod
+    @abstractmethod
+    def downloads(cls) -> List[str]:
+        ...
 
     @classmethod
     def config_datasets(cls, config):
@@ -30,6 +47,7 @@ class DataSet:
 
 
 FIRST_NUM_PAT = re.compile(r"\d+")
+POSE_PAT = re.compile(r"pose\d+")
 
 
 class HandDataSet(DataSet):
@@ -53,9 +71,7 @@ class HandDataSet(DataSet):
         "**/NUS Hand Posture dataset II/Backgrounds/*",
         "**/Marcel-Test/MiniTrieschGallery/**",
     ]
-    left_patterns = [
-        "**/fingerspelling5/**"
-    ]
+    left_patterns = ["**/fingerspelling5/**"]
 
     @staticmethod
     def path_is_excluded(path):
@@ -80,7 +96,9 @@ class HandDataSet(DataSet):
             else:
                 cls = barename.split()[0]
         elif src == "BochumGestures1998":
-            cls = FIRST_NUM_PAT.search(barename)[0]
+            match = FIRST_NUM_PAT.search(barename)
+            assert match is not None
+            cls = match[0]
         elif src == "fingerspelling5":
             cls = bits[-3]
         elif src == "shp_marcel":
@@ -100,14 +118,37 @@ def unwrap(arr):
         return arr
 
 
-def read_label_map(body_labels):
+def read_label_map(data):
     label_map = {}
-    data = loadmat(body_labels, simplify_cells=True)["RELEASE"][0, 0]
-    annos = data["annolist"]
-    acts = reader["act"]
-    for anno, act in zip(annos, acts):
+    for anno, act in zip(data["annolist"], data["act"]):
         label_map[anno["image"]["name"]] = act
     return label_map
+
+
+def read_bbox_map(data):
+    from skeldump.utils.geom import cxywh_to_x1y1x2y2
+
+    bbox_map = {}
+    for anno in data["annolist"]:
+        rect_list: List[Optional[List[float]]] = []
+        if isinstance(anno["annorect"], dict):
+            annorects = [anno["annorect"]]
+        else:
+            annorects = anno["annorect"]
+        for rectinfo in annorects:
+            rect: Optional[List[float]]
+            if "x1" in rectinfo:
+                rect = [rectinfo["x1"], rectinfo["y1"], rectinfo["x2"], rectinfo["y2"]]
+            elif "scale" in rectinfo and rectinfo["scale"]:
+                size = rectinfo["scale"] * 200
+                x = rectinfo["objpos"]["x"]
+                y = rectinfo["objpos"]["y"]
+                rect = cxywh_to_x1y1x2y2([x, y, x + size, y + size])
+            else:
+                rect = None
+            rect_list.append(rect)
+        bbox_map[anno["image"]["name"]] = rect_list
+    return bbox_map
 
 
 class BodyDataSet(DataSet):
@@ -117,15 +158,38 @@ class BodyDataSet(DataSet):
         "https://datasets.d2.mpi-inf.mpg.de/andriluka14cvpr/mpii_human_pose_v1.tar.gz",
         "https://datasets.d2.mpi-inf.mpg.de/andriluka14cvpr/mpii_human_pose_v1_u12_2.zip",
     ]
-    _label_map = None
+    _label_map: Optional[Dict[str, str]] = None
+    _bbox_map: Optional[Dict[str, List[float]]] = None
+
+    @classmethod
+    def lazyload(cls, body_labels):
+        data = loadmat(body_labels, simplify_cells=True)["RELEASE"]
+        cls._label_map = read_label_map(data)
+        cls._bbox_map = read_bbox_map(data)
+
+    @staticmethod
+    def path_to_barename(path):
+        bits = path.strip("/").split("/")
+        if POSE_PAT.match(bits[-1]):
+            return bits[-2]
+        else:
+            return bits[-1]
 
     @classmethod
     def path_to_class(cls, body_labels, path):
-        bits = path.strip("/").split("/")
-        barename = bits[-1]
+        barename = cls.path_to_barename(path)
         if cls._label_map is None:
-            cls._label_map = read_label_map(body_labels)
+            cls.lazyload(body_labels)
+        assert cls._label_map is not None
         return cls._label_map[barename]
+
+    @classmethod
+    def path_to_bboxes(cls, body_labels, path):
+        barename = cls.path_to_barename(path)
+        if cls._bbox_map is None:
+            cls.lazyload(body_labels)
+        assert cls._bbox_map is not None
+        return cls._bbox_map[barename]
 
 
 class ActionDataSet(DataSet):

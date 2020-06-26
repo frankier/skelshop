@@ -1,8 +1,9 @@
 from math import atan2, pi
-from typing import Optional
+from typing import Optional, Tuple, cast
 
 import numpy as np
 from numpy.linalg import norm
+
 from skeldump.pose import PoseBase
 from skeldump.skelgraphs.openpose import BODY_135
 
@@ -45,11 +46,11 @@ def iter_size_lines(kp_idxs):
         yield line
 
 
-def line_len(pose, line):
-    return norm(pose[line[0], :2] - pose[line[1], :2])
+def line_len(pose: np.ndarray, line: Tuple[int, int]) -> float:
+    return cast(float, norm(pose[line[0], :2] - pose[line[1], :2]))
 
 
-def size_dist(pose1, pose2, kp_idxs) -> Optional[float]:
+def size_dist(pose1: np.ndarray, pose2: np.ndarray, kp_idxs) -> Optional[float]:
     for line in iter_size_lines(kp_idxs):
         len1 = line_len(pose1, line)
         if len1 < REF_LEN_THRESH:
@@ -93,4 +94,4 @@ def man_dist(pose1: PoseBase, pose2: PoseBase) -> float:
     angle_embed2 = angle_embed_pose_joints(BODY_135, pose2_kps, kp_idxs)
     angle_diffs = np.asarray(angle_embed1) - np.asarray(angle_embed2)
     stacked_diff = np.hstack([angle_diffs, sdist])
-    return norm(stacked_diff)
+    return cast(float, norm(stacked_diff))

@@ -5,6 +5,7 @@ import cv2
 import numpy as np
 import opencv_wrapper as cvw
 from more_itertools.recipes import grouper
+
 from skeldump.skelgraphs.openpose import MODE_SKELS
 from skeldump.skelgraphs.posetrack import POSETRACK18_SKEL
 
@@ -133,6 +134,8 @@ class VideoSticksWriter:
 def drawsticks_shots(vid_read, stick_read, vid_write):
     shots_it = iter(stick_read)
     shot = next(shots_it, None)
+    if shot is None:
+        return
     shot_it = iter(shot)
     bundle = None
     for frame in vid_read:

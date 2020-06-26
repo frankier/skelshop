@@ -1,3 +1,5 @@
+from typing import Dict, Set
+
 from more_itertools.recipes import pairwise
 
 
@@ -25,8 +27,8 @@ class SkeletonType:
         yield from flatten(self.lines)
 
     def build_graphs(self):
-        self.graph = {}
-        self.digraph = {}
+        self.graph: Dict[int, Set[int]] = {}
+        self.digraph: Dict[int, Set[int]] = {}
         for line in self.lines_flat:
             for n1, n2 in pairwise(line):
                 if n1 > n2:

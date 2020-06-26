@@ -1,5 +1,5 @@
-from wcmatch.glob import globmatch
 import cv2
+from wcmatch.glob import globmatch
 
 
 def sane_globmatch(path, matchers):

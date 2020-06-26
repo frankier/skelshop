@@ -1,21 +1,37 @@
+from __future__ import annotations
+
 import collections
+from abc import ABC, abstractmethod
+from typing import Any, Deque, Optional
 
 
-class PipelineStageBase:
+class PipelineStageBase(ABC):
+    prev: Optional[PipelineStageBase] = None
+
     def __iter__(self):
         return self
 
+    @abstractmethod
+    def __next__(self):
+        ...
+
     def send_back(self, name, *args, **kwargs):
-        if hasattr(self, name):
-            getattr(self, name)(*args, **kwargs)
-        elif hasattr(self, "prev"):
+        meth = getattr(self, name, None)
+        if meth is not None:
+            meth(*args, **kwargs)
+            return
+        if self.prev is not None:
             self.prev.send_back(name, *args, **kwargs)
 
 
-class RewindStage(PipelineStageBase):
-    def __init__(self, size, prev):
+class FilterStageBase(PipelineStageBase, ABC):
+    prev: PipelineStageBase
+
+
+class RewindStage(FilterStageBase):
+    def __init__(self, size, prev: PipelineStageBase):
         self.prev = prev
-        self.buf = collections.deque(maxlen=size)
+        self.buf: Deque[Any] = collections.deque(maxlen=size)
         self.rewinded = 0
 
     def __next__(self):

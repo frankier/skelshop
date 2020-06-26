@@ -1,3 +1,7 @@
+from __future__ import annotations
+
+from typing import Iterator, Tuple, Type
+
 import numpy as np
 
 from .skelgraphs.conv import BODY_25_TO_POSETRACK, keypoints_to_posetrack
@@ -37,12 +41,12 @@ class IdPoseBundle:
 
 
 class DumpReaderPoseBundle:
-    def __init__(self, bundle, cls):
+    def __init__(self, bundle, cls: Type[PoseBase]):
         # TODO: Maybe they shouldn't be assumed as ordered
         self.bundle = bundle
         self.cls = cls
 
-    def __iter__(self):
+    def __iter__(self) -> Iterator[Tuple[int, PoseBase]]:
         for idx, pose in enumerate(self.bundle):
             yield idx, self.cls.from_keypoints(pose)
 
@@ -54,7 +58,7 @@ class UnorderedDumpReaderPoseBundle(DumpReaderPoseBundle):
 
 class PoseBase:
     def __init__(self):
-        pass
+        self.keypoints: np.ndarray
 
     @classmethod
     def from_datum(cls, datum, idx):
