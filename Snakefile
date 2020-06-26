@@ -86,7 +86,7 @@ rule skel_unsorted:
     output:
         "{base}.unsorted.h5"
     shell:
-        "python skeldump.py dump " +
+        "python skelshop.py dump " +
         "--mode BODY_25_ALL " + 
         "{input.video} " + 
         "{output}"
@@ -99,7 +99,7 @@ rule skel_filter_csvshotseg_reidpt:
     output:
         "{base}.reidpt.h5"
     shell:
-        "python skeldump.py filter " +
+        "python skelshop.py filter " +
         "--track " +
         "--track-reid-embed=posetrack " +
         "--pose-matcher-config {input.gcn_config} " +
@@ -115,7 +115,7 @@ rule skel_filter_csvshotseg_reidman:
     output:
         "{base}.reidman.h5"
     shell:
-        "python skeldump.py filter " +
+        "python skelshop.py filter " +
         "--track " +
         "--track-reid-embed=manual " +
         "--pose-matcher-config {input.gcn_config} " +
@@ -130,5 +130,5 @@ rule drawsticks:
     output:
         "{base}.{var}.sticks.mp4"
     shell:
-        "python skeldump.py drawsticks " +
+        "python skelshop.py drawsticks " +
         "{input.skels} {input.video} {output}"
