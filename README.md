@@ -1,8 +1,12 @@
 # SkelShop
 
 <p align="center">
-<a href="https://gitlab.com/frankier/skelshop/-/commits/master"><img alt="pipeline status" src="https://gitlab.com/frankier/skelshop/badges/master/pipeline.svg" /></a>
-<a href="https://singularity-hub.org/collections/4494">Singularity -! Hub !-</a>
+<a href="https://gitlab.com/frankier/skelshop/-/commits/master">
+  <img alt="pipeline status" src="https://gitlab.com/frankier/skelshop/badges/master/pipeline.svg" />
+</a>
+<a href="https://singularity-hub.org/collections/4494">
+  <img alt="SingularityHub container image builds" src="https://img.shields.io/badge/SingularityHub-Images-red" />
+</a>
 </p>
 
 ## Features
