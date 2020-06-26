@@ -1,0 +1,17 @@
+image: python
+
+stages:
+  - test
+
+before_script:
+  - curl -sSL https://raw.githubusercontent.com/python-poetry/poetry/master/get-poetry.py | python
+
+python36:
+  image: python:3.6
+  stage: test
+  script: tox -e py36
+
+python39:
+  image: python:3.9
+  stage: test
+  script: tox -e py39
