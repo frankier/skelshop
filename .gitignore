@@ -1,5 +1,15 @@
 __pycache__/
 /work/
 /.install_done
-/.snakemake/
+.snakemake/
 *.pyc
+/embedtrain/work/
+/openpose_dump.egg-info/
+*.sif
+
+# own mess
+/attic/
+/data/
+/embedtrain/remotework/
+/embedtrain/attic/
+/notes/
