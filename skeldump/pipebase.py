@@ -1,12 +1,10 @@
-from __future__ import annotations
-
 import collections
 from abc import ABC, abstractmethod
 from typing import Any, Deque, Optional
 
 
 class PipelineStageBase(ABC):
-    prev: Optional[PipelineStageBase] = None
+    prev: Optional["PipelineStageBase"] = None
 
     def __iter__(self):
         return self

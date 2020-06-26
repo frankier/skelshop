@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 import re
 from abc import ABC, abstractmethod
 from typing import Dict, List, Optional
@@ -9,9 +7,9 @@ from scipy.io import loadmat
 
 
 class DataSet(ABC):
-    by_zip: Dict[str, DataSet] = {}
-    by_ex: Dict[str, DataSet] = {}
-    by_name: Dict[str, DataSet] = {}
+    by_zip: Dict[str, "DataSet"] = {}
+    by_ex: Dict[str, "DataSet"] = {}
+    by_name: Dict[str, "DataSet"] = {}
 
     @property
     @classmethod

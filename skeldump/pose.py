@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 from typing import Iterator, Tuple, Type
 
 import numpy as np
@@ -41,12 +39,12 @@ class IdPoseBundle:
 
 
 class DumpReaderPoseBundle:
-    def __init__(self, bundle, cls: Type[PoseBase]):
+    def __init__(self, bundle, cls: Type["PoseBase"]):
         # TODO: Maybe they shouldn't be assumed as ordered
         self.bundle = bundle
         self.cls = cls
 
-    def __iter__(self) -> Iterator[Tuple[int, PoseBase]]:
+    def __iter__(self) -> Iterator[Tuple[int, "PoseBase"]]:
         for idx, pose in enumerate(self.bundle):
             yield idx, self.cls.from_keypoints(pose)
 
