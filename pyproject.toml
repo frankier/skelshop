@@ -1,4 +1,5 @@
 [tool.poetry]
+
 name = "openpose-dump"
 version = "0.1.0"
 description = "File format for OpenPose on video files"
@@ -24,7 +25,7 @@ click_log = "^0.3.2"
 ordered-set = "^4.0.1"
 orjson = "^3.1.0"
 dataclasses = { version = "^0.7", python = "~3.6" }
-numpy = "^1.18.5"
+numpy = "^1.19.0"
 
 snakemake = { version = "^5.18.1", optional = true}
 scenedetect = { version = "^0.5.2", optional = true}
@@ -48,6 +49,7 @@ embedvis = ["tensorboard"]
 black = "^19.10b0"
 isort = {extras = ["pyproject"], version = "^4.3.21"}
 pre-commit = "^2.4.0"
+mypy = "^0.782"
 
 [build-system]
 requires = ["poetry-core>=1.0.0a5"]
