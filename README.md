@@ -1,3 +1,10 @@
+# SkelShop
+
+<p align="center">
+<a href="https://gitlab.com/frankier/skelshop/-/commits/master"><img alt="pipeline status" src="https://gitlab.com/frankier/skelshop/badges/master/pipeline.svg" /></a>
+<a href="https://singularity-hub.org/collections/4494"><font style="font-variant: small-caps">Singularity<font style="color:red">Hub</font></font></a>
+</p>
+
 ## Features
 
  * Dump OpenPose skeletons to a fast-to-read HDF5 file format
