@@ -5,7 +5,7 @@ stages:
 
 before_script:
   - curl -sSL https://raw.githubusercontent.com/python-poetry/poetry/master/get-poetry.py | python
-  - ./install-all.sh
+  - ./install_all.sh
 
 python36:
   image: python:3.6
