@@ -6,6 +6,7 @@ __pycache__/
 /embedtrain/work/
 /openpose_dump.egg-info/
 *.sif
+/.tox/
 
 # own mess
 /attic/
