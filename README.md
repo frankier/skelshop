@@ -4,9 +4,7 @@
 <a href="https://gitlab.com/frankier/skelshop/-/commits/master">
   <img alt="pipeline status" src="https://gitlab.com/frankier/skelshop/badges/master/pipeline.svg" />
 </a>
-<a href="https://singularity-hub.org/collections/4494">
-  <img alt="SingularityHub container image builds" src="https://img.shields.io/badge/SingularityHub-Images-red" />
-</a>
+[![https://www.singularity-hub.org/static/img/hosted-singularity--hub-%23e32929.svg](https://www.singularity-hub.org/static/img/hosted-singularity--hub-%23e32929.svg)](https://singularity-hub.org/collections/4494)
 </p>
 
 ## Features
