@@ -7,8 +7,8 @@ repos:
     rev: 3.8.2
     hooks:
     -   id: flake8
--   repo: https://github.com/asottile/seed-isort-config
-    rev: v2.2.0
+-   repo: https://github.com/frankier/seed-isort-config
+    rev: 75dc0693fe575ce51f4be91c86447a67aa284d8f
     hooks:
     -   id: seed-isort-config
 -   repo: git://github.com/timothycrosley/isort 
