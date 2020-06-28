@@ -13,7 +13,12 @@ python36:
   stage: test
   script: tox -e py36
 
-python39:
-  image: python:3.9-rc
+python37:
+  image: python:3.7
   stage: test
-  script: tox -e py39
+  script: tox -e py37
+
+python39:
+  image: python:3.8
+  stage: test
+  script: tox -e py38
