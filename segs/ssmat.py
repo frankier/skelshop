@@ -5,9 +5,10 @@ import numpy as np
 from matplotlib import pyplot as plt
 from numba import jit
 from scipy.ndimage import median_filter
+from sklearn.preprocessing import normalize
+
 from skeldump.skelgraphs.openpose import BODY_25
 from skeldump.sparsepose import as_scipy_csrs
-from sklearn.preprocessing import normalize
 
 JOINT_IDXS = (
     BODY_25.names.index("left wrist"),
@@ -117,10 +118,10 @@ def heatmap2d(arr: np.ndarray):
 
 
 def main():
-    h5fn, path, start_idx, end_idx, kernel_size = sys.argv[1:]
-    start_idx = int(start_idx)
-    end_idx = int(end_idx)
-    kernel_size = int(kernel_size)
+    h5fn, path, start_idx_str, end_idx_str, kernel_size_str = sys.argv[1:]
+    start_idx = int(start_idx_str)
+    end_idx = int(end_idx_str)
+    kernel_size = int(kernel_size_str)
     with h5py.File(h5fn, "r") as h5in:
         num_limbs = h5in.attrs["limbs"]
         pose_grp = h5in[path]
