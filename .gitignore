@@ -4,7 +4,7 @@ __pycache__/
 .snakemake/
 *.pyc
 /embedtrain/work/
-/openpose_dump.egg-info/
+*.egg-info/
 *.sif
 /.tox/
 
