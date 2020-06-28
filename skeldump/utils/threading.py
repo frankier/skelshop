@@ -11,7 +11,7 @@ def collect(inner_func, q, args, kwargs):
 
 
 def thread_wrap_iter(inner_func, *args, maxsize=0, **kwargs):
-    q = queue.Queue(maxsize=maxsize)
+    q: queue.Queue = queue.Queue(maxsize=maxsize)
     thr = threading.Thread(target=collect, args=(inner_func, q, args, kwargs))
     thr.start()
 

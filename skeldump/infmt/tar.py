@@ -1,8 +1,10 @@
 import tarfile
 from heapq import heappop, heappush
 from itertools import cycle
+from typing import Dict, List, Set, Tuple
 
 import orjson
+
 from skeldump.openpose import POSE_CLASSES
 from skeldump.pipebase import PipelineStageBase
 from skeldump.pose import JsonPoseBundle
@@ -17,16 +19,15 @@ HEAP_REMAINING = object()
 
 
 def iter_shard_complete_infos(tar_path):
-    collected_state = {}
+    collected_state: Dict[str, Dict[int, tarfile.TarInfo]] = {}
     # Deliberately reopening in thread
     with tarfile.open(tar_path, "r|") as tarin:
         for tarinfo in tarin:
             if not tarinfo.isfile():
                 continue
-            basename, shard = tarinfo.name.rsplit("_openpose_body_hand_", 1)
-            assert shard.endswith(".tar.bz2")
-            shard = shard[: -len(".tar.bz2")]
-            shard = int(shard)
+            basename, shard_str = tarinfo.name.rsplit("_openpose_body_hand_", 1)
+            assert shard_str.endswith(".tar.bz2")
+            shard = int(shard_str[: -len(".tar.bz2")])
             assert shard in range(SHARDS)
             if basename not in collected_state:
                 collected_state[basename] = {}
@@ -43,7 +44,7 @@ def consume_ordered(tar_path, tarinfo, shard_idx):
     with tarfile.open(tar_path, "r") as outer_tar:
         inner_file = outer_tar.extractfile(tarinfo)
         with tarfile.open(fileobj=inner_file, mode="r|bz2") as shard_tar:
-            heap = []
+            heap: List[Tuple[int, bytes]] = []
             cur_idx = shard_idx
             try:
                 for jsoninfo in shard_tar:
@@ -51,7 +52,9 @@ def consume_ordered(tar_path, tarinfo, shard_idx):
                         continue
 
                     def read():
-                        return shard_tar.extractfile(jsoninfo).read()
+                        fio = shard_tar.extractfile(jsoninfo)
+                        assert fio is not None
+                        return fio.read()
 
                     def drain():
                         nonlocal cur_idx
@@ -131,8 +134,8 @@ class ShardedJsonDumpSource(PipelineStageBase):
             )
         # Go through round robin until all corrupt or exhausted
         rr = cycle(rr_schedule)
-        corrupt = set()
-        exhausted = set()
+        corrupt: Set[int] = set()
+        exhausted: Set[int] = set()
         last_ones = []
         for shard_idx, inner_iter in rr:
             if not exhausted and shard_idx in corrupt:

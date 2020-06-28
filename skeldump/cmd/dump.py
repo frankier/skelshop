@@ -1,5 +1,8 @@
+from typing import Type, Union
+
 import click
 from imutils.video.count_frames import count_frames
+
 from skeldump.dump import add_fmt_metadata, add_metadata, write_shots
 from skeldump.io import AsIfOrdered, ShotSegmentedWriter, UnsegmentedWriter
 from skeldump.openpose import LIMBS, MODES, OpenPoseStage
@@ -19,6 +22,7 @@ def dump(video, h5fn, mode, model_folder, pipeline, debug):
     with h5out(h5fn) as h5f:
         limbs = LIMBS[mode]
         stage = OpenPoseStage(model_folder, mode, video, debug)
+        writer_cls: Union[Type[ShotSegmentedWriter], Type[UnsegmentedWriter]]
         if pipeline.stages:
             frame_iter = pipeline(stage)
             writer_cls = ShotSegmentedWriter

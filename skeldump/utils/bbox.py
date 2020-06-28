@@ -1,20 +1,22 @@
+from typing import List
+
 import numpy as np
 from ufunclab import minmax
 
 from skeldump.utils.geom import x1y1x2y2_to_xywh
 
 
-def keypoints_bbox_x1y1x2y2(keypoints, enlarge_scale=0.2):
+def keypoints_bbox_x1y1x2y2(keypoints: np.ndarray, enlarge_scale=0.2) -> List[float]:
     bbox = minmax(keypoints[:, :2][np.nonzero(keypoints[:, 2])], axes=[(0,), (1,)])
     bbox = np.transpose(bbox).reshape(-1)
     return enlarge_bbox(bbox, enlarge_scale)
 
 
-def keypoints_bbox_xywh(keypoints, enlarge_scale=0.2):
+def keypoints_bbox_xywh(keypoints: np.ndarray, enlarge_scale=0.2) -> List[float]:
     return x1y1x2y2_to_xywh(keypoints_bbox_x1y1x2y2(keypoints, enlarge_scale))
 
 
-def enlarge_bbox(bbox, scale):
+def enlarge_bbox(bbox: List[float], scale: float) -> List[float]:
     assert scale > 0
     min_x, min_y, max_x, max_y = bbox
     margin_x = int(0.5 * scale * (max_x - min_x))

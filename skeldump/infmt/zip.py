@@ -2,6 +2,7 @@ from contextlib import contextmanager
 from zipfile import ZipFile
 
 import orjson
+
 from skeldump.openpose import POSE_CLASSES
 from skeldump.pipebase import PipelineStageBase
 from skeldump.pose import JsonPoseBundle

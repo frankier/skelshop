@@ -1,7 +1,7 @@
 from itertools import islice
 
 from .bbshotseg import SHOT_CHANGE
-from .pipebase import PipelineStageBase
+from .pipebase import FilterStageBase
 
 
 def get_cuts_from_csv(shot_csv):
@@ -13,7 +13,7 @@ def get_cuts_from_csv(shot_csv):
     return res
 
 
-class CsvShotSegStage(PipelineStageBase):
+class CsvShotSegStage(FilterStageBase):
     def __init__(self, prev, shot_csv, start_frame):
         self.prev = prev
         self.cuts = get_cuts_from_csv(shot_csv)

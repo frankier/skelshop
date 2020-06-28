@@ -50,7 +50,7 @@ class RewindStage(FilterStageBase):
 
 class IterStage(PipelineStageBase):
     def __init__(self, wrapped):
-        self.wrapped = wrapped
+        self.wrapped = iter(wrapped)
 
     def __next__(self):
         return next(self.wrapped)

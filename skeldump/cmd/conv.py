@@ -6,6 +6,7 @@ from multiprocessing import Pool, set_start_method
 from os.path import join as pjoin
 
 import click
+
 from skeldump.dump import add_fmt_metadata, add_metadata, write_shots
 from skeldump.infmt.tar import ShardedJsonDumpSource, iter_tarinfos
 from skeldump.infmt.zip import zip_json_source
@@ -74,7 +75,7 @@ class TarInfosProcessor:
             self.mode, self.tar_path, tarinfos, self.suppress_end_fail
         )
         path = pjoin(self.out, basename + ".unsorted.h5")
-        stats = Counter()
+        stats: Counter = Counter()
         if self.skip_existing and os.path.exists(path):
             return stats
         os.makedirs(os.path.dirname(path), exist_ok=True)
@@ -124,7 +125,7 @@ def conv(input_fmt, legacy_dump, out, mode, cores, suppress_end_fail, skip_exist
         set_start_method("forkserver")
         if out is None:
             out = ""
-        stats = Counter()
+        stats: Counter = Counter()
         processor = TarInfosProcessor(
             mode,
             legacy_dump,

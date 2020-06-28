@@ -5,6 +5,7 @@ from pprint import pformat
 import click
 import h5py
 import opencv_wrapper as cvw
+
 from skeldump.drawsticks import (
     VideoSticksWriter,
     drawsticks_shots,
@@ -46,8 +47,6 @@ def drawsticks(h5fn, videoin, videoout, posetrack, scale, overlay):
         else:
             frames = repeat(None, h5f.attrs["num_frames"])
         if h5f.attrs["fmt_type"] == "trackshots":
-            stick_read = ShotSegmentedReader(h5f)
-            drawsticks_shots(frames, stick_read, vid_write)
+            drawsticks_shots(frames, ShotSegmentedReader(h5f), vid_write)
         else:
-            stick_read = AsIfOrdered(UnsegmentedReader(h5f))
-            drawsticks_unseg(frames, stick_read, vid_write)
+            drawsticks_unseg(frames, AsIfOrdered(UnsegmentedReader(h5f)), vid_write)

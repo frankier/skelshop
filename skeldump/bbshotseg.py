@@ -1,20 +1,21 @@
 import collections
+from typing import Any, Deque, Set
 
-from .pipebase import PipelineStageBase
+from .pipebase import FilterStageBase
 
 
-def ex_pose_ids(pose_bundle):
+def ex_pose_ids(pose_bundle) -> Set[int]:
     return {id for id, _pose in pose_bundle}
 
 
 SHOT_CHANGE = object()
 
 
-class ShotSegStage(PipelineStageBase):
+class ShotSegStage(FilterStageBase):
     def __init__(self, prev, behind_len=3, ahead_len=5):
         self.prev = prev
-        self.behind_buf = collections.deque(maxlen=behind_len)
-        self.ahead_buf = collections.deque(maxlen=ahead_len)
+        self.behind_buf: Deque[Any] = collections.deque(maxlen=behind_len)
+        self.ahead_buf: Deque[Any] = collections.deque(maxlen=ahead_len)
         self.drain = False
 
     def __next__(self):
@@ -27,6 +28,7 @@ class ShotSegStage(PipelineStageBase):
         if self.drain:
             # Drain
             return shift()
+        assert self.ahead_buf.maxlen is not None
         # Fill
         while len(self.ahead_buf) < self.ahead_buf.maxlen:
             try:
@@ -42,7 +44,7 @@ class ShotSegStage(PipelineStageBase):
             # Criterium #1: Same pose ID appears more than once in behind
             # buffer
             behind_consistent = False
-            behind_union = set()
+            behind_union: Set[int] = set()
             for bundle in self.behind_buf:
                 ref_set = ex_pose_ids(bundle)
                 if not behind_consistent and behind_union & ref_set:

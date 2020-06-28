@@ -1,12 +1,8 @@
 import argparse
-import sys
 
 import torch
 from lighttrack.graph.gcn_utils.io import IO
 from lighttrack.graph.gcn_utils.processor_siamese_gcn import SGCN_Processor
-
-from .bbox import bbox_invalid
-from .utils import graph_pair_to_data, keypoints_to_graph
 
 
 class PoseMatcher(SGCN_Processor):
@@ -50,29 +46,3 @@ class PoseMatcher(SGCN_Processor):
         dist = torch.sqrt(dist_sq)
 
         return dist.data.cpu().numpy()[0]
-
-
-def mk_posetrack_gcn_pose_matcher(pose_matcher_config):
-    pose_matcher_obj = PoseMatcher(pose_matcher_config)
-
-    def pose_matcher(det_cur, det_prev):
-        return get_pose_matching_score(
-            pose_matcher_obj,
-            det_cur.posetrack_kps,
-            det_prev.posetrack_kps,
-            det_cur.bbox,
-            det_prev.bbox,
-        )
-
-    return pose_matcher
-
-
-def get_pose_matching_score(pose_matcher, keypoints_A, keypoints_B, bbox_A, bbox_B):
-    if bbox_invalid(bbox_A) or bbox_invalid(bbox_B):
-        print("graph not correctly generated!")
-        return sys.maxsize
-
-    graph_A = keypoints_to_graph(keypoints_A, bbox_A)
-    graph_B = keypoints_to_graph(keypoints_B, bbox_B)
-    data_A, data_B = graph_pair_to_data((graph_A, graph_B))
-    return pose_matcher.inference(data_A, data_B)

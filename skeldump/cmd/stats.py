@@ -9,7 +9,7 @@ import h5py
 @click.command()
 @click.argument("input_dir", type=click.Path(exists=True))
 def stats(input_dir):
-    stats = Counter()
+    stats: Counter = Counter()
     for root, _dirs, files in os.walk(input_dir):
         for fn in files:
             stats["total_dumps"] += 1

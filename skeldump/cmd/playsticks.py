@@ -4,6 +4,7 @@ from pprint import pformat
 import click
 import h5py
 import opencv_wrapper as cvw
+
 from skeldump.drawsticks import SkelDraw, get_skel
 from skeldump.io import AsIfOrdered, UnsegmentedReader
 

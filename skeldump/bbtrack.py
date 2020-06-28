@@ -1,12 +1,12 @@
 from skeldump.track import PoseTrack
 
-from .pipebase import PipelineStageBase
+from .pipebase import FilterStageBase
 from .pose import IdPoseBundle
 
 
-class TrackStage(PipelineStageBase):
-    def __init__(self, pose_matcher, prev, **kwargs):
-        self.tracker = PoseTrack(pose_matcher, **kwargs)
+class TrackStage(FilterStageBase):
+    def __init__(self, prev, **kwargs):
+        self.tracker = PoseTrack(**kwargs)
         self.prev = prev
 
     def __next__(self):

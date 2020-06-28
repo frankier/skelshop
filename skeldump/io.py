@@ -1,4 +1,7 @@
 from functools import partial
+from typing import List
+
+from numpy import ndarray
 
 from .openpose import POSE_CLASSES
 from .pose import DumpReaderPoseBundle, UnorderedDumpReaderPoseBundle
@@ -103,9 +106,9 @@ class ShotSegmentedWriter:
         shot_grp.attrs["start_frame"] = self.shot_start
         shot_grp.attrs["end_frame"] = self.last_frame + 1
         for pose_id, poses in self.pose_data.items():
-            data = []
-            indices = []
-            indptr = []
+            data: List[ndarray] = []
+            indices: List[int] = []
+            indptr: List[int] = []
             try:
                 frames = poses.keys()
                 pose_first_frame = next(iter(frames))
