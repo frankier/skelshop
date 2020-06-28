@@ -7,8 +7,8 @@ repos:
     rev: 3.8.2
     hooks:
     -   id: flake8
--   repo: https://github.com/frankier/seed-isort-config
-    rev: 75dc0693fe575ce51f4be91c86447a67aa284d8f
+-   repo: https://github.com/asottile/seed-isort-config
+    rev: ae09e01635e596c87bd9ca33565a65134200881c
     args: [--exclude=submodules/.*\.py]
     hooks:
     -   id: seed-isort-config
