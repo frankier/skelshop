@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from typing import List, Optional, cast
@@ -16,8 +14,8 @@ PENALTY_WEIGHT = 1e6
 class TrackingSpec:
     enlarge_scale: float
     prev_frame_buf_size: int
-    cand_filter: CandFilter
-    procedure: ProcedureNode
+    cand_filter: "CandFilter"
+    procedure: "ProcedureNode"
 
 
 class CandFilter(ABC):
