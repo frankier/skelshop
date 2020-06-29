@@ -69,7 +69,7 @@ def add_fmt_metadata(h5f, fmt_type, running_op=False):
 
 def write_shots(h5f, limbs, frame_iter, writer_cls=ShotSegmentedWriter, start_frame=0):
     writer = writer_cls(h5f)
-    writer.start_shot()
+    writer.start_shot(start_frame)
     frame_num = start_frame
     for frame in frame_iter:
         if frame is SHOT_CHANGE:

@@ -1,5 +1,6 @@
 import logging
 from itertools import zip_longest
+from typing import Iterator
 
 import cv2
 import numpy as np
@@ -16,11 +17,30 @@ def rnd(x):
     return int(x + 0.5)
 
 
-def scale_video(vid_read, scale):
+def scale_video(vid_read, dim) -> Iterator[np.ndarray]:
     for frame in vid_read:
-        if scale != 1:
-            frame = cv2.resize(frame, fx=scale, fy=scale)
-        yield frame
+        yield cv2.resize(frame, dim)
+
+
+class ScaledVideo:
+    def __init__(self, vid_read, scale):
+        self.vid_read = vid_read
+        self.scale = scale
+        self.width = int(vid_read.width) * scale
+        self.height = int(vid_read.height) * scale
+        self.fps = vid_read.fps
+
+    def reset(self):
+        # XXX: In general CAP_PROP_POS_FRAMES will cause problems with
+        # keyframes but okay in this case?
+        self.vid_read.set(cv2.CAP_PROP_POS_FRAMES, 0)
+
+    def __iter__(self) -> Iterator[np.ndarry]:
+        frame_iter = iter(self.vid_read)
+        if self.scale == 1:
+            return frame_iter
+        else:
+            return scale_video(frame_iter, (self.width, self.height))
 
 
 class SkelDraw:
@@ -60,12 +80,18 @@ class SkelDraw:
             anchor = numarr[left_idx]
         x, y, c = anchor
         if c == 0:
-            return
+            # Just pick lowest index with some conf
+            for x, y, c in numarr:
+                if c > 0.2:
+                    break
+            else:
+                return
         cvw.put_text(
             frame, str(pers_id), (rnd(x + 2), rnd(y + 2)), (0, 0, 255), scale=0.5
         )
 
     def draw_bundle(self, frame, bundle):
+        numarrs = []
         for pers_id, person in bundle:
             if self.conv_to_posetrack:
                 flat = person.as_posetrack()
@@ -74,7 +100,10 @@ class SkelDraw:
             numarr = []
             for point in grouper(flat, 3):
                 numarr.append([point[0] * self.scale, point[1] * self.scale, point[2]])
+            numarrs.append(numarr)
+        for numarr in numarrs:
             self.draw_skel(frame, numarr)
+        for (pers_id, person), numarr in zip(bundle, numarrs):
             self.draw_ann(frame, pers_id, numarr)
 
 

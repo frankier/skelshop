@@ -1,6 +1,7 @@
-import collections
 from abc import ABC, abstractmethod
-from typing import Any, Deque, Optional
+from typing import Optional
+
+from .utils.iter import RewindableIter
 
 
 class PipelineStageBase(ABC):
@@ -29,23 +30,13 @@ class FilterStageBase(PipelineStageBase, ABC):
 class RewindStage(FilterStageBase):
     def __init__(self, size, prev: PipelineStageBase):
         self.prev = prev
-        self.buf: Deque[Any] = collections.deque(maxlen=size)
-        self.rewinded = 0
+        self.rewindable = RewindableIter(size, prev)
 
     def __next__(self):
-        if self.rewinded > 0:
-            res = self.buf[-self.rewinded]
-            self.rewinded -= 1
-            return res
-        else:
-            item = next(self.prev)
-            self.buf.append(item)
-            return item
+        return next(self.rewindable)
 
     def rewind(self, iters):
-        self.rewinded += iters
-        if self.rewinded > len(self.buf):
-            raise Exception("Can't rewind that far")
+        self.rewind(iters)
 
 
 class IterStage(PipelineStageBase):

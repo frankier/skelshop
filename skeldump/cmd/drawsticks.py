@@ -1,17 +1,19 @@
 import logging
 from itertools import repeat
 from pprint import pformat
+from typing import Iterator, Optional
 
 import click
 import h5py
 import opencv_wrapper as cvw
+from numpy import ndarray
 
 from skeldump.drawsticks import (
+    ScaledVideo,
     VideoSticksWriter,
     drawsticks_shots,
     drawsticks_unseg,
     get_skel,
-    scale_video,
 )
 from skeldump.io import AsIfOrdered, ShotSegmentedReader, UnsegmentedReader
 
@@ -42,8 +44,9 @@ def drawsticks(h5fn, videoin, videoout, posetrack, scale, overlay):
             conv_to_posetrack=posetrack,
             scale=scale,
         )
+        frames: Iterator[Optional[ndarray]]
         if overlay:
-            frames = scale_video(vid_read, scale)
+            frames = iter(ScaledVideo(vid_read, scale))
         else:
             frames = repeat(None, h5f.attrs["num_frames"])
         if h5f.attrs["fmt_type"] == "trackshots":

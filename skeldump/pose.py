@@ -40,12 +40,11 @@ class IdPoseBundle:
 
 class DumpReaderPoseBundle:
     def __init__(self, bundle, cls: Type["PoseBase"]):
-        # TODO: Maybe they shouldn't be assumed as ordered
         self.bundle = bundle
         self.cls = cls
 
     def __iter__(self) -> Iterator[Tuple[int, "PoseBase"]]:
-        for idx, pose in enumerate(self.bundle):
+        for idx, pose in self.bundle.items():
             yield idx, self.cls.from_keypoints(pose)
 
 
