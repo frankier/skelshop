@@ -62,7 +62,7 @@ class HandMetaWriter(MetaWriter):
         self.metadataf.write(f"{path}\t{src}\t{cls}\t{src}-{cls}\n")
 
     def get_thumb(self, image_base, path, pose):
-        return draw(image_base, path, self.skel, pose)
+        return draw(image_base, path, self.skel, [pose])
 
 
 class BodyMetaWriter(MetaWriter):
@@ -88,7 +88,7 @@ class BodyMetaWriter(MetaWriter):
 
     def get_thumb(self, image_base, path, pose):
         img_path, _, _ = self.parse_path(path)
-        im = draw(image_base, img_path, self.skel, pose)
+        im = draw(image_base, img_path, self.skel, [pose])
         bbox = keypoints_bbox_x1y1x2y2(pose, enlarge_scale=0.05)
         if im is not None:
             return clip_mat_x1y1x2y2(im, bbox)

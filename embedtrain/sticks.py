@@ -27,7 +27,6 @@ def sticks(image_path, skel_name, output_path, h5fn, image_base, imview):
             poses = [h5f[image_path][()]]
         else:
             poses = [pose[()] for pose in h5f[image_path].values()]
-        print("poses", poses)
         img = draw(image_base, image_path, skel, poses)
     if output_path:
         cv2.imwrite(output_path, img)
