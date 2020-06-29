@@ -140,7 +140,7 @@ def to_tensorboard(h5fin, log_dir, skel_name, image_base, body_labels, sprite_si
                     ] = resize_sq_aspect(thumb_im, sprite_size)
 
         if image_base is not None:
-            cv2.imwrite(pjoin(log_dir, "sprites.png", sprite_sheet))
+            cv2.imwrite(pjoin(log_dir, "sprites.png"), sprite_sheet)
         print("Done writing embeddings and metadata")
 
     weights = tf.Variable(embeddings)
