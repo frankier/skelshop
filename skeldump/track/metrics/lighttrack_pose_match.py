@@ -1,6 +1,8 @@
-from typing import TYPE_CHECKING, Optional
+from dataclasses import dataclass, field
+from typing import TYPE_CHECKING, Any, Optional
 
 import numpy as np
+from scipy.spatial.distance import euclidean
 
 from ...pose import PoseBody25
 from .base import Metric
@@ -10,8 +12,12 @@ if TYPE_CHECKING:
     from ..models import TrackedPose
 
 
+@dataclass
 class LightTrackPoseMatchMetric(Metric):
-    pose_matcher: Optional[PoseMatcher] = None
+    # Should have type: Callable[[np.ndarray, np.ndarray], float]
+    # https://github.com/python/mypy/issues/5485
+    dist: Any = euclidean
+    pose_matcher: Optional[PoseMatcher] = field(init=False, default=None)
 
     @classmethod
     def setup(cls, new_pose_matcher):
@@ -22,11 +28,12 @@ class LightTrackPoseMatchMetric(Metric):
         assert isinstance(pose, PoseBody25)
         posetrack_kps = pose.as_posetrack()
         graph = keypoints_to_graph(posetrack_kps, tracked_pose.bbox)
-        return graph_to_data(graph)
+        data = graph_to_data(graph)
+        assert self.pose_matcher is not None
+        return self.pose_matcher.preproc(data)
 
     def cmp(self, data1, data2):
-        assert self.pose_matcher is not None
-        return self.pose_matcher.inference(data1, data2)
+        return self.dist(data1, data2)
 
 
 def keypoints_to_graph(keypoints, bbox):

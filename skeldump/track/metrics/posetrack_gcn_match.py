@@ -26,23 +26,12 @@ class PoseMatcher(SGCN_Processor):
         parser.set_defaults(config=self.config)
         return parser
 
-    def inference(self, data_1, data_2):
+    def preproc(self, data):
         self.model.eval()
 
         with torch.no_grad():
-            data_1 = torch.from_numpy(data_1)
-            data_1 = data_1.unsqueeze(0)
-            data_1 = data_1.float().to(self.dev)
-
-            data_2 = torch.from_numpy(data_2)
-            data_2 = data_2.unsqueeze(0)
-            data_2 = data_2.float().to(self.dev)
-
-            feature_1, feature_2 = self.model.forward(data_1, data_2)
-
-        # euclidian distance
-        diff = feature_1 - feature_2
-        dist_sq = torch.sum(pow(diff, 2), 1)
-        dist = torch.sqrt(dist_sq)
-
-        return dist.data.cpu().numpy()[0]
+            data = torch.from_numpy(data)
+            data = data.unsqueeze(0)
+            data = data.float().to(self.dev)
+            data = self.model.extract_feature(data)
+            return data.cpu().numpy()[0]

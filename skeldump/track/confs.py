@@ -2,6 +2,7 @@ from .metrics import BboxIouMetric, LightTrackPoseMatchMetric, WeightedSumMetric
 from .spec import (
     AssignRemaining,
     GreedyAssignMetThresh,
+    OptAssignMetThresh,
     OrElse,
     PrevFrameCascade,
     SumConfCandFilter,
@@ -27,6 +28,24 @@ CONFS = {
             ]
         ),
     ),
+    "opt_lighttrack": TrackingSpec(
+        enlarge_scale=0.2,
+        prev_frame_buf_size=5,
+        cand_filter=SumConfCandFilter(5),
+        procedure=OrElse(
+            [
+                PrevFrameCascade(
+                    OrElse(
+                        [
+                            OptAssignMetThresh(BboxIouMetric(), -0.3,),
+                            OptAssignMetThresh(LightTrackPoseMatchMetric(), 0.4,),
+                        ]
+                    )
+                ),
+                AssignRemaining(),
+            ]
+        ),
+    ),
     "deepsortlike": TrackingSpec(
         # No Kalman filter
         enlarge_scale=0.2,
@@ -35,7 +54,7 @@ CONFS = {
         procedure=OrElse(
             [
                 PrevFrameCascade(
-                    GreedyAssignMetThresh(
+                    OptAssignMetThresh(
                         WeightedSumMetric(
                             [(1, BboxIouMetric()), (1, LightTrackPoseMatchMetric()),]
                         ),

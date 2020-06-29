@@ -29,7 +29,7 @@ class SumConfCandFilter(CandFilter):
     min_score: float
 
     def accept_pose(self, pose: PoseBase) -> bool:
-        score = cast(float, np.sum(pose.all()[:, :2]))
+        score = cast(float, np.sum(pose.all()[:, 2]))
         return score >= self.min_score
 
 
@@ -38,7 +38,7 @@ class MeanConfCandFilter(CandFilter):
     min_score: float
 
     def accept_pose(self, pose: PoseBase) -> bool:
-        confs = pose.all()[:, :, 2]
+        confs = pose.all()[:, 2]
         score = cast(float, np.mean(confs[confs > 0]))
         return score >= self.min_score
 
@@ -106,10 +106,24 @@ class OptAssignMetThresh(ProcedureNode, AssignMetMixin):
     ):
         from scipy.optimize import linear_sum_assignment
 
-        candidates_as_tracked = tracking_state.untracked_as_tracked(candidates)
-        cands_proc = self.metric.preproc_poses(candidates_as_tracked)
-        refs_proc = self.metric.preproc_poses(references)
-        cost_mat = np.ndarray.empty((len(candidates_as_tracked), len(references)))
+        # Get references/candidates as lists
+        references_list = list(references)
+        if not references_list:
+            return
+        candidates_as_tracked_list = list(
+            tracking_state.untracked_as_tracked(candidates)
+        )
+        if not candidates_as_tracked_list:
+            return
+
+        # Represent them
+        refs_proc = self.metric.preproc_poses(references_list)
+        assert len(refs_proc) == len(references_list)
+        cands_proc = self.metric.preproc_poses(candidates_as_tracked_list)
+        assert len(cands_proc) == len(candidates_as_tracked_list)
+        cost_mat = np.empty((len(candidates_as_tracked_list), len(references_list)))
+
+        # Build cost matrix
         for cand_idx, cand_proc in enumerate(cands_proc):
             for ref_idx, ref_proc in enumerate(refs_proc):
                 cost = self.metric.cmp(cand_proc, ref_proc)
@@ -117,14 +131,15 @@ class OptAssignMetThresh(ProcedureNode, AssignMetMixin):
                     cost_mat[cand_idx, ref_idx] = PENALTY_WEIGHT
                 else:
                     cost_mat[cand_idx, ref_idx] = cost
+
+        # Solve
         cand_idxs, ref_idxs = linear_sum_assignment(cost_mat)
         for cand_idx, ref_idx in zip(cand_idxs, ref_idxs):
+            cand = candidates_as_tracked_list[cand_idx]
             if cost_mat[cand_idx, ref_idx] == PENALTY_WEIGHT:
                 continue
-            cand = candidates_as_tracked[cand_idx]
-            cand.track_as(references[ref_idx].track_id)
+            cand.track_as(references_list[ref_idx].track_id)
             tracking_state.track(cand)
-            del references[ref_idx]
 
 
 @dataclass
