@@ -35,7 +35,7 @@ class ScaledVideo:
         # keyframes but okay in this case?
         self.vid_read.set(cv2.CAP_PROP_POS_FRAMES, 0)
 
-    def __iter__(self) -> Iterator[np.ndarry]:
+    def __iter__(self) -> Iterator[np.ndarray]:
         frame_iter = iter(self.vid_read)
         if self.scale == 1:
             return frame_iter
