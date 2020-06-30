@@ -1,3 +1,4 @@
+import math
 import os
 from os.path import join as pjoin
 from time import time
@@ -95,6 +96,21 @@ class BodyMetaWriter(MetaWriter):
         return im
 
 
+def find_sprite_dims(num, maxdist=20):
+    start_dim = int(math.sqrt(num))
+    best_rem = float("inf")
+    best_res = None
+    for dist in range(0, maxdist):
+        dim = start_dim + dist
+        quotient, remainder = divmod(num, dim)
+        if remainder == 0:
+            return quotient, dim
+        if remainder < best_rem:
+            best_rem = remainder
+            best_res = (quotient, dim)
+    return best_res
+
+
 @embed_vis.command()
 @click.argument("h5fin")
 @click.argument("log_dir")
@@ -125,18 +141,19 @@ def to_tensorboard(h5fin, log_dir, skel_name, image_base, body_labels, sprite_si
         manual_embeddings = mk_manual_embeddings(skel, h5f)
         print("Writing embeddings and metadata")
         if image_base is not None:
+            width, height = find_sprite_dims(len(manual_embeddings))
             print("...and sprite sheet")
-            sprite_sheet = numpy.empty(
-                (len(manual_embeddings) * sprite_size, sprite_size, 3)
-            )
+            sprite_sheet = numpy.empty((height * sprite_size, width * sprite_size, 3))
         for idx, (path, embedding, pose) in enumerate(manual_embeddings):
             embeddings.append(embedding)
             writer.write_line(path)
             if image_base is not None:
                 thumb_im = writer.get_thumb(image_base, path, pose)
                 if thumb_im is not None:
+                    idx_j, idx_i = divmod(idx, width)
                     sprite_sheet[
-                        idx * sprite_size : (idx + 1) * sprite_size, :
+                        idx_j * sprite_size : (idx_j + 1) * sprite_size,
+                        idx_i * sprite_size : (idx_i + 1) * sprite_size,
                     ] = resize_sq_aspect(thumb_im, sprite_size)
 
         if image_base is not None:
