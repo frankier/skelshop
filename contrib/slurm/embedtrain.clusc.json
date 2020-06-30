@@ -15,5 +15,11 @@
         "partition": "gpu",
         "gres": "gpu:4",
         "mem": "40gb"
+    },
+    "proj_hands_man": {
+        "mem": "16gb"
+    },
+    "proj_body_man": {
+        "mem": "16gb"
     }
 }
