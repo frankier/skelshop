@@ -40,7 +40,7 @@ rule setup:
 
 def all(ext):
     base, = glob_wildcards(pjoin(VIDEO_BASE, "{base}.mp4"))
-    return base + ext
+    return [fn + ext for fn in base]
 
 rule sorted_all:
     input:
@@ -103,7 +103,7 @@ rule skel_filter_csvshotseg_opt_lighttrack:
     shell:
         "python skelshop.py filter " +
         "--track " +
-        "--track-conf opt_lighttrack ",
+        "--track-conf opt_lighttrack " +
         "--pose-matcher-config {input.gcn_config} " +
         "--shot-seg=csv " +
         "--shot-csv {input.scenes_csv} " +
