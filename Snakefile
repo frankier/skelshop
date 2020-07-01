@@ -91,33 +91,17 @@ rule skel_unsorted:
         "{input.video} " + 
         "{output}"
 
-rule skel_filter_csvshotseg_reidpt:
+rule skel_filter_csvshotseg_opt_lighttrack:
     input:
         gcn_config = GCN_CONFIG,
         unsorted = "{base}.unsorted.h5",
         scenes_csv = "{base}-Scenes.csv"
     output:
-        "{base}.reidpt.h5"
+        "{base}.opt_lighttrack.h5"
     shell:
         "python skelshop.py filter " +
         "--track " +
-        "--track-reid-embed=posetrack " +
-        "--pose-matcher-config {input.gcn_config} " +
-        "--shot-seg=csv " +
-        "--shot-csv {input.scenes_csv} " +
-        "{input.unsorted} {output}"
-
-rule skel_filter_csvshotseg_reidman:
-    input:
-        gcn_config = GCN_CONFIG,
-        unsorted = "{base}.unsorted.h5",
-        scenes_csv = "{base}-Scenes.csv"
-    output:
-        "{base}.reidman.h5"
-    shell:
-        "python skelshop.py filter " +
-        "--track " +
-        "--track-reid-embed=manual " +
+        "--track-conf opt_lighttrack ",
         "--pose-matcher-config {input.gcn_config} " +
         "--shot-seg=csv " +
         "--shot-csv {input.scenes_csv} " +
