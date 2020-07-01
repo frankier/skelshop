@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 
+set -euo pipefail
 shopt -s extglob
 git submodule update --init --recursive
 # Tensorflow has over restrictive dependency versions
