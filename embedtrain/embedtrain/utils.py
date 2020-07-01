@@ -1,11 +1,11 @@
 import cv2
-from wcmatch.glob import globmatch
+from wcmatch.glob import GLOBSTAR, globmatch
 
 
 def sane_globmatch(path, matchers):
     if len(matchers) == 0:
         return False
-    return globmatch(path, matchers)
+    return globmatch(path, matchers, flags=GLOBSTAR)
 
 
 def has_img_ext(filename):
@@ -40,13 +40,21 @@ def squarify(img, pad):
     )
 
 
-def resize_sq_aspect(im, target_size):
+def put_sprite(sheet, idx_j, idx_i, im, target_size):
     orig_h, orig_w = im.shape[:2]
     if orig_w < orig_h:
-        new_size = (target_size, orig_w * target_size // orig_h)
+        new_size = ((orig_w * target_size) // orig_h, target_size)
     else:
-        new_size = (orig_h * target_size // orig_w, target_size)
+        new_size = (target_size, (orig_h * target_size) // orig_w)
 
     im = cv2.resize(im, new_size)
 
-    return squarify(im, get_square_padding(im))
+    pad = get_square_padding(im)
+
+    square_j_top = idx_j * target_size + pad[0]
+    square_i_left = idx_i * target_size + pad[2]
+    square_j_bottom = square_j_top + new_size[1]
+    square_i_right = square_i_left + new_size[0]
+
+    sheet[square_j_top:square_j_bottom, square_i_left:square_i_right, :3] = im
+    sheet[square_j_top:square_j_bottom, square_i_left:square_i_right, 3] = 255

@@ -5,6 +5,8 @@ from typing import Dict, List, Optional
 import numpy
 from scipy.io import loadmat
 
+from embedtrain.utils import sane_globmatch
+
 
 class DataSet(ABC):
     by_zip: Dict[str, "DataSet"] = {}
@@ -63,21 +65,21 @@ class HandDataSet(DataSet):
         "http://www.cvssp.org/FingerSpellingKinect2011/fingerspelling5.tar.bz2",
     ]
     exclude_patterns = [
-        "**/fingerspelling5/**/depth_*",
+        "fingerspelling5/**/depth_*",
         "**/NUS Hand Posture Dataset/BW/*",
         "**/BochumGestures1998/sih/*",
-        "**/NUS Hand Posture dataset II/Backgrounds/*",
+        "**/NUS Hand Posture dataset-II/Backgrounds/*",
         "**/Marcel-Test/MiniTrieschGallery/**",
     ]
-    left_patterns = ["**/fingerspelling5/**"]
+    left_patterns = ["fingerspelling5/**"]
 
-    @staticmethod
-    def path_is_excluded(path):
-        pass
+    @classmethod
+    def path_is_excluded(cls, path):
+        return sane_globmatch(path, cls.exclude_patterns)
 
-    @staticmethod
-    def path_is_left(path):
-        pass
+    @classmethod
+    def path_is_left(cls, path):
+        return sane_globmatch(path, cls.left_patterns)
 
     @staticmethod
     def path_to_dataset_class_pair(path):
@@ -87,18 +89,18 @@ class HandDataSet(DataSet):
             src = "shp_marcel"
         barename = bits[-1]
         if src == "NUS-Hand-Posture-Dataset-I":
-            cls = barename.split()[0]
+            cls = barename.split()[0].split(".")[0]
         elif src == "NUS-Hand-Posture-Dataset-II":
             if "human noise" in bits[-2]:
                 cls = barename.split("_")[0]
             else:
-                cls = barename.split()[0]
+                cls = barename.split()[0].split(".")[0]
         elif src == "BochumGestures1998":
             match = FIRST_NUM_PAT.search(barename)
             assert match is not None
             cls = match[0]
         elif src == "fingerspelling5":
-            cls = bits[-3]
+            cls = bits[-2]
         elif src == "shp_marcel":
             cls = bits[2]
         elif src == "shp_triesch":
@@ -180,6 +182,11 @@ class BodyDataSet(DataSet):
             cls.lazyload(body_labels)
         assert cls._label_map is not None
         return cls._label_map[barename]
+
+    @classmethod
+    def path_to_labels(cls, body_labels, path):
+        labels = cls.path_to_class(body_labels, path)
+        return [act.strip() for act in labels["act_name"].split(",")]
 
     @classmethod
     def path_to_bboxes(cls, body_labels, path):

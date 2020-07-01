@@ -36,12 +36,15 @@ scipy = { version = "^1.5.0", optional = true }
 wcmatch = { version = "^6.0.1", optional = true }
 imagesize = {version = "^1.2.0", optional = true}
 tensorboard = {version = "^2.2.2", optional = true}
+scikit-multilearn = {git = "https://github.com/frankier/scikit-multilearn.git", rev = "142f701b5e210db4a65d6518bee19d76931ec72d"}
+mmskeleton = {git = "https://github.com/frankier/mmskeleton.git", rev = "8188e1b315f15fb119e17ca665ee272dad20fd75", optional = true}
+pytorch_lightning = {version = "^0.8.3", optional = true}
 
 [tool.poetry.extras]
 pipeline = ["scenedetect", "snakemake"]
 play = ["pygame"]
 ssmat = ["numba", "matplotlib", "scikit-learn", "scipy"]
-embedtrain = ["wcmatch", "snakemake", "imagesize"]
+embedtrain = ["wcmatch", "snakemake", "imagesize", "scikit-multilearn", "mmskeleton", "pytorch_lightning"]
 embedvis = ["tensorboard"]
 
 [tool.poetry.dev-dependencies]

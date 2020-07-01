@@ -9,7 +9,6 @@ repos:
     -   id: flake8
 -   repo: https://github.com/asottile/seed-isort-config
     rev: ae09e01635e596c87bd9ca33565a65134200881c
-    args: [--exclude=submodules/.*\.py]
     hooks:
     -   id: seed-isort-config
 -   repo: git://github.com/timothycrosley/isort 

@@ -1,12 +1,11 @@
-import os
 from os.path import basename
-from os.path import join as pjoin
 
 import click
 import cv2
 import imagesize
 
-from embedtrain.utils import get_square_padding, has_img_ext, sane_globmatch, squarify
+from embedtrain.prep import walk_hand
+from embedtrain.utils import get_square_padding, squarify
 from skeldump.openpose import LIMBS, MODES, OpenPoseStage
 from skeldump.utils.h5py import h5out as mk_h5out
 
@@ -72,35 +71,21 @@ def prep_images():
 @prep_images.command()
 @click.argument("input_dir")
 @click.argument("h5out")
-@click.option("-x", "--exclude", multiple=True)
-@click.option("-l", "--left-hands", multiple=True)
 @click.option("--model-folder", envvar="MODEL_FOLDER", required=True)
-def hand(input_dir, h5out, exclude, left_hands, model_folder):
+def hand(input_dir, h5out, model_folder):
     hand_op = SingleHandOpenPose(model_folder)
     with mk_h5out(h5out) as h5f:
-        for root, _dirs, files in os.walk(input_dir):
-            assert root.startswith(input_dir)
-            rel_root = root[len(input_dir) :]
-            for fn in files:
-                if fn.startswith("."):
-                    continue
-                if not has_img_ext(fn):
-                    continue
-                rel_full_path = pjoin(rel_root, fn)
-                if sane_globmatch(rel_full_path, exclude):
-                    continue
-                is_left_hand = sane_globmatch(rel_full_path, left_hands)
-                full_path = pjoin(root, fn)
-                hand_skel_res = hand_op.hand_skel(full_path, is_left_hand)
-                if hand_skel_res is None:
-                    print("Skipping", full_path, "(could not read)")
-                    continue
-                hand_skelarr, width, height = hand_skel_res
-                h5f[rel_full_path] = hand_skelarr
-                hand_grp = h5f[rel_full_path]
-                hand_grp.attrs["is_left_hand"] = is_left_hand
-                hand_grp.attrs["width"] = width
-                hand_grp.attrs["height"] = height
+        for rel_full_path, full_path, is_left_hand in walk_hand(input_dir):
+            hand_skel_res = hand_op.hand_skel(full_path, is_left_hand)
+            if hand_skel_res is None:
+                print("Skipping", full_path, "(could not read)")
+                continue
+            hand_skelarr, width, height = hand_skel_res
+            h5f[rel_full_path] = hand_skelarr
+            hand_grp = h5f[rel_full_path]
+            hand_grp.attrs["is_left_hand"] = is_left_hand
+            hand_grp.attrs["width"] = width
+            hand_grp.attrs["height"] = height
         h5f.attrs["fmt_type"] = "hands"
         h5f.attrs["fmt_ver"] = 1
 
