@@ -2,6 +2,7 @@ Bootstrap: shub
 From: frankier/gsoc2020:frankier_gsoc2020
 
 %post
+    export LC_ALL=C.UTF-8
     apt-get install -y --no-install-recommends python3-venv
     git clone https://github.com/frankier/skelshop/ /opt/skelshop
     curl -sSL \

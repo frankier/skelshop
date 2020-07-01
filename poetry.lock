@@ -11,14 +11,6 @@ six = "*"
 
 [[package]]
 category = "main"
-description = "Addict is a dictionary whose items can be set using both attribute and item syntax."
-name = "addict"
-optional = true
-python-versions = "*"
-version = "2.2.1"
-
-[[package]]
-category = "main"
 description = "A small Python module for determining appropriate platform-specific dirs, e.g. a \"user data dir\"."
 name = "appdirs"
 optional = false
@@ -90,7 +82,7 @@ version = "4.1.1"
 category = "main"
 description = "Python package for providing Mozilla's CA Bundle."
 name = "certifi"
-optional = false
+optional = true
 python-versions = "*"
 version = "2020.6.20"
 
@@ -106,7 +98,7 @@ version = "3.1.0"
 category = "main"
 description = "Universal encoding detector for Python 2 and 3"
 name = "chardet"
-optional = false
+optional = true
 python-versions = "*"
 version = "3.0.4"
 
@@ -162,6 +154,14 @@ six = "*"
 
 [[package]]
 category = "main"
+description = "The Cython compiler for writing C extensions for the Python language."
+name = "cython"
+optional = true
+python-versions = ">=2.6, !=3.0.*, !=3.1.*, !=3.2.*"
+version = "0.29.20"
+
+[[package]]
+category = "main"
 description = "A backport of the dataclasses module for Python 3.6"
 marker = "python_version >= \"3.6\" and python_version < \"3.7\""
 name = "dataclasses"
@@ -181,7 +181,7 @@ version = "0.8.2"
 category = "main"
 description = "Decorators for Humans"
 name = "decorator"
-optional = false
+optional = true
 python-versions = ">=2.6, !=3.0.*, !=3.1.*"
 version = "4.4.2"
 
@@ -310,7 +310,7 @@ license = ["editdistance"]
 category = "main"
 description = "Internationalized Domain Names in Applications (IDNA)"
 name = "idna"
-optional = false
+optional = true
 python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*"
 version = "2.10"
 
@@ -394,7 +394,7 @@ xdg_home = ["appdirs (>=1.4.0)"]
 category = "main"
 description = "Lightweight pipelining: using Python functions as pipeline jobs."
 name = "joblib"
-optional = false
+optional = true
 python-versions = ">=3.6"
 version = "0.15.1"
 
@@ -442,23 +442,9 @@ version = "1.2.0"
 
 [[package]]
 category = "main"
-description = "A module for lazy loading of Python modules"
-name = "lazy-import"
-optional = true
-python-versions = "*"
-version = "0.2.2"
-
-[package.dependencies]
-six = "*"
-
-[package.extras]
-test = ["pytest", "pytest-xdist"]
-
-[[package]]
-category = "main"
 description = "A module for read and write ARFF files in Python."
 name = "liac-arff"
-optional = false
+optional = true
 python-versions = "*"
 version = "2.4.0"
 
@@ -501,39 +487,6 @@ numpy = ">=1.11"
 pyparsing = ">=2.0.1,<2.0.4 || >2.0.4,<2.1.2 || >2.1.2,<2.1.6 || >2.1.6"
 python-dateutil = ">=2.1"
 
-[[package]]
-category = "main"
-description = "Open MMLab Computer Vision Foundation"
-name = "mmcv"
-optional = true
-python-versions = "*"
-version = "0.6.2"
-
-[package.dependencies]
-addict = "*"
-numpy = "*"
-opencv-python = ">=3"
-pyyaml = "*"
-yapf = "*"
-
-[[package]]
-category = "main"
-description = "Open MMLab Skeleton-based Human Understanding Toolbox"
-name = "mmskeleton"
-optional = true
-python-versions = "*"
-version = "0.7rc1+8188e1b"
-
-[package.dependencies]
-lazy_import = "*"
-mmcv = "*"
-torch = ">=1.1"
-torchvision = "*"
-
-[package.source]
-reference = "8188e1b315f15fb119e17ca665ee272dad20fd75"
-type = "git"
-url = "https://github.com/frankier/mmskeleton.git"
 [[package]]
 category = "main"
 description = "More routines for operating on iterables, beyond itertools"
@@ -587,7 +540,7 @@ test = ["pytest", "pytest-cov", "testpath"]
 category = "main"
 description = "Python package for creating and manipulating graphs and networks"
 name = "networkx"
-optional = false
+optional = true
 python-versions = ">=3.5"
 version = "2.4"
 
@@ -648,17 +601,6 @@ version = "3.1.0"
 rsa = ["cryptography"]
 signals = ["blinker"]
 signedtoken = ["cryptography", "pyjwt (>=1.0.0)"]
-
-[[package]]
-category = "main"
-description = "Wrapper package for OpenCV python bindings."
-name = "opencv-python"
-optional = true
-python-versions = "*"
-version = "4.2.0.34"
-
-[package.dependencies]
-numpy = ">=1.11.1"
 
 [[package]]
 category = "main"
@@ -807,6 +749,19 @@ pyasn1 = ">=0.4.6,<0.5.0"
 
 [[package]]
 category = "main"
+description = "Official APIs for the MS-COCO dataset"
+name = "pycocotools"
+optional = true
+python-versions = "*"
+version = "2.0.1"
+
+[package.dependencies]
+cython = ">=0.27.3"
+matplotlib = ">=2.1.0"
+setuptools = ">=18.0"
+
+[[package]]
+category = "main"
 description = "Python Game Development"
 name = "pygame"
 optional = true
@@ -847,7 +802,7 @@ six = ">=1.5"
 category = "main"
 description = "Louvain algorithm for community detection"
 name = "python-louvain"
-optional = false
+optional = true
 python-versions = "*"
 version = "0.14"
 
@@ -870,6 +825,26 @@ numpy = ">=1.15"
 tensorboard = ">=1.14"
 torch = ">=1.3"
 tqdm = ">=4.41.0"
+
+[[package]]
+category = "main"
+description = "The easiest way to use deep metric learning in your application. Modular, flexible, and extensible. Written in PyTorch."
+name = "pytorch-metric-learning"
+optional = true
+python-versions = ">=3.0"
+version = "0.9.88"
+
+[package.dependencies]
+numpy = "*"
+scikit-learn = "*"
+torch = "*"
+torchvision = "*"
+tqdm = "*"
+
+[package.extras]
+dev = ["pytest (>3.8)", "pytest-cov (>=2.8,<3.0)"]
+with-hooks = ["record-keeper (>=0.9.27)", "faiss-gpu (>=1.6.3)", "tensorboard"]
+with-hooks-cpu = ["record-keeper (>=0.9.27)", "faiss-cpu (>=1.6.3)", "tensorboard"]
 
 [[package]]
 category = "main"
@@ -911,7 +886,7 @@ version = "2020.6.8"
 category = "main"
 description = "Python HTTP for Humans."
 name = "requests"
-optional = false
+optional = true
 python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*"
 version = "2.24.0"
 
@@ -972,7 +947,7 @@ progress_bar = ["tqdm"]
 category = "main"
 description = "A set of python modules for machine learning and data mining"
 name = "scikit-learn"
-optional = false
+optional = true
 python-versions = ">=3.6"
 version = "0.23.1"
 
@@ -989,7 +964,7 @@ alldeps = ["numpy (>=1.13.3)", "scipy (>=0.19.1)"]
 category = "main"
 description = "Scikit-multilearn is a BSD-licensed library for multi-label classification that is built on top of the well-known scikit-learn ecosystem."
 name = "scikit-multilearn"
-optional = false
+optional = true
 python-versions = "*"
 version = "0.2.0"
 
@@ -1013,11 +988,12 @@ meka = ["whichcraft (>=0.4.1)"]
 reference = "142f701b5e210db4a65d6518bee19d76931ec72d"
 type = "git"
 url = "https://github.com/frankier/scikit-multilearn.git"
+
 [[package]]
 category = "main"
 description = "SciPy: Scientific Library for Python"
 name = "scipy"
-optional = false
+optional = true
 python-versions = ">=3.6"
 version = "1.5.0"
 
@@ -1106,7 +1082,7 @@ version = "1.7.0"
 category = "main"
 description = "threadpoolctl"
 name = "threadpoolctl"
-optional = false
+optional = true
 python-versions = ">=3.5"
 version = "2.1.0"
 
@@ -1227,7 +1203,7 @@ version = "3.7.4.2"
 category = "main"
 description = "HTTP library with thread-safe connection pooling, file post, and more."
 name = "urllib3"
-optional = false
+optional = true
 python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*, <4"
 version = "1.25.9"
 
@@ -1308,14 +1284,6 @@ version = "1.12.1"
 
 [[package]]
 category = "main"
-description = "A formatter for Python code."
-name = "yapf"
-optional = true
-python-versions = "*"
-version = "0.30.0"
-
-[[package]]
-category = "main"
 description = "Backport of pathlib-compatible object wrapper for zip files"
 marker = "python_version < \"3.8\""
 name = "zipp"
@@ -1328,23 +1296,19 @@ docs = ["sphinx", "jaraco.packaging (>=3.2)", "rst.linker (>=1.9)"]
 testing = ["jaraco.itertools", "func-timeout"]
 
 [extras]
-embedtrain = ["wcmatch", "snakemake", "imagesize", "scikit-multilearn", "mmskeleton", "pytorch_lightning"]
+embedtrain = ["wcmatch", "snakemake", "imagesize", "scikit-multilearn", "pytorch_lightning", "pycocotools"]
 embedvis = ["tensorboard"]
 pipeline = ["scenedetect", "snakemake"]
 play = ["pygame"]
 ssmat = ["numba", "matplotlib", "scikit-learn", "scipy"]
 
 [metadata]
-content-hash = "ba3f36e0935aad84a859ba3251f3633a8bb4018d4afeb925490078772af5b15a"
+content-hash = "080a254dfc2bdbb5041abd0da102d88037e867f6743f831e5df0424aa5ed7456"
 python-versions = "^3.6.1"
 
 [metadata.files]
 absl-py = [
     {file = "absl-py-0.9.0.tar.gz", hash = "sha256:75e737d6ce7723d9ff9b7aa1ba3233c34be62ef18d5859e706b8fdc828989830"},
-]
-addict = [
-    {file = "addict-2.2.1-py3-none-any.whl", hash = "sha256:1948c2a5d93ba6026eb91aef2c971234aaf72488a9c07ab8a7950f82ae30eea7"},
-    {file = "addict-2.2.1.tar.gz", hash = "sha256:f22493f056032f50e4931a82444fcba8ef74c8fc994c5d06aa546a1433c2b8b0"},
 ]
 appdirs = [
     {file = "appdirs-1.4.4-py2.py3-none-any.whl", hash = "sha256:a841dacd6b99318a741b166adb07e19ee71a274450e68237b4650ca1055ab128"},
@@ -1399,6 +1363,41 @@ configargparse = [
 cycler = [
     {file = "cycler-0.10.0-py2.py3-none-any.whl", hash = "sha256:1d8a5ae1ff6c5cf9b93e8811e581232ad8920aeec647c37316ceac982b08cb2d"},
     {file = "cycler-0.10.0.tar.gz", hash = "sha256:cd7b2d1018258d7247a71425e9f26463dfb444d411c39569972f4ce586b0c9d8"},
+]
+cython = [
+    {file = "Cython-0.29.20-cp27-cp27m-macosx_10_9_x86_64.whl", hash = "sha256:a49d0f5c55ad0f4aacad32f058a71d0701cb8936d6883803e50698fa04cac8d2"},
+    {file = "Cython-0.29.20-cp27-cp27m-manylinux1_i686.whl", hash = "sha256:a985a7e3c7f1663af398938029659a4381cfe9d1bd982cf19c46b01453e81775"},
+    {file = "Cython-0.29.20-cp27-cp27m-manylinux1_x86_64.whl", hash = "sha256:714b8926a84e3e39c5278e43fb8823598db82a4b015cff263b786dc609a5e7d6"},
+    {file = "Cython-0.29.20-cp27-cp27m-win32.whl", hash = "sha256:0754ec9d45518d0dbb5da72db2c8b063d40c4c51779618c68431054de179387f"},
+    {file = "Cython-0.29.20-cp27-cp27m-win_amd64.whl", hash = "sha256:a21cb3423acd6dbf383c9e41e8e60c93741987950434c85145864458d30099f3"},
+    {file = "Cython-0.29.20-cp27-cp27mu-manylinux1_i686.whl", hash = "sha256:2d84e8d2a0c698c1bce7c2a4677f9f03b076e9f0af7095947ecd2a900ffceea5"},
+    {file = "Cython-0.29.20-cp27-cp27mu-manylinux1_x86_64.whl", hash = "sha256:b7bb0d54ff453c7516d323c3c78b211719f39a506652b79b7e85ba447d5fa9e7"},
+    {file = "Cython-0.29.20-cp34-cp34m-manylinux1_i686.whl", hash = "sha256:c5e29333c9e20df384645902bed7a67a287b979da1886c8f10f88e57b69e0f4b"},
+    {file = "Cython-0.29.20-cp34-cp34m-manylinux1_x86_64.whl", hash = "sha256:0f3488bf2a9e049d1907d35ad8834f542f8c03d858d1bca6d0cbc06b719163e0"},
+    {file = "Cython-0.29.20-cp34-cp34m-win32.whl", hash = "sha256:34dd57f5ac5a0e3d53da964994fc1b7e7ee3f86172d7a1f0bde8a1f90739e04d"},
+    {file = "Cython-0.29.20-cp34-cp34m-win_amd64.whl", hash = "sha256:1024714b0f7829b0f712db9cebec92c2782b1f42409b8575cacc340aa438d4ba"},
+    {file = "Cython-0.29.20-cp35-cp35m-macosx_10_6_intel.whl", hash = "sha256:0bb201124f67b8d5e6a3e7c02257ca56a90204611971ecca76c02897096f097d"},
+    {file = "Cython-0.29.20-cp35-cp35m-manylinux1_i686.whl", hash = "sha256:57f32d1095ad7fad1e7f2ff6e8c6a7197fa532c8e6f4d044ff69212e0bf05461"},
+    {file = "Cython-0.29.20-cp35-cp35m-manylinux1_x86_64.whl", hash = "sha256:d490a54814b69d814b157ac86ada98c15fd77fabafc23732818ed9b9f1f0af80"},
+    {file = "Cython-0.29.20-cp35-cp35m-win32.whl", hash = "sha256:5dfe519e400a1672a3ac5bdfb5e957a9c14c52caafb01f4a923998ec9ae77736"},
+    {file = "Cython-0.29.20-cp35-cp35m-win_amd64.whl", hash = "sha256:9bfd42c1d40aa26bf76186cba0d89be66ba47e36fa7ea56d71f377585a53f7c4"},
+    {file = "Cython-0.29.20-cp36-cp36m-macosx_10_9_x86_64.whl", hash = "sha256:60def282839ed81a2ffae29d2df0a6777fd74478c6e82c6c3f4b54e698b9d11c"},
+    {file = "Cython-0.29.20-cp36-cp36m-manylinux1_i686.whl", hash = "sha256:8598b09f7973ccb15c03b21d3185dc129ae7c60d0a6caf8176b7099a4b83483e"},
+    {file = "Cython-0.29.20-cp36-cp36m-manylinux1_x86_64.whl", hash = "sha256:4473f169d6dd02174eb76396cb38ce469f377c08b21965ddf4f88bbbebd5816e"},
+    {file = "Cython-0.29.20-cp36-cp36m-win32.whl", hash = "sha256:b553473c31297e4ca77fbaea2eb2329889d898c03941d90941679247c17e38fb"},
+    {file = "Cython-0.29.20-cp36-cp36m-win_amd64.whl", hash = "sha256:809f0a3f647052c4bcbc34a15f53a5dab90de1a83ebd77add37ed5d3e6ee5d97"},
+    {file = "Cython-0.29.20-cp37-cp37m-macosx_10_9_x86_64.whl", hash = "sha256:384582b5024007dfdabc9753e3e0f85d61837b0103b0ee3f8acf04a4bcfad175"},
+    {file = "Cython-0.29.20-cp37-cp37m-manylinux1_i686.whl", hash = "sha256:7352b88f2213325c1e111561496a7d53b0326e7f07e6f81f9b8b21420e40851c"},
+    {file = "Cython-0.29.20-cp37-cp37m-manylinux1_x86_64.whl", hash = "sha256:c5df2c42d4066cda175cd4d075225501e1842cfdbdaeeb388eb7685c367cc3ce"},
+    {file = "Cython-0.29.20-cp37-cp37m-win32.whl", hash = "sha256:7089fb2be9a9869b9aa277bc6de401928954ce70e139c3cf9b244ae5f490b8f2"},
+    {file = "Cython-0.29.20-cp37-cp37m-win_amd64.whl", hash = "sha256:b32965445b8dbdc36c69fba47e024060f9b39b1b4ceb816da5028eea01924505"},
+    {file = "Cython-0.29.20-cp38-cp38-macosx_10_9_x86_64.whl", hash = "sha256:8dc68f93b257718ea0e2bc9be8e3c61d70b6e49ab82391125ba0112a30a21025"},
+    {file = "Cython-0.29.20-cp38-cp38-manylinux1_i686.whl", hash = "sha256:b3233341c3fe352b1090168bd087686880b582b635d707b2c8f5d4f1cc1fa533"},
+    {file = "Cython-0.29.20-cp38-cp38-manylinux1_x86_64.whl", hash = "sha256:10b6d2e2125169158128b7f11dad8bb0d8f5fba031d5d4f8492f3afbd06491d7"},
+    {file = "Cython-0.29.20-cp38-cp38-win32.whl", hash = "sha256:16ed0260d031d90dda43997e9b0f0eebc3cf18e6ece91cad7b0fb17cd4bfb29b"},
+    {file = "Cython-0.29.20-cp38-cp38-win_amd64.whl", hash = "sha256:d0b445def03b4cd33bd2d1ae6fbbe252b6d1ef7077b3b5ba3f2c698a190d26e5"},
+    {file = "Cython-0.29.20-py2.py3-none-any.whl", hash = "sha256:b56c02f14f1708411d95679962b742a1235d33a23535ce4a7f75425447701245"},
+    {file = "Cython-0.29.20.tar.gz", hash = "sha256:22d91af5fc2253f717a1b80b8bb45acb655f643611983fd6f782b9423f8171c7"},
 ]
 dataclasses = [
     {file = "dataclasses-0.7-py3-none-any.whl", hash = "sha256:3459118f7ede7c8bea0fe795bff7c6c2ce287d01dd226202f7c9ebc0610a7836"},
@@ -1591,9 +1590,6 @@ kiwisolver = [
     {file = "kiwisolver-1.2.0-cp38-none-win_amd64.whl", hash = "sha256:18d749f3e56c0480dccd1714230da0f328e6e4accf188dd4e6884bdd06bf02dd"},
     {file = "kiwisolver-1.2.0.tar.gz", hash = "sha256:247800260cd38160c362d211dcaf4ed0f7816afb5efe56544748b21d6ad6d17f"},
 ]
-lazy-import = [
-    {file = "lazy_import-0.2.2.tar.gz", hash = "sha256:2149aef8579459407c62cfeccf118527939c9931ace124f355236360644f8a3d"},
-]
 liac-arff = [
     {file = "liac-arff-2.4.0.tar.gz", hash = "sha256:47afcd1fd248b2892f66075987422d0576fc2c2fd0811d0cbd32f2135b065df5"},
 ]
@@ -1637,10 +1633,6 @@ matplotlib = [
     {file = "matplotlib-3.2.2-pp36-pypy36_pp73-win32.whl", hash = "sha256:67065d938df34478451af62fbd0670d2b51c4d859fb66673064eb5de8660dd7c"},
     {file = "matplotlib-3.2.2.tar.gz", hash = "sha256:3d77a6630d093d74cbbfebaa0571d00790966be1ed204e4a8239f5cbd6835c5d"},
 ]
-mmcv = [
-    {file = "mmcv-0.6.2.tar.gz", hash = "sha256:75d6a94db24f8e4225e587bd2cea27fb0a023a6ee4f23e3fa59f726d90c29d6d"},
-]
-mmskeleton = []
 more-itertools = [
     {file = "more-itertools-8.4.0.tar.gz", hash = "sha256:68c70cc7167bdf5c7c9d8f6954a7837089c6a36bf565383919bb595efb8a17e5"},
     {file = "more_itertools-8.4.0-py3-none-any.whl", hash = "sha256:b78134b2063dd214000685165d81c154522c3ee0a1c0d4d113c80361c234c5a2"},
@@ -1728,28 +1720,6 @@ numpy = [
 oauthlib = [
     {file = "oauthlib-3.1.0-py2.py3-none-any.whl", hash = "sha256:df884cd6cbe20e32633f1db1072e9356f53638e4361bef4e8b03c9127c9328ea"},
     {file = "oauthlib-3.1.0.tar.gz", hash = "sha256:bee41cc35fcca6e988463cacc3bcb8a96224f470ca547e697b604cc697b2f889"},
-]
-opencv-python = [
-    {file = "opencv_python-4.2.0.34-cp35-cp35m-macosx_10_9_x86_64.whl", hash = "sha256:e3c57d6579e5bf85f564d6d48d8ee89868b92879a9232b9975d072c346625e92"},
-    {file = "opencv_python-4.2.0.34-cp35-cp35m-manylinux1_i686.whl", hash = "sha256:aa3ca1f54054e1c6439fdf1edafa2a2b940a9eaac04a7b422a1cba9b2d7b9690"},
-    {file = "opencv_python-4.2.0.34-cp35-cp35m-manylinux1_x86_64.whl", hash = "sha256:31d634dea1b47c231b88d384f90605c598214d0c596443c9bb808e11761829f5"},
-    {file = "opencv_python-4.2.0.34-cp35-cp35m-win32.whl", hash = "sha256:78cc89ebc808886eb190626ee71ab65e47f374121975f86e4d5f7c0e3ce6bed9"},
-    {file = "opencv_python-4.2.0.34-cp35-cp35m-win_amd64.whl", hash = "sha256:7c7ba11720d01cb572b4b6945d115cb103462c0a28996b44d4e540d06e6a90fd"},
-    {file = "opencv_python-4.2.0.34-cp36-cp36m-macosx_10_9_x86_64.whl", hash = "sha256:6fa8fac14dd5af4819d475f74af12d65fbbfa391d3110c3a972934a5e6507c24"},
-    {file = "opencv_python-4.2.0.34-cp36-cp36m-manylinux1_i686.whl", hash = "sha256:a37ee82f1b8ed4b4645619c504311e71ce845b78f40055e78d71add5fab7da82"},
-    {file = "opencv_python-4.2.0.34-cp36-cp36m-manylinux1_x86_64.whl", hash = "sha256:dcb8da8c5ebaa6360c8555547a4c7beb6cd983dd95ba895bb78b86cc8cf3de2b"},
-    {file = "opencv_python-4.2.0.34-cp36-cp36m-win32.whl", hash = "sha256:ef89cbf332b9a735d8a82e9ff79cc743eeeb775ad1cd7100bc2aa2429b496f07"},
-    {file = "opencv_python-4.2.0.34-cp36-cp36m-win_amd64.whl", hash = "sha256:f45c1c3cdda1857bedd4dfe0bbd49c9419af0cc57f33490341edeae97d18f037"},
-    {file = "opencv_python-4.2.0.34-cp37-cp37m-macosx_10_9_x86_64.whl", hash = "sha256:c0087b428cef9a32d977390656d91b02245e0e91f909870492df7e39202645dd"},
-    {file = "opencv_python-4.2.0.34-cp37-cp37m-manylinux1_i686.whl", hash = "sha256:fb3c855347310788e4286b867997be354c55535597966ed5dac876d9166013a4"},
-    {file = "opencv_python-4.2.0.34-cp37-cp37m-manylinux1_x86_64.whl", hash = "sha256:d87e506ab205799727f0efa34b3888949bf029a3ada5eb000ff632606370ca6e"},
-    {file = "opencv_python-4.2.0.34-cp37-cp37m-win32.whl", hash = "sha256:b9de3dd956574662712da8e285f0f54327959a4e95b96a2847d3c3f5ee7b96e2"},
-    {file = "opencv_python-4.2.0.34-cp37-cp37m-win_amd64.whl", hash = "sha256:d8a55585631f9c9eca4b1a996e9732ae023169cf2f46f69e4518d67d96198226"},
-    {file = "opencv_python-4.2.0.34-cp38-cp38-macosx_10_9_x86_64.whl", hash = "sha256:5fdfc0bed37315f27d30ae5ae9bad47ec0a0a28c323739d39c8177b7e0929238"},
-    {file = "opencv_python-4.2.0.34-cp38-cp38-manylinux1_i686.whl", hash = "sha256:068928b9907b3d3acd53b129062557d6b0b8b324bfade77f028dbe4dfe482bf2"},
-    {file = "opencv_python-4.2.0.34-cp38-cp38-manylinux1_x86_64.whl", hash = "sha256:0e7c91718351449877c2d4141abd64eee1f9c8701bcfaf4e8627bd023e303368"},
-    {file = "opencv_python-4.2.0.34-cp38-cp38-win32.whl", hash = "sha256:1ab92d807427641ec45d28d5907426aa06b4ffd19c5b794729c74d91cd95090e"},
-    {file = "opencv_python-4.2.0.34-cp38-cp38-win_amd64.whl", hash = "sha256:e2206bb8c17c0f212f1f356d82d72dd090ff4651994034416da9bf0c29732825"},
 ]
 opencv-python-headless = [
     {file = "opencv_python_headless-4.2.0.34-cp35-cp35m-macosx_10_9_x86_64.whl", hash = "sha256:45f90a872bc2e3d3257e06508ea18b3e2d429cf1b20de1a8f5c57251cc39fae4"},
@@ -1904,6 +1874,9 @@ pyasn1-modules = [
     {file = "pyasn1_modules-0.2.8-py3.6.egg", hash = "sha256:cbac4bc38d117f2a49aeedec4407d23e8866ea4ac27ff2cf7fb3e5b570df19e0"},
     {file = "pyasn1_modules-0.2.8-py3.7.egg", hash = "sha256:c29a5e5cc7a3f05926aff34e097e84f8589cd790ce0ed41b67aed6857b26aafd"},
 ]
+pycocotools = [
+    {file = "pycocotools-2.0.1.tar.gz", hash = "sha256:1c06e73a85ed9874c1174d47064524b9fb2759b95a6997437775652f20c1711f"},
+]
 pygame = [
     {file = "pygame-1.9.6-cp27-cp27m-macosx_10_11_intel.whl", hash = "sha256:4aaff572a273a32e70ec3593d213e59ab11c183a9916616562247930f17a5447"},
     {file = "pygame-1.9.6-cp27-cp27m-win32.whl", hash = "sha256:73cd9df328c7e72638dbcc1d18e7155225faed880a53db6bad90d1d7c0a71dfd"},
@@ -1949,6 +1922,10 @@ python-louvain = [
 pytorch-lightning = [
     {file = "pytorch-lightning-0.8.3.tar.gz", hash = "sha256:9fe4442f68cf79c6658538075ff6c966634559352821e0c24cc09170905a08de"},
     {file = "pytorch_lightning-0.8.3-py3-none-any.whl", hash = "sha256:637146fb8851f5c8f4670f66493b599613aa00ba81690329c82498727d0a1331"},
+]
+pytorch-metric-learning = [
+    {file = "pytorch-metric-learning-0.9.88.tar.gz", hash = "sha256:6610ab0250d38bee703879b5b5cced7353cf18f4a18ad33a6e390d5c32a2cfcd"},
+    {file = "pytorch_metric_learning-0.9.88-py3-none-any.whl", hash = "sha256:b0b3783541b48bcf27c00493b2a3533d8a3daabc0e65d9add4b201a9a552c4eb"},
 ]
 pywin32 = [
     {file = "pywin32-228-cp27-cp27m-win32.whl", hash = "sha256:37dc9935f6a383cc744315ae0c2882ba1768d9b06700a70f35dc1ce73cd4ba9c"},
@@ -2170,10 +2147,6 @@ wheel = [
 ]
 wrapt = [
     {file = "wrapt-1.12.1.tar.gz", hash = "sha256:b62ffa81fb85f4332a4f609cab4ac40709470da05643a082ec1eb88e6d9b97d7"},
-]
-yapf = [
-    {file = "yapf-0.30.0-py2.py3-none-any.whl", hash = "sha256:3abf61ba67cf603069710d30acbc88cfe565d907e16ad81429ae90ce9651e0c9"},
-    {file = "yapf-0.30.0.tar.gz", hash = "sha256:3000abee4c28daebad55da6c85f3cd07b8062ce48e2e9943c8da1b9667d48427"},
 ]
 zipp = [
     {file = "zipp-3.1.0-py3-none-any.whl", hash = "sha256:aa36550ff0c0b7ef7fa639055d797116ee891440eac1a56f378e2d3179e0320b"},
