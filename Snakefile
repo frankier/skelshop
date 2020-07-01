@@ -9,6 +9,7 @@ def cnf(name, val):
 
 # Intermediate dirs
 cnf("WORK", "work")
+cnf("VIDEO_BASE", ".")
 cnf("GCN_WEIGHTS", WORK + "/gcn_weights")
 cnf("GCN_CONFIG", WORK + "/gcn_config.yaml")
 
@@ -37,14 +38,15 @@ rule setup:
     input:
         GCN_CONFIG
 
-rule vid_all:
+def all(ext):
+    base, = glob_wildcards(pjoin(VIDEO_BASE, "{base}.mp4"))
+    return base + ext
+
+rule sorted_all:
     input:
-        csvshotseg_reidpt = "{base}.reidpt.sticks.mp4",
-        csvshotseg_reidman = "{base}.reidman.sticks.mp4"
+        all(".opt_lighttrack.h5")
     output:
-        "{base}.all"
-    shell:
-        "touch {output}"
+        touch(".sorted_all")
 
 rule get_gcn_weights:
     output:
@@ -70,7 +72,7 @@ rule tmpl_gcn_config:
 
 rule scenedetect:
     input:
-        "{base}.mp4"
+        pjoin(VIDEO_BASE, "{base}.mp4")
     output:
         "{base}-Scenes.csv"
     run:
@@ -82,7 +84,7 @@ rule scenedetect:
 
 rule skel_unsorted:
     input:
-        video = "{base}.mp4"
+        video = pjoin(VIDEO_BASE, "{base}.mp4")
     output:
         "{base}.unsorted.h5"
     shell:
@@ -110,7 +112,7 @@ rule skel_filter_csvshotseg_opt_lighttrack:
 rule drawsticks:
     input:
         skels = "{base}.{var}.h5",
-        video = "{base}.mp4"
+        video = pjoin(VIDEO_BASE, "{base}.mp4")
     output:
         "{base}.{var}.sticks.mp4"
     shell:
