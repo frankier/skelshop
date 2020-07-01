@@ -7,7 +7,7 @@ From: frankier/gsoc2020:frankier_gsoc2020
     git clone https://github.com/frankier/skelshop/ /opt/skelshop
     curl -sSL \
         https://raw.githubusercontent.com/python-poetry/poetry/master/get-poetry.py \
-        | python
+        | python || true
     export PATH=$HOME/.poetry/bin/:$PATH
     poetry config virtualenvs.create false
     cd /opt/skelshop && \

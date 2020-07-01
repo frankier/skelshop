@@ -9,5 +9,5 @@
 	url = https://github.com/WarrenWeckesser/ufunclab.git
 [submodule "submodules/mmskeleton"]
 	path = submodules/mmskeleton
-	url = git@github.com:frankier/mmskeleton.git
+	url = https://github.com/frankier/mmskeleton.git
 	branch = gsoc2020
