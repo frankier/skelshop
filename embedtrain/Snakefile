@@ -1,7 +1,7 @@
 import re
 from shutil import unpack_archive
 
-from embedtrain.datasets import DataSet
+from embedtrain.dl_datasets import DataSet
 from embedtrain.embed_skels import BODY_EMBED_SKELS, EMBED_SKELS
 
 
@@ -17,12 +17,20 @@ def cnf(name, val=None):
 cnf("WORK", "work")
 cnf("HAND_H5", WORK + "/hand.h5")
 cnf("BODY_H5", WORK + "/body.h5")
+cnf("VOCAB", WORK + "/vocab")
 
-SKEL_NAME_MAP = {}
+MAN_TB_SKEL_NAME_MAP = {}
+TRAIN_LOG_SKEL_NAME_MAP = {}
 for embed_skel in EMBED_SKELS.keys():
     embed_skel_lower = embed_skel.lower()
     man_tb_dir = cnf(embed_skel + "_MAN_TB", WORK + "/" + embed_skel_lower + "-man-tb")
-    SKEL_NAME_MAP[man_tb_dir] = embed_skel
+    MAN_TB_SKEL_NAME_MAP[man_tb_dir] = embed_skel
+    train_log_dir = cnf(embed_skel + "_TRAIN_LOG", WORK + "/" + embed_skel_lower + "-train-log")
+    TRAIN_LOG_SKEL_NAME_MAP[train_log_dir] = embed_skel
+
+
+def skel_output_constraint(postfix, skel_names)
+    return "|".join(("(^{}$)".format(re.escape(globals()[skel_name + postfix])) for skel_name in skel_names))
 
 
 DataSet.config_datasets(cnf)
@@ -117,11 +125,52 @@ rule proj_body_man:
     output:
         man_tb = directory("{outdir}")
     wildcard_constraints:
-        outdir = "|".join(("(^{}$)".format(re.escape(globals()[skel_name + "_MAN_TB"])) for skel_name in BODY_EMBED_SKELS.keys()))
+        outdir = skel_output_constraint("_MAN_TB", BODY_EMBED_SKELS.keys())
     params:
-        skel_name = lambda wildcards, output: SKEL_NAME_MAP[output.man_tb]
+        skel_name = lambda wildcards, output: MAN_TB_SKEL_NAME_MAP[output.man_tb]
     shell:
         runscript("embed_vis") + " to-tensorboard " +
         "--image-base {input.img_base} " +
         "--body-labels {input.img_base}/mpii_human_pose_v1_u12_2/mpii_human_pose_v1_u12_2/mpii_human_pose_v1_u12_1.mat " +
         "{input.skels} {output.man_tb} {params.skel_name}"
+
+
+rule pre_vocab:
+    input:
+        ds_h5 = lambda wc: HAND_H5 if wc.var == "hand" else BODY_H5
+    output:
+        vocab_pkl = VOCAB + "/{var}.pkl"
+    params:
+        skel_name = lambda wildcards, output: wildcards.var.upper()
+    shell:
+        runscript("prep_vocab") + " {input.ds_h5} {params.skel_name} " +
+	"{output.vocab_pkl}"
+
+
+rule train_pose:
+    input:
+        skels = lambda wc: \
+            HAND_H5 \
+	    if TRAIN_LOG_SKEL_NAME_MAP[output.train_log] == "HAND" \
+	    else BODY_H5
+        vocab_pkl = lambda wc: \
+	    VOCAB + "/" + ("hand" \
+	    if TRAIN_LOG_SKEL_NAME_MAP[output.train_log] == "HAND" \
+	    else "body") + ".pkl"
+    output:
+        train_log = directory("{outdir}/{loss}-{reduc}-{aug}")
+    wildcard_constraints:
+        outdir = skel_output_constraint("_TRAIN_LOG", EMBED_SKELS.keys())
+
+    params:
+        skel_name = lambda wildcards, output: TRAIN_LOG_SKEL_NAME_MAP[output.train_log]
+    shell:
+        runscript("train") + " --prep-vocab {input.vocab_pkl} " +
+	"{input.skels} {params.skel_name} {outputs.train_log}"
+
+rule pilots_trained:
+    input:
+        train_log = directory("{outdir}/{var}")
+@click.option("--embed-size", type=int, default=64)
+@click.option("--loss", type=click.Choice(["nsm", "msl"]), default="nsm")
+@click.option("--no-aug", is_flag=True)

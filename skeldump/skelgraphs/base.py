@@ -21,6 +21,7 @@ class SkeletonType:
             for kp in line:
                 if kp > self.num_kps:
                     self.num_kps = kp
+        self.num_kps += 1
 
     @property
     def lines_flat(self):

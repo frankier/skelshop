@@ -19,7 +19,7 @@ from skmultilearn.model_selection.iterative_stratification import (
     iterative_train_test_split,
 )
 
-from embedtrain.datasets import BodyDataSet, HandDataSet
+from embedtrain.dl_datasets import BodyDataSet, HandDataSet
 from embedtrain.draw import draw
 from embedtrain.embed_skels import EMBED_SKELS
 from embedtrain.prep import walk_hand
@@ -304,8 +304,37 @@ def class_vis(image_base, out_path):
                 out_path,
             ]
         )
-        print(src_agg_dir)
-        input()
+
+
+@embed_vis.command()
+@click.argument("h5fin")
+@click.argument("skel_name")
+@click.option("--body-labels", envvar="BODY_LABELS", type=click.Path(exists=True))
+@click.option("--print-labels", is_flag=True)
+def num_classes(h5fin, skel_name, body_labels, print_labels):
+    from embedtrain.merge import map_cls, assert_all_mapped
+
+    with h5py.File(h5fin, "r") as h5f:
+        paths, labels = get_path_class_pairs(h5f, body_labels, skel_name == "HAND")
+    seen = set()
+    combs_seen = set()
+    if skel_name == "HAND":
+        for label in labels:
+            seen.add(map_cls(label))
+        assert_all_mapped()
+    else:
+        for multilabel in labels:
+            combs_seen.add(tuple(multilabel))
+            for label in multilabel:
+                seen.add(label)
+    print(len(combs_seen))
+    print(len(seen))
+    if print_labels:
+        print(combs_seen)
+        print()
+        print()
+        print()
+        print(seen)
 
 
 if __name__ == "__main__":

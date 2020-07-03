@@ -186,7 +186,16 @@ class BodyDataSet(DataSet):
     @classmethod
     def path_to_labels(cls, body_labels, path):
         labels = cls.path_to_class(body_labels, path)
-        return [act.strip() for act in labels["act_name"].split(",")]
+        act_name = labels["act_name"]
+        if len(act_name) == 0:
+            return []
+        acts = []
+        for act in act_name.split(","):
+            stripped = act.strip()
+            if not stripped:
+                continue
+            acts.append(act)
+        return tuple(sorted(acts))
 
     @classmethod
     def path_to_bboxes(cls, body_labels, path):

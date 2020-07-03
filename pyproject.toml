@@ -40,12 +40,16 @@ scikit-multilearn = {git = "https://github.com/frankier/scikit-multilearn.git", 
 pytorch_lightning = {version = "^0.8.3", optional = true}
 pycocotools = {version = "^2.0.1", optional = true}
 pytorch_metric_learning = {version = "^0.9.88", optional = true}
+chardet = {version = "^3.0.4", optional = true}
+requests = {version = "^2.24.0", optional = true}
+umap-learn = {version = "^0.1.1", optional = true}
+faiss-gpu = {version = "^1.6.3", optional = true}
 
 [tool.poetry.extras]
 pipeline = ["scenedetect", "snakemake"]
 play = ["pygame"]
 ssmat = ["numba", "matplotlib", "scikit-learn", "scipy"]
-embedtrain = ["wcmatch", "snakemake", "imagesize", "scikit-multilearn", "pytorch_lightning", "pycocotools", "pytorch_metric_learning"]
+embedtrain = ["wcmatch", "snakemake", "imagesize", "scikit-multilearn", "pytorch_lightning", "pycocotools", "pytorch_metric_learning", "chardet", "requests", "umap-learn", "faiss-gpu"]
 embedvis = ["tensorboard"]
 
 [tool.poetry.dev-dependencies]

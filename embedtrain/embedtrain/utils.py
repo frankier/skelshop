@@ -1,4 +1,7 @@
+import io
+
 import cv2
+import numpy as np
 from wcmatch.glob import GLOBSTAR, globmatch
 
 
@@ -58,3 +61,16 @@ def put_sprite(sheet, idx_j, idx_i, im, target_size):
 
     sheet[square_j_top:square_j_bottom, square_i_left:square_i_right, :3] = im
     sheet[square_j_top:square_j_bottom, square_i_left:square_i_right, 3] = 255
+
+
+def save_fig_np(fig, dpi=96):
+    io_buf = io.BytesIO()
+    fig.savefig(io_buf, format="raw", dpi=dpi)
+    dim = np.rint(fig.get_size_inches() * dpi)
+    io_buf.seek(0)
+    mat = np.reshape(
+        np.frombuffer(io_buf.getvalue(), dtype=np.uint8),
+        newshape=(int(dim[0]), int(dim[1]), -1),
+    )
+    mat = mat[:, :, :3].transpose((2, 1, 0))
+    return mat
