@@ -8,13 +8,14 @@ from matplotlib import pyplot as plt
 from pytorch_lightning.core.lightning import LightningModule
 from pytorch_metric_learning import losses, miners, testers
 from sklearn.model_selection import train_test_split as single_train_test_split
-from torch.utils.data import DataLoader, Subset
+from torch.utils.data import DataLoader, Subset, WeightedRandomSampler
+
+from skeldump.skelgraphs.reducer import SkeletonReducer
 
 from . import pt_tb_monkey  # noqa
 from .embed_skels import EMBED_SKELS
 from .flex_st_gcn import FlexStGcn
 from .graph import GraphAdapter
-from .multilabel_softmax import NormalizedMultilabelSoftmaxLoss
 from .pt_datasets import BodySkeletonDataset, DataPipeline, HandSkeletonDataset
 from .utils import save_fig_np
 
@@ -42,58 +43,56 @@ class MetGcnLit(LightningModule):
     ):
         super().__init__()
         self.data_path = data_path
-        self.skel_graph = EMBED_SKELS[graph]
-        self.embed_size = embed_size
-        self.loss_name = loss
+        self.hparams.skel_graph_name = graph
+        self.skel_graph = SkeletonReducer(EMBED_SKELS[graph])
+        self.hparams.embed_size = embed_size
+        self.hparams.loss_name = loss
         if graph == "HAND":
             self.dataset = HandSkeletonDataset(self.data_path, vocab=vocab)
         else:
             self.dataset = BodySkeletonDataset(
                 self.data_path,
                 vocab=vocab,
-                powerset=loss == "psnsm",
+                skel_graph=self.skel_graph,
                 body_labels=body_labels,
             )
-        self.mode = mode
-        assert self.mode in ("eval", "prod")
+        self.hparams.mode = mode
+        assert self.hparams.mode in ("eval", "prod")
         self.batch_size = batch_size
-        self.lr = lr
-        self.no_aug = no_aug
-        self.include_score = include_score
+        self.hparams.lr = lr
+        self.hparams.no_aug = no_aug
+        self.hparams.include_score = include_score
 
         self.gcn = FlexStGcn(
-            3 if self.include_score else 2,
-            self.embed_size,
-            GraphAdapter(self.skel_graph),
+            3 if self.hparams.include_score else 2,
+            self.hparams.embed_size,
+            GraphAdapter(self.skel_graph.dense_skel),
         )
 
-        if self.mode == "prod":
+        if self.hparams.mode == "prod":
             self.num_classes = self.dataset.CLASSES_TOTAL
         else:
             self.num_classes = self.dataset.CLASSES_TOTAL - len(
-                HandSkeletonDataset.LEFT_OUT_EVAL
+                self.dataset.LEFT_OUT_EVAL
             )
 
         # Parameters are based on ones that seem reasonable given
         # https://github.com/KevinMusgrave/powerful-benchmarker
         # Could optimise...
-        if self.loss_name in ("nsm", "psnsm"):
+        if self.hparams.loss_name == "nsm":
             self.loss = losses.NormalizedSoftmaxLoss(
-                0.07, self.embed_size, self.num_classes
-            )
-        elif self.loss_name == "lbnsm":
-            self.loss = NormalizedMultilabelSoftmaxLoss(
-                0.07, self.embed_size, self.num_classes
+                0.07, self.hparams.embed_size, self.num_classes
             )
         else:
-            assert self.loss_name == "msl"
+            assert self.hparams.loss_name == "msl"
             self.loss = losses.MultiSimilarityLoss(10, 50, 0.7)
             self.miner = miners.MultiSimilarityMiner(epsilon=0.5)
 
     def setup(self, stage):
         dataset = self.dataset
-        if self.mode == "prod":
+        if self.hparams.mode == "prod":
             self.train_dataset = dataset
+            sample_weights = dataset.get_sample_weights()
             self.val_dataset = Subset(dataset, [])
             self.test_dataset = Subset(dataset, [])
             self.val_tester = None
@@ -113,30 +112,36 @@ class MetGcnLit(LightningModule):
                 train_val_idxs, test_size=0.1, stratify=train_val_clses
             )
 
-            # assign to use in dataloaders
             self.train_dataset = Subset(dataset, train_idxs)
+            sample_weights = dataset.get_sample_weights(train_idxs)
             self.val_dataset = Subset(dataset, val_idxs)
             self.test_dataset = Subset(dataset, test_idxs)
 
             self.val_tester = self.setup_validation_tester()
 
+        self.train_sampler = WeightedRandomSampler(
+            weights=sample_weights,
+            num_samples=len(sample_weights) * 20,
+            replacement=True,
+        )
+
         self.train_dataset = self.mk_data_pipeline(self.train_dataset)
         self.val_dataset = self.mk_data_pipeline(self.val_dataset)
-        self.test_dataset = self.mk_data_pipeline(self.test_dataset)
+        self.test_dataset = self.mk_data_pipeline(self.test_dataset, no_aug=True)
 
     # *Common
 
     def batch_loss(self, batch):
         x, y = batch
         y_hat = self(x)
-        if self.loss_name == "nsm":
+        if self.hparams.loss_name == "nsm":
             return self.loss(y_hat, y)
         else:
-            assert self.loss_name == "msl"
+            assert self.hparams.loss_name == "msl"
             hard_pairs = self.miner(y_hat, y)
             return self.loss(y_hat, y, hard_pairs)
 
-    def mk_data_pipeline(self, dataset):
+    def mk_data_pipeline(self, dataset, no_aug=False):
         from mmskeleton.datasets.skeleton import (
             normalize_by_resolution,
             mask_by_visibility,
@@ -146,9 +151,9 @@ class MetGcnLit(LightningModule):
         )
 
         aug_steps: List[Dict[str, Any]] = []
-        if not self.no_aug:
+        if not self.hparams.no_aug or no_aug:
             aug_steps.extend((dict(stage=simulate_camera_moving),))
-        if not self.include_score:
+        if not self.hparams.include_score:
             aug_steps.append(
                 dict(stage=lambda data: {**data, "data": data["data"][:2, :, :, :]})
             )
@@ -163,9 +168,13 @@ class MetGcnLit(LightningModule):
             ],
         )
 
-    def mk_data_loader(self, dataset, shuffle=False):
+    def mk_data_loader(self, dataset, **kwargs):
         return DataLoader(
-            dataset, batch_size=self.batch_size, shuffle=shuffle, num_workers=8,
+            dataset,
+            batch_size=self.batch_size,
+            num_workers=8,
+            pin_memory=True,
+            **kwargs,
         )
 
     # *Training
@@ -180,7 +189,7 @@ class MetGcnLit(LightningModule):
     def configure_optimizers(self):
         return torch.optim.SGD(
             self.parameters(),
-            lr=self.lr,
+            lr=self.hparams.lr,
             momentum=0.9,
             nesterov=True,
             weight_decay=0.0001,
@@ -188,7 +197,7 @@ class MetGcnLit(LightningModule):
         # return torch.optim.Adam(self.parameters(), lr=self.lr)
 
     def train_dataloader(self):
-        return self.mk_data_loader(self.train_dataset, shuffle=True)
+        return self.mk_data_loader(self.train_dataset, sampler=self.train_sampler)
 
     # *Validation
 
@@ -227,15 +236,16 @@ class MetGcnLit(LightningModule):
             save_fig_np(plt.gcf()),
             self.global_step,
         )
+
+    def end_of_testing_hook(self, tester):
         # Add embedding for projector / reprojection
-        assert self.val_tester is not None
-        embeddings, labels = self.val_tester.embeddings_and_labels[split_name]
-        self.logger.experiment.add_embedding(
-            embeddings,
-            labels,
-            global_step=self.global_step,
-            tag="proj_{split_name}_{keyname}",
-        )
+        for split_name, (embeddings, labels) in tester.embeddings_and_labels.items():
+            self.logger.experiment.add_embedding(
+                embeddings,
+                labels,
+                global_step=self.global_step,
+                tag="proj_{split_name}",
+            )
 
     def validation_epoch_end(self, outputs):
         if self.val_tester is None:
@@ -262,7 +272,7 @@ class MetGcnLit(LightningModule):
         return {}
 
     def test_epoch_end(self, outputs):
-        if self.mode == "prod":
+        if self.hparams.mode == "prod":
             return
         tester = testers.GlobalEmbeddingSpaceTester(
             "compared_to_sets_combined",
@@ -278,7 +288,7 @@ class MetGcnLit(LightningModule):
             },
             self.current_epoch,
             self,
-            ["test"],
+            splits_to_eval=["test"],
         )
         return {"global_embedding_space_accuracies": tester.all_accuracies}
 

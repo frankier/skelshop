@@ -11,10 +11,10 @@ class GraphAdapter(Graph):
         self.get_adjacency(strategy)
 
     def setup_edge(self, skelshop_graph):
-        # XXX: This could be too high since SkeletonType can have discontinuous
-        # ranges of kps
-        # XXX: May also need to renumber to fix this...
-        self.num_node = skelshop_graph.num_kps
+        # Can use max_kp as num_kps here because we know we have been passed a
+        # skel graph Perhaps this info should be indicated in an asserted
+        # value/type
+        self.num_node = skelshop_graph.max_kp
         self_link = [(i, i) for i in range(self.num_node)]
         neighbor_link = [(k, v) for k, vs in skelshop_graph.graph.items() for v in vs]
         self.edge = self_link + neighbor_link

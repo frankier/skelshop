@@ -184,18 +184,9 @@ class BodyDataSet(DataSet):
         return cls._label_map[barename]
 
     @classmethod
-    def path_to_labels(cls, body_labels, path):
+    def path_to_act_id(cls, body_labels, path):
         labels = cls.path_to_class(body_labels, path)
-        act_name = labels["act_name"]
-        if len(act_name) == 0:
-            return []
-        acts = []
-        for act in act_name.split(","):
-            stripped = act.strip()
-            if not stripped:
-                continue
-            acts.append(act)
-        return tuple(sorted(acts))
+        return labels["act_id"]
 
     @classmethod
     def path_to_bboxes(cls, body_labels, path):

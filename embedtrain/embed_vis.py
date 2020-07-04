@@ -41,7 +41,7 @@ def get_path_class_pairs(h5f, body_labels, is_hand=False):
                 return
             cls = HandDataSet.path_to_dataset_class_pair(path)
         else:
-            cls = BodyDataSet.path_to_labels(body_labels, path)
+            cls = BodyDataSet.path_to_act_id(body_labels, path)
         x.append(path)
         y.append(cls)
 

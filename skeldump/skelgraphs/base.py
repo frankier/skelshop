@@ -16,12 +16,12 @@ class SkeletonType:
         self.lines = lines
         self.names = names
         self.build_graphs()
-        self.num_kps = 0
+        self.max_kp = 0
         for line in self.lines_flat:
             for kp in line:
-                if kp > self.num_kps:
-                    self.num_kps = kp
-        self.num_kps += 1
+                if kp > self.max_kp:
+                    self.max_kp = kp
+        self.max_kp += 1
 
     @property
     def lines_flat(self):
@@ -46,7 +46,7 @@ class SkeletonType:
 
     def iter_limbs(self, kps, kp_idxs=None):
         if kp_idxs is None:
-            kp_idxs = range(self.num_kps)
+            kp_idxs = range(self.max_kp)
         for idx in kp_idxs:
             for other_idx in self.digraph.get(idx, set()):
                 if other_idx not in kp_idxs:
@@ -55,7 +55,7 @@ class SkeletonType:
 
     def iter_limb_pairs(self, kps, kp_idxs=None):
         if kp_idxs is None:
-            kp_idxs = range(self.num_kps)
+            kp_idxs = range(self.max_kp)
         for idx in kp_idxs:
             for outwards1 in self.graph.get(idx, set()):
                 if outwards1 not in kp_idxs:

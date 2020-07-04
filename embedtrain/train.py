@@ -21,9 +21,7 @@ logger = logging.getLogger(__name__)
 # Config
 @click.option("--run-type", type=click.Choice(["prod", "eval"]), default="eval")
 @click.option("--embed-size", type=int, default=64)
-@click.option(
-    "--loss", type=click.Choice(["nsm", "msl", "psnsm", "mlnsm"]), default="nsm"
-)
+@click.option("--loss", type=click.Choice(["nsm", "msl"]), default="nsm")
 @click.option("--no-aug", is_flag=True)
 @click.option("--include-score", is_flag=True)
 # Diagnostic modes
@@ -47,10 +45,8 @@ def train(
     lr_find_plot,
     test,
 ):
-    if skel == "HAND":
-        assert loss in ("nsm", "msl"), "Single label loss required for HAND"
-    else:
-        assert loss in ("psnsm", "mlnsm"), "Multi label loss required for HAND"
+    if skel != "HAND":
+        assert body_labels is not None, "--body-labels needed for BODY skels"
     vocab = pickle.load(pre_vocab) if pre_vocab else None
     model = MetGcnLit(
         h5fn, run_type, graph=skel, vocab=vocab, loss=loss, body_labels=body_labels
@@ -79,7 +75,7 @@ def train(
         trainer.scale_batch_size(model, init_val=4096)
     trainer.fit(model)
     if test:
-        trainer.test()
+        trainer.test(ckpt_path=None)
 
 
 if __name__ == "__main__":
