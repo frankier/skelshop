@@ -6,6 +6,7 @@ from typing import Any, Dict
 import click
 from pytorch_lightning import Trainer, loggers
 
+from embedtrain.cmd_utils import body_labels_option
 from embedtrain.litmod import MetGcnLit
 
 logger = logging.getLogger(__name__)
@@ -17,7 +18,7 @@ logger = logging.getLogger(__name__)
 @click.argument("skel")
 @click.argument("outdir")
 @click.option("--pre-vocab", type=click.File("rb"))
-@click.option("--body-labels", type=click.Path(exists=True))
+@body_labels_option
 # Config
 @click.option("--run-type", type=click.Choice(["prod", "eval"]), default="eval")
 @click.option("--embed-size", type=int, default=64)

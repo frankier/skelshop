@@ -21,5 +21,11 @@
     },
     "proj_body_man": {
         "mem": "16gb"
+    },
+    "train_pose": {
+        "time" : "4-00:00:00",
+        "partition": "gpu",
+        "gres": "gpu:4",
+        "mem": "40gb"
     }
 }

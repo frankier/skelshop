@@ -19,6 +19,7 @@ from skmultilearn.model_selection.iterative_stratification import (
     iterative_train_test_split,
 )
 
+from embedtrain.cmd_utils import body_labels_option
 from embedtrain.dl_datasets import BodyDataSet, HandDataSet
 from embedtrain.draw import draw
 from embedtrain.embed_skels import EMBED_SKELS
@@ -140,7 +141,7 @@ def find_sprite_dims(num):
 @click.argument("log_dir")
 @click.argument("skel_name")
 @click.option("--image-base", envvar="IMAGE_BASE", type=click.Path(exists=True))
-@click.option("--body-labels", envvar="BODY_LABELS", type=click.Path(exists=True))
+@body_labels_option
 @click.option("--sprite-size", default=DEFAULT_SPRITE_SIZE, type=int)
 @click.option("--sample-size", default=10000, type=int)
 def to_tensorboard(
@@ -309,7 +310,7 @@ def class_vis(image_base, out_path):
 @embed_vis.command()
 @click.argument("h5fin")
 @click.argument("skel_name")
-@click.option("--body-labels", envvar="BODY_LABELS", type=click.Path(exists=True))
+@body_labels_option
 @click.option("--print-labels", is_flag=True)
 def num_classes(h5fin, skel_name, body_labels, print_labels):
     from embedtrain.merge import map_cls, assert_all_mapped
