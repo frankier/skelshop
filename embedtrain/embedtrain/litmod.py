@@ -27,9 +27,24 @@ class MetGcnLit(LightningModule):
 
     # *Setup
 
+    @staticmethod
+    def add_model_specific_args(parent_parser):
+        from argparse import ArgumentParser
+
+        parser = ArgumentParser(parents=[parent_parser], add_help=False)
+        parser.add_argument(
+            "--run-type", type=str, choices=["prod", "eval"], default="eval"
+        )
+        parser.add_argument("--embed-size", type=int, default=64)
+        parser.add_argument("--loss", choices=["nsm", "msl"], default="nsm")
+        # Config
+        parser.add_argument("--no-aug", action="store_true")
+        parser.add_argument("--include-score", action="store_true")
+        return parser
+
     def __init__(
         self,
-        data_path,
+        h5fn,
         mode="eval",
         graph="HAND",
         embed_size=64,
@@ -40,9 +55,10 @@ class MetGcnLit(LightningModule):
         vocab=None,
         include_score=False,
         body_labels=None,
+        **kwargs,
     ):
         super().__init__()
-        self.data_path = data_path
+        self.data_path = h5fn
         self.hparams.skel_graph_name = graph
         self.skel_graph = SkeletonReducer(EMBED_SKELS[graph])
         self.hparams.embed_size = embed_size
