@@ -1,0 +1,13 @@
+{
+    "__default__": {
+        "mail-user" : "frankie@robertson.name",
+        "time" : "05:00:00",
+        "nodes" : 1
+    },
+    "scenedetect": {
+        "nodes" : 64
+    },
+    "skel_filter_csvshotseg_opt_lighttrack": {
+        "nodes" : 64
+    }
+}
