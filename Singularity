@@ -1,5 +1,5 @@
-Bootstrap: localimage
-From: ./frankier_gsoc2020.sif
+Bootstrap: shub
+From: frankier/gsoc2020:frankier_gsoc2020
 
 %post
     export LC_ALL=C.UTF-8
