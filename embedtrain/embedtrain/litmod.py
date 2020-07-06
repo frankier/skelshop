@@ -210,6 +210,7 @@ class MetGcnLit(LightningModule):
             visualizer=umap.UMAP(),
             visualizer_hook=self.visualizer_hook,
             dataloader_num_workers=32,
+            data_device=self.device,
         )
 
     def visualizer_hook(
@@ -279,6 +280,7 @@ class MetGcnLit(LightningModule):
             visualizer=umap.UMAP(),
             visualizer_hook=self.visualizer_hook,
             dataloader_num_workers=32,
+            data_device=self.device,
         )
         tester.test(
             {
