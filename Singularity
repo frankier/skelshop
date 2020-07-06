@@ -1,5 +1,5 @@
-Bootstrap: shub
-From: frankier/gsoc2020:frankier_gsoc2020
+Bootstrap: localimage
+From: ./frankier_gsoc2020.sif
 
 %post
     export LC_ALL=C.UTF-8
@@ -12,7 +12,7 @@ From: frankier/gsoc2020:frankier_gsoc2020
     export PATH=$HOME/.poetry/bin/:$PATH
     poetry config virtualenvs.create false
     cd /opt/skelshop && \
-        ./install_all.sh && \
+        FORCE_CUDA=1 ./install_all.sh && \
         snakemake --cores 4
 
 %runscript
