@@ -42,7 +42,8 @@ cat << RUN_SNAKEMAKE > run_snakemake.sh
 snakemake \
   -j128 \
   --profile $tmp_dir/singslurm \
-  --snakefile $SNAKEFILE
+  --snakefile $SNAKEFILE \
+  $@
 RUN_SNAKEMAKE
 chmod +x run_snakemake.sh
 
