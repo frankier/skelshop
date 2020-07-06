@@ -3,12 +3,18 @@ from typing import Any, Dict, List
 import numpy as np
 import torch
 import umap
+from catalyst.data.sampler import DistributedSamplerWrapper
 from cycler import cycler
 from matplotlib import pyplot as plt
 from pytorch_lightning.core.lightning import LightningModule
 from pytorch_metric_learning import losses, miners, testers
 from sklearn.model_selection import train_test_split as single_train_test_split
-from torch.utils.data import DataLoader, Subset, WeightedRandomSampler
+from torch.utils.data import (
+    DataLoader,
+    DistributedSampler,
+    Subset,
+    WeightedRandomSampler,
+)
 
 from skeldump.skelgraphs.reducer import SkeletonReducer
 
@@ -140,10 +146,16 @@ class MetGcnLit(LightningModule):
             num_samples=len(sample_weights) * 20,
             replacement=True,
         )
+        self.val_sampler = None
+        self.test_sampler = None
 
         self.train_dataset = self.mk_data_pipeline(self.train_dataset)
         self.val_dataset = self.mk_data_pipeline(self.val_dataset)
         self.test_dataset = self.mk_data_pipeline(self.test_dataset, no_aug=True)
+        if self.ddp or self.ddp2:
+            self.train_sampler = DistributedSamplerWrapper(self.train_sampler)
+            self.val_sampler = DistributedSampler()
+            self.test_sampler = DistributedSampler()
 
     # *Common
 
@@ -280,7 +292,7 @@ class MetGcnLit(LightningModule):
         }
 
     def val_dataloader(self):
-        return self.mk_data_loader(self.val_dataset)
+        return self.mk_data_loader(self.val_dataset, sampler=self.val_sampler)
 
     # *Testing
 
@@ -311,4 +323,4 @@ class MetGcnLit(LightningModule):
         return {"global_embedding_space_accuracies": tester.all_accuracies}
 
     def test_dataloader(self):
-        return self.mk_data_loader(self.test_dataset)
+        return self.mk_data_loader(self.test_dataset, sampler=self.test_sampler)

@@ -48,7 +48,11 @@ def train():
     )
     tb_logger = loggers.TensorBoardLogger(pjoin(args.outdir, "logs/"))
     trainer = Trainer.from_argparse_args(
-        args, default_root_dir=args.outdir, logger=tb_logger, early_stop_callback=True,
+        args,
+        default_root_dir=args.outdir,
+        logger=tb_logger,
+        early_stop_callback=True,
+        replace_sampler_ddp=False,
     )
     if args.lr_find_plot:
         model.setup(None)
