@@ -152,7 +152,7 @@ class MetGcnLit(LightningModule):
         self.train_dataset = self.mk_data_pipeline(self.train_dataset)
         self.val_dataset = self.mk_data_pipeline(self.val_dataset)
         self.test_dataset = self.mk_data_pipeline(self.test_dataset, no_aug=True)
-        if self.ddp or self.ddp2:
+        if self.use_ddp or self.use_ddp2:
             self.train_sampler = DistributedSamplerWrapper(self.train_sampler)
             self.val_sampler = DistributedSampler()
             self.test_sampler = DistributedSampler()
