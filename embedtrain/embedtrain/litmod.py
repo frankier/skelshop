@@ -200,7 +200,7 @@ class MetGcnLit(LightningModule):
         return DataLoader(
             dataset,
             batch_size=self.batch_size,
-            num_workers=8,
+            num_workers=4,
             pin_memory=True,
             **kwargs,
         )
@@ -237,7 +237,7 @@ class MetGcnLit(LightningModule):
         return testers.GlobalEmbeddingSpaceTester(
             visualizer=umap.UMAP(),
             visualizer_hook=self.visualizer_hook,
-            dataloader_num_workers=32,
+            dataloader_num_workers=4,
             data_device=self.device,
         )
 
@@ -307,7 +307,7 @@ class MetGcnLit(LightningModule):
             "compared_to_sets_combined",
             visualizer=umap.UMAP(),
             visualizer_hook=self.visualizer_hook,
-            dataloader_num_workers=32,
+            dataloader_num_workers=4,
             data_device=self.device,
         )
         tester.test(
