@@ -23,9 +23,9 @@
         "mem": "16gb"
     },
     "train_pose": {
-        "time" : "4-00:00:00",
+        "time" : "7-00:00:00",
         "partition": "gpu",
-        "gres": "gpu:4",
-        "mem": "40gb"
+        "gres": "gpu:1",
+        "mem": "10gb"
     }
 }
