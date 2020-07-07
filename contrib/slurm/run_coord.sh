@@ -74,6 +74,9 @@ popd
 mkdir -p $tmp_dir/req_run
 touch $tmp_dir/req_run/reqs
 
+trap "exit" INT TERM
+trap "kill 0" EXIT
+
 tail -f $tmp_dir/req_run/reqs 2>/dev/null | (
 while IFS= read -r line
 do
