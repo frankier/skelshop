@@ -570,7 +570,7 @@ version = "2.4.0"
 category = "main"
 description = "lightweight wrapper around basic LLVM functionality"
 name = "llvmlite"
-optional = true
+optional = false
 python-versions = "*"
 version = "0.32.1"
 
@@ -690,7 +690,7 @@ version = "1.4.0"
 category = "main"
 description = "compiling Python code using LLVM"
 name = "numba"
-optional = true
+optional = false
 python-versions = ">=3.6"
 version = "0.49.1"
 
@@ -972,6 +972,21 @@ name = "pygments"
 optional = false
 python-versions = ">=3.5"
 version = "2.6.1"
+
+[[package]]
+category = "main"
+description = "Nearest Neighbor Descent"
+name = "pynndescent"
+optional = false
+python-versions = "*"
+version = "0.4.8"
+
+[package.dependencies]
+joblib = ">=0.11"
+llvmlite = ">=0.30"
+numba = ">=0.46"
+scikit-learn = ">=0.18"
+scipy = ">=1.0"
 
 [[package]]
 category = "main"
@@ -1561,7 +1576,7 @@ play = ["pygame"]
 ssmat = ["numba", "matplotlib", "scikit-learn", "scipy"]
 
 [metadata]
-content-hash = "e35d23b5efe0fbadff6e489b9b3f388ebe192039eda62dbf226b77f4282032bb"
+content-hash = "7e133394bcf951ab9dcfc7133966c5975260606ae0e2da5fcc20733d65f199e0"
 python-versions = "^3.6.1"
 
 [metadata.files]
@@ -2239,6 +2254,9 @@ pygame = [
 pygments = [
     {file = "Pygments-2.6.1-py3-none-any.whl", hash = "sha256:ff7a40b4860b727ab48fad6360eb351cc1b33cbf9b15a0f689ca5353e9463324"},
     {file = "Pygments-2.6.1.tar.gz", hash = "sha256:647344a061c249a3b74e230c739f434d7ea4d8b1d5f3721bc0f3558049b38f44"},
+]
+pynndescent = [
+    {file = "pynndescent-0.4.8.tar.gz", hash = "sha256:63a0b4d2b592f3849ef96065d88fbcb2ec9d5ca403f28373371b141729732152"},
 ]
 pyparsing = [
     {file = "pyparsing-2.4.7-py2.py3-none-any.whl", hash = "sha256:ef9d7589ef3c200abe66653d3f1ab1033c3c419ae9b9bdb1240a85b024efc88b"},
