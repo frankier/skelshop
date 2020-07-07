@@ -26,6 +26,6 @@
         "time" : "7-00:00:00",
         "partition": "gpu",
         "gres": "gpu:1",
-        "mem": "10gb"
+        "mem": "40gb"
     }
 }
