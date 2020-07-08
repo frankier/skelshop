@@ -27,8 +27,8 @@ def parse_args():
 
     # Diagnostic modes / trainer stuff
     parser.add_argument("--lr-find-plot", action="store_true")
+    parser.add_argument("--batch-size")
     parser.add_argument("--test", action="store_true")
-    parser.add_argument("--no-scale-batch-size", action="store_true")
 
     # All the available trainer options
     parser = Trainer.add_argparse_args(parser)
@@ -48,12 +48,16 @@ def train():
         )
     )
     tb_logger = loggers.TensorBoardLogger(pjoin(args.outdir, "logs/"))
+    kwargs = {}
+    if args.batch_size is not None:
+        kwargs["batch_size"] = args.batch_size
     trainer = Trainer.from_argparse_args(
         args,
         default_root_dir=args.outdir,
         logger=tb_logger,
         early_stop_callback=True,
         replace_sampler_ddp=False,
+        **kwargs
     )
     if args.lr_find_plot:
         model.setup(None)
@@ -62,11 +66,7 @@ def train():
         fig.show()
         input()
         return
-    if (
-        not args.fast_dev_run
-        and not args.overfit_batches
-        and not args.no_scale_batch_size
-    ):
+    if not args.fast_dev_run and not args.overfit_batches and args.batch_size is None:
         trainer.scale_batch_size(model, init_val=4096)
     trainer.fit(model)
     if args.test:
