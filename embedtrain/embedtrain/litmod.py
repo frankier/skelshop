@@ -99,6 +99,9 @@ class MetGcnLit(LightningModule):
             self.loss = losses.MultiSimilarityLoss(10, 50, 0.7)
             self.miner = miners.MultiSimilarityMiner(epsilon=0.5)
 
+        self.val_tester = None
+        self.test_tester = None
+
     def setup(self, stage):
         dataset = self.dataset
         if self.hparams.mode == "prod":
@@ -106,7 +109,6 @@ class MetGcnLit(LightningModule):
             sample_weights = dataset.get_sample_weights()
             self.val_dataset = Subset(dataset, [])
             self.test_dataset = Subset(dataset, [])
-            self.val_tester = None
         else:
             train_val_idxs = []
             train_val_clses = []
@@ -128,8 +130,6 @@ class MetGcnLit(LightningModule):
             self.val_dataset = Subset(dataset, val_idxs)
             self.test_dataset = Subset(dataset, test_idxs)
 
-            self.val_tester = self.setup_validation_tester()
-
         self.train_sampler = WeightedRandomSampler(
             weights=sample_weights,
             num_samples=len(sample_weights) * 20,
@@ -143,6 +143,14 @@ class MetGcnLit(LightningModule):
         self.test_dataset = self.mk_data_pipeline(self.test_dataset, no_aug=True)
 
     # *Common
+
+    @staticmethod
+    def ges_acc_flat(all_accuracies):
+        res = {}
+        for seg, accs in all_accuracies.items():
+            for name, acc in accs.items():
+                res[f"ges_{seg}_{name}"] = acc
+        return res
 
     def batch_loss(self, batch):
         x, y = batch
@@ -218,12 +226,24 @@ class MetGcnLit(LightningModule):
         loss = self.batch_loss(batch)
         return {"val_loss": loss, "log": {"val_loss": loss}}
 
-    def setup_validation_tester(self):
-        return testers.GlobalEmbeddingSpaceTester(
-            dataloader_num_workers=4,
-            data_device=self.device,
-            end_of_testing_hook=self.end_of_testing_hook,
-        )
+    def get_val_tester(self) -> testers.GlobalEmbeddingSpaceTester:
+        if self.val_tester is None:
+            self.val_tester = testers.GlobalEmbeddingSpaceTester(
+                dataloader_num_workers=4,
+                data_device=self.device,
+                end_of_testing_hook=self.end_of_testing_hook,
+            )
+        return self.val_tester
+
+    def get_test_tester(self) -> testers.GlobalEmbeddingSpaceTester:
+        if self.test_tester is None:
+            self.test_tester = testers.GlobalEmbeddingSpaceTester(
+                "compared_to_sets_combined",
+                dataloader_num_workers=4,
+                data_device=self.device,
+                end_of_testing_hook=self.end_of_testing_hook,
+            )
+        return self.test_tester
 
     def end_of_testing_hook(self, tester):
         # Add embedding for projector / reprojection
@@ -236,10 +256,11 @@ class MetGcnLit(LightningModule):
             )
 
     def validation_epoch_end(self, outputs):
-        if self.val_tester is None:
+        if self.hparams.mode == "prod":
             return
         val_loss_mean = torch.stack([x["val_loss"] for x in outputs]).mean()
-        self.val_tester.test(
+        tester = self.get_val_tester()
+        tester.test(
             {"train": self.train_dataset, "val": self.val_dataset,},
             self.current_epoch,
             self,
@@ -247,7 +268,7 @@ class MetGcnLit(LightningModule):
         )
         return {
             "val_loss": val_loss_mean,
-            "global_embedding_space_accuracies": self.val_tester.all_accuracies,
+            "log": self.ges_acc_flat(tester.all_accuracies),
         }
 
     def val_dataloader(self):
@@ -262,12 +283,7 @@ class MetGcnLit(LightningModule):
     def test_epoch_end(self, outputs):
         if self.hparams.mode == "prod":
             return
-        tester = testers.GlobalEmbeddingSpaceTester(
-            "compared_to_sets_combined",
-            dataloader_num_workers=4,
-            data_device=self.device,
-            end_of_testing_hook=self.end_of_testing_hook,
-        )
+        tester = self.get_test_tester()
         tester.test(
             {
                 "train": self.train_dataset,
@@ -278,7 +294,7 @@ class MetGcnLit(LightningModule):
             self,
             splits_to_eval=["test"],
         )
-        return {"global_embedding_space_accuracies": tester.all_accuracies}
+        return {"log": self.ges_acc_flat(tester.all_accuracies)}
 
     def test_dataloader(self):
         return self.mk_data_loader(self.test_dataset, sampler=self.test_sampler)
