@@ -25,9 +25,10 @@ def parse_args():
     # Model specific args
     parser = MetGcnLit.add_model_specific_args(parser)
 
-    # Diagnostic modes
+    # Diagnostic modes / trainer stuff
     parser.add_argument("--lr-find-plot", action="store_true")
     parser.add_argument("--test", action="store_true")
+    parser.add_argument("--no-scale-batch-size", action="store_true")
 
     # All the available trainer options
     parser = Trainer.add_argparse_args(parser)
@@ -61,7 +62,11 @@ def train():
         fig.show()
         input()
         return
-    if not args.fast_dev_run and not args.overfit_batches:
+    if (
+        not args.fast_dev_run
+        and not args.overfit_batches
+        and not args.no_scale_batch_size
+    ):
         trainer.scale_batch_size(model, init_val=4096)
     trainer.fit(model)
     if args.test:
