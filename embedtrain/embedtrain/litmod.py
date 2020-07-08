@@ -1,20 +1,10 @@
 from typing import Any, Dict, List
 
-import numpy as np
 import torch
-import umap
-from catalyst.data.sampler import DistributedSamplerWrapper
-from cycler import cycler
-from matplotlib import pyplot as plt
 from pytorch_lightning.core.lightning import LightningModule
 from pytorch_metric_learning import losses, miners, testers
 from sklearn.model_selection import train_test_split as single_train_test_split
-from torch.utils.data import (
-    DataLoader,
-    DistributedSampler,
-    Subset,
-    WeightedRandomSampler,
-)
+from torch.utils.data import DataLoader, Subset, WeightedRandomSampler
 
 from skeldump.skelgraphs.reducer import SkeletonReducer
 
@@ -23,7 +13,6 @@ from .embed_skels import EMBED_SKELS
 from .flex_st_gcn import FlexStGcn
 from .graph import GraphAdapter
 from .pt_datasets import BodySkeletonDataset, DataPipeline, HandSkeletonDataset
-from .utils import save_fig_np
 
 
 class MetGcnLit(LightningModule):
@@ -152,10 +141,6 @@ class MetGcnLit(LightningModule):
         self.train_dataset = self.mk_data_pipeline(self.train_dataset)
         self.val_dataset = self.mk_data_pipeline(self.val_dataset)
         self.test_dataset = self.mk_data_pipeline(self.test_dataset, no_aug=True)
-        if self.use_ddp or self.use_ddp2:
-            self.train_sampler = DistributedSamplerWrapper(self.train_sampler)
-            self.val_sampler = DistributedSampler()
-            self.test_sampler = DistributedSampler()
 
     # *Common
 
@@ -235,35 +220,9 @@ class MetGcnLit(LightningModule):
 
     def setup_validation_tester(self):
         return testers.GlobalEmbeddingSpaceTester(
-            visualizer=umap.UMAP(),
-            visualizer_hook=self.visualizer_hook,
             dataloader_num_workers=4,
             data_device=self.device,
-        )
-
-    def visualizer_hook(
-        self, umapper, umap_embeddings, labels, split_name, keyname, *args
-    ):
-        # Plotting
-        label_set = np.unique(labels)
-        num_classes = len(label_set)
-        plt.figure(figsize=(20, 15))
-        plt.gca().set_prop_cycle(
-            cycler(
-                "color",
-                [plt.cm.nipy_spectral(i) for i in np.linspace(0, 0.9, num_classes)],
-            )
-        )
-        for i in range(num_classes):
-            idx = labels == label_set[i]
-            plt.plot(
-                umap_embeddings[idx, 0], umap_embeddings[idx, 1], ".", markersize=1
-            )
-        # Log image
-        self.logger.experiment.add_image(
-            f"umap_plot_{split_name}_{keyname}",
-            save_fig_np(plt.gcf()),
-            self.global_step,
+            end_of_testing_hook=self.end_of_testing_hook,
         )
 
     def end_of_testing_hook(self, tester):
@@ -305,10 +264,9 @@ class MetGcnLit(LightningModule):
             return
         tester = testers.GlobalEmbeddingSpaceTester(
             "compared_to_sets_combined",
-            visualizer=umap.UMAP(),
-            visualizer_hook=self.visualizer_hook,
             dataloader_num_workers=4,
             data_device=self.device,
+            end_of_testing_hook=self.end_of_testing_hook,
         )
         tester.test(
             {
