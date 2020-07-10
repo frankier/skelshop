@@ -48,16 +48,12 @@ def train():
         )
     )
     tb_logger = loggers.TensorBoardLogger(pjoin(args.outdir, "logs/"))
-    kwargs = {}
-    if args.batch_size is not None:
-        kwargs["batch_size"] = args.batch_size
     trainer = Trainer.from_argparse_args(
         args,
         default_root_dir=args.outdir,
         logger=tb_logger,
         early_stop_callback=True,
         replace_sampler_ddp=False,
-        **kwargs
     )
     if args.lr_find_plot:
         model.setup(None)
