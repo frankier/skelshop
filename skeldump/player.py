@@ -99,8 +99,10 @@ class PlayerBase(ABC):
             self.seek_to_time(target_seconds)
         elif event.type == pg.KEYDOWN and event.key == pg.K_o:
             self.osd_disp = not self.osd_disp
+            self.disp()
         elif event.type == pg.KEYDOWN and event.unicode in ("h", "?"):
             self.help_disp = not self.help_disp
+            self.disp()
         elif event.type == pg.MOUSEBUTTONDOWN:
             x, y = pg.mouse.get_pos()
             print(f"{self.frame_info()}")

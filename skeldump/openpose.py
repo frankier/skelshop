@@ -1,12 +1,20 @@
 import logging
 
 from .pipebase import PipelineStageBase
-from .pose import PoseBody25, PoseBody25All, PoseBody25Hands, PoseBody135, PoseBundle
+from .pose import (
+    PoseBody25,
+    PoseBody25All,
+    PoseBody25Face,
+    PoseBody25Hands,
+    PoseBody135,
+    PoseBundle,
+    PoseFace,
+)
 
 logger = logging.getLogger(__name__)
 
 
-MODES = ["BODY_25_ALL", "BODY_25_HANDS", "BODY_25", "BODY_135"]
+MODES = ["BODY_25_ALL", "BODY_25_HANDS", "BODY_25", "BODY_135", "FACE", "BODY_25_FACE"]
 
 
 POSE_CLASSES = {
@@ -14,10 +22,19 @@ POSE_CLASSES = {
     "BODY_25_HANDS": PoseBody25Hands,
     "BODY_25": PoseBody25,
     "BODY_135": PoseBody135,
+    "FACE": PoseFace,
+    "BODY_25_FACE": PoseBody25Face,
 }
 
 
-LIMBS = {"BODY_25_ALL": 135, "BODY_25_HANDS": 65, "BODY_25": 25, "BODY_135": 135}
+LIMBS = {
+    "BODY_25_ALL": 135,
+    "BODY_25_HANDS": 65,
+    "BODY_25": 25,
+    "BODY_135": 135,
+    "FACE": 70,
+    "BODY_25_FACE": 95,
+}
 
 
 def print_all(datum, print=print):
@@ -38,6 +55,8 @@ def mode_conf(mode):
         return {"model_pose": "BODY_25"}
     elif mode == "BODY_135":
         return {"model_pose": "BODY_135"}
+    elif mode == "BODY_25_FACE":
+        return {"model_pose": "BODY_25", "face": True}
     else:
         assert False
 

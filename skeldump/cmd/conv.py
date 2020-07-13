@@ -8,6 +8,7 @@ from os.path import join as pjoin
 import click
 
 from skeldump.dump import add_fmt_metadata, add_metadata, write_shots
+from skeldump.infmt.ordered_tar import ordered_tar_source
 from skeldump.infmt.tar import ShardedJsonDumpSource, iter_tarinfos
 from skeldump.infmt.zip import zip_json_source
 from skeldump.io import AsIfOrdered, UnsegmentedWriter
@@ -19,6 +20,8 @@ def write_conv(h5f, mode, basename, json_source, input_fmt):
     limbs = LIMBS[mode]
     frame_iter = AsIfOrdered(json_source)
     write_shots(h5f, limbs, frame_iter, writer_cls=UnsegmentedWriter)
+    if basename is None:
+        basename = json_source.basename
     video = basename.rsplit("/", 1)[-1] + ".mp4"
     add_metadata(h5f, video, json_source.num_frames, mode, limbs)
     add_fmt_metadata(h5f, "unseg", False)
@@ -107,11 +110,18 @@ class TarInfosProcessor:
 
 
 @click.command()
-@click.argument("input_fmt", type=click.Choice(["monolithic-tar", "single-zip"]))
+@click.argument(
+    "input_fmt", type=click.Choice(["monolithic-tar", "single-zip", "ordered-tar"])
+)
 @click.argument("legacy_dump", type=click.Path(exists=True))
 @click.argument("out", type=click.Path(), required=False)
 @click.option("--mode", type=click.Choice(MODES), required=True)
-@click.option("--cores", type=int, default=1, help="")
+@click.option(
+    "--cores",
+    type=int,
+    default=1,
+    help="Number of cores to use (only for monolithic-tar)",
+)
 @click.option("--suppress-end-fail/--no-suppress-end-fail", default=True)
 @click.option("--skip-existing/--overwrite-existing", default=False)
 def conv(input_fmt, legacy_dump, out, mode, cores, suppress_end_fail, skip_existing):
@@ -122,6 +132,15 @@ def conv(input_fmt, legacy_dump, out, mode, cores, suppress_end_fail, skip_exist
     single-zip, otherwise it is the base of a directory tree which will be
     created during processing.
     """
+    if input_fmt != "monolithic-tar":
+        if cores != 1:
+            raise click.UsageError(
+                "--cores must be 1 for INPUT_FMT other than monolithic-tar"
+            )
+        if out is None:
+            raise click.UsageError(
+                "OUT required for INPUT_FMT other than monolithic-tar"
+            )
     if input_fmt == "monolithic-tar":
         set_start_method("forkserver")
         if out is None:
@@ -139,12 +158,12 @@ def conv(input_fmt, legacy_dump, out, mode, cores, suppress_end_fail, skip_exist
         for new_stats in processor:
             stats += new_stats
         print("Stats", stats)
-    elif input_fmt == "single-zip":
-        if cores != 1:
-            raise click.UsageError("--cores must be 1 for single-zip")
-        if out is None:
-            raise click.UsageError("Out required when run with single-zip")
-        with h5out(out) as h5f, zip_json_source(mode, legacy_dump) as json_source:
-            write_conv(h5f, mode, json_source.basename, json_source, "single-zip")
+    elif input_fmt in ("single-zip", "ordered-tar"):
+        if input_fmt == "single-zip":
+            json_source_ctx = zip_json_source(mode, legacy_dump)
+        else:
+            json_source_ctx = ordered_tar_source(mode, legacy_dump)
+        with h5out(out) as h5f, json_source_ctx as json_source:
+            write_conv(h5f, mode, None, json_source, input_fmt)
     else:
         assert False

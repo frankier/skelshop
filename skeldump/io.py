@@ -59,10 +59,11 @@ class UnsegmentedWriter:
         for limb_idx, limb in get_pose_nz(pose):
             new_data.append(limb)
             new_indices.append(limb_idx)
-        grow_ds(data, len(new_data))
-        grow_ds(indices, len(new_indices))
-        data[-len(new_data) :] = new_data
-        indices[-len(new_indices) :] = new_indices
+        if new_data:
+            grow_ds(data, len(new_data))
+            grow_ds(indices, len(new_indices))
+            data[-len(new_data) :] = new_data
+            indices[-len(new_indices) :] = new_indices
         self.pose_grps[pose_id][-1] = frame_num
 
     def start_shot(self, start_frame=None):

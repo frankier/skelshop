@@ -152,6 +152,45 @@ class PoseBody25All(PoseBody25):
         )
 
 
+class PoseFace(PoseBody25):
+    """
+    OpenPose's face
+    """
+
+    @classmethod
+    def from_parts(cls, face):
+        return cls.from_keypoints(face)
+
+    @classmethod
+    def from_datum(cls, datum, idx):
+        return cls.from_parts(datum.faceKeypoints[idx],)
+
+    @classmethod
+    def from_json(cls, person):
+        return cls.from_parts(json_to_np(person["face_keypoints_2d"]),)
+
+
+class PoseBody25Face(PoseBody25):
+    """
+    OpenPose's BODY_25 + face
+    """
+
+    @classmethod
+    def from_parts(cls, pose, face):
+        return cls.from_keypoints(np.vstack([pose, face]))
+
+    @classmethod
+    def from_datum(cls, datum, idx):
+        return cls.from_parts(datum.poseKeypoints[idx], datum.faceKeypoints[idx],)
+
+    @classmethod
+    def from_json(cls, person):
+        return cls.from_parts(
+            json_to_np(person["pose_keypoints_2d"]),
+            json_to_np(person["face_keypoints_2d"]),
+        )
+
+
 class PoseBody135(PoseBody25):
     """
     OpenPose's BODY_135
