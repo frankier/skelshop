@@ -15,6 +15,9 @@ from skeldump.pipeline import pipeline_options
 @click.option("--start-frame", type=int, default=0)
 @click.option("--end-frame", type=int, default=None)
 def filter(h5infn, h5outfn, pipeline, start_frame, end_frame):
+    """
+    Apply tracking to an untracked HDF5 pose dump.
+    """
     with h5py.File(h5infn, "r") as h5in, h5py.File(h5outfn, "w") as h5out:
         for attr, val in h5in.attrs.items():
             h5out.attrs[attr] = val

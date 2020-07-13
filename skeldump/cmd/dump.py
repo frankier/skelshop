@@ -18,6 +18,12 @@ from skeldump.utils.h5py import h5out
 @click.option("--debug/--no-debug")
 @pipeline_options(allow_empty=True)
 def dump(video, h5fn, mode, model_folder, pipeline, debug):
+    """
+    Create a HDF5 pose dump from a video using OpenPose.
+
+    This command optionally applies steps from the tracking/segmentation
+    pipeline.
+    """
     num_frames = count_frames(video)
     with h5out(h5fn) as h5f:
         limbs = LIMBS[mode]

@@ -24,10 +24,20 @@ logger = logging.getLogger(__name__)
 @click.argument("h5fn", type=click.Path(exists=True))
 @click.argument("videoin", type=click.Path(exists=True))
 @click.argument("videoout", type=click.Path())
-@click.option("--posetrack/--no-posetrack")
+@click.option(
+    "--posetrack/--no-posetrack",
+    help="Whether to convert BODY_25 keypoints to PoseTrack-style keypoints",
+)
 @click.option("--scale", type=int, default=1)
-@click.option("--overlay/--no-overlay", default=True)
+@click.option(
+    "--overlay/--no-overlay",
+    default=True,
+    help="Whether to draw VIDEOIN below the stick figures or not",
+)
 def drawsticks(h5fn, videoin, videoout, posetrack, scale, overlay):
+    """
+    Output a video with stick figures from pose dump superimposed.
+    """
     with h5py.File(h5fn, "r") as h5f, cvw.load_video(videoin) as vid_read:
         if logger.isEnabledFor(logging.INFO):
             logging.info(

@@ -111,15 +111,16 @@ class TarInfosProcessor:
 @click.argument("legacy_dump", type=click.Path(exists=True))
 @click.argument("out", type=click.Path(), required=False)
 @click.option("--mode", type=click.Choice(MODES), required=True)
-@click.option("--cores", type=int, default=1)
-@click.option("--suppress_end_fail/--no-suppress-end-fail", default=True)
+@click.option("--cores", type=int, default=1, help="")
+@click.option("--suppress-end-fail/--no-suppress-end-fail", default=True)
 @click.option("--skip-existing/--overwrite-existing", default=False)
 def conv(input_fmt, legacy_dump, out, mode, cores, suppress_end_fail, skip_existing):
     """
-    Convert a LEGACY_DUMP in a given format into unsegmented hdf5 format OUT.
+    Convert a exiting dump from another format into HDF5 format.
 
-    OUT is a file path when run with single-zip, otherwise it is the base of a
-    directory tree which will be created during processing.
+    LEGACY_DUMP is the dump in the old format. OUT is a file path when run with
+    single-zip, otherwise it is the base of a directory tree which will be
+    created during processing.
     """
     if input_fmt == "monolithic-tar":
         set_start_method("forkserver")

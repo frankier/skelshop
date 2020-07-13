@@ -15,12 +15,18 @@ logger = logging.getLogger(__name__)
 @click.command()
 @click.argument("h5fn", type=click.Path(exists=True))
 @click.argument("videoin", type=click.Path(exists=True))
-@click.option("--posetrack/--no-posetrack")
+@click.option(
+    "--posetrack/--no-posetrack",
+    help="Whether to convert BODY_25 keypoints to PoseTrack-style keypoints",
+)
 @click.option("--seek-time", type=float)
 @click.option("--seek-frame", type=int)
 @click.option("--scale", type=int, default=1)
 @click.option("--paused/--playing")
 def playsticks(h5fn, videoin, posetrack, seek_time, seek_frame, scale, paused):
+    """
+    Play a video with stick figures from pose dump superimposed.
+    """
     from skeldump.player import UnsegPlayer, SegPlayer, PlayerBase
 
     with h5py.File(h5fn, "r") as h5f, cvw.load_video(videoin) as vid_read:
