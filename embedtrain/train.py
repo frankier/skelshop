@@ -27,7 +27,7 @@ def parse_args():
 
     # Diagnostic modes / trainer stuff
     parser.add_argument("--lr-find-plot", action="store_true")
-    parser.add_argument("--batch-size")
+    parser.add_argument("--batch-size", type=int)
     parser.add_argument("--test", action="store_true")
 
     # All the available trainer options
