@@ -1,5 +1,6 @@
-from more_itertools.recipes import pairwise
 from typing import Dict, Set
+
+from more_itertools.recipes import pairwise
 
 
 def flatten(nested):

@@ -313,7 +313,7 @@ def class_vis(image_base, out_path):
 @body_labels_option
 @click.option("--print-labels", is_flag=True)
 def num_classes(h5fin, skel_name, body_labels, print_labels):
-    from embedtrain.merge import map_cls, assert_all_mapped
+    from embedtrain.merge import assert_all_mapped, map_cls
 
     with h5py.File(h5fin, "r") as h5f:
         paths, labels = get_path_class_pairs(h5f, body_labels, skel_name == "HAND")

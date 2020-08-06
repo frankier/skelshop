@@ -27,7 +27,7 @@ def playsticks(h5fn, videoin, posetrack, seek_time, seek_frame, scale, paused):
     """
     Play a video with stick figures from pose dump superimposed.
     """
-    from skeldump.player import UnsegPlayer, SegPlayer, PlayerBase
+    from skeldump.player import PlayerBase, SegPlayer, UnsegPlayer
 
     with h5py.File(h5fn, "r") as h5f, cvw.load_video(videoin) as vid_read:
         vid_read = ScaledVideo(vid_read, scale)
