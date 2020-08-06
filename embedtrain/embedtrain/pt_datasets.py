@@ -1,3 +1,4 @@
+from abc import ABC, abstractmethod
 from collections import Counter
 from typing import Any, List, Tuple
 
@@ -5,11 +6,12 @@ import h5py
 import numpy as np
 import torch
 from ordered_set import OrderedSet
+from torch.utils.data import Dataset
 
 from embedtrain.merge import assert_all_mapped
 
 
-class DataPipeline(torch.utils.data.Dataset):
+class DataPipeline(Dataset):
     def __init__(self, data_source, pipeline=[]):
         self.data_source = data_source
         self.pipeline = []
@@ -38,7 +40,17 @@ class StratifiedVocab:
         return OrderedSet.union(*self.vocabs)
 
 
-class SkeletonDataset(torch.utils.data.Dataset):
+class SkeletonDataset(ABC, Dataset):
+    @property
+    @abstractmethod
+    def CLASSES_TOTAL(self):
+        ...
+
+    @property
+    @abstractmethod
+    def LEFT_OUT_EVAL(self):
+        ...
+
     def __init__(self, data_path, vocab=None):
         self.data_path = data_path
         self.init_done = False
@@ -107,6 +119,18 @@ class SkeletonDataset(torch.utils.data.Dataset):
             _, _, cls = self.data[index]
             samples_weights[swidx] = weights[cls]
         return samples_weights
+
+    @abstractmethod
+    def get_cls(self, name):
+        ...
+
+    @abstractmethod
+    def get_res(self, ds: h5py.Dataset):
+        ...
+
+    @abstractmethod
+    def get_mat(self, ds: h5py.Dataset):
+        ...
 
     def __len__(self):
         if not self.init_done:

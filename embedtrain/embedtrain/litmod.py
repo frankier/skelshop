@@ -4,7 +4,7 @@ import torch
 from pytorch_lightning.core.lightning import LightningModule
 from pytorch_metric_learning import losses, miners, testers
 from sklearn.model_selection import train_test_split as single_train_test_split
-from torch.utils.data import DataLoader, Subset, WeightedRandomSampler
+from torch.utils.data import DataLoader, Dataset, Subset, WeightedRandomSampler
 
 from skeldump.skelgraphs.reducer import SkeletonReducer
 
@@ -12,13 +12,21 @@ from . import pt_tb_monkey  # noqa
 from .embed_skels import EMBED_SKELS
 from .flex_st_gcn import FlexStGcn
 from .graph import GraphAdapter
-from .pt_datasets import BodySkeletonDataset, DataPipeline, HandSkeletonDataset
+from .pt_datasets import (
+    BodySkeletonDataset,
+    DataPipeline,
+    HandSkeletonDataset,
+    SkeletonDataset,
+)
 
 
 class MetGcnLit(LightningModule):
     """
     Class for metric learning using mmskeleton GCNs using PyTorch Lightning.
     """
+
+    dataset: SkeletonDataset
+    train_dataset: Dataset
 
     # *Setup
 

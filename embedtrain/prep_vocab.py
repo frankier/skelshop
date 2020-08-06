@@ -4,7 +4,11 @@ import click
 
 from embedtrain.cmd_utils import body_labels_option
 from embedtrain.embed_skels import EMBED_SKELS
-from embedtrain.pt_datasets import BodySkeletonDataset, HandSkeletonDataset
+from embedtrain.pt_datasets import (
+    BodySkeletonDataset,
+    HandSkeletonDataset,
+    SkeletonDataset,
+)
 from skeldump.skelgraphs.reducer import SkeletonReducer
 
 
@@ -14,6 +18,7 @@ from skeldump.skelgraphs.reducer import SkeletonReducer
 @click.argument("outf", type=click.File("wb"))
 @body_labels_option
 def prep_vocab(h5fn, skel, outf, body_labels):
+    dataset: SkeletonDataset
     if skel == "HAND":
         dataset = HandSkeletonDataset(h5fn)
     else:
