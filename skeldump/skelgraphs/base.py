@@ -1,6 +1,5 @@
-from typing import Dict, Set
-
 from more_itertools.recipes import pairwise
+from typing import Dict, Set
 
 
 def flatten(nested):
@@ -64,3 +63,12 @@ class SkeletonType:
                     if outwards2 < outwards1 or outwards2 not in kp_idxs:
                         continue
                     yield kps[idx], kps[outwards1], kps[outwards2]
+
+    def export(self):
+        return {
+            "lines": self.lines,
+            "names": self.names,
+            "graph": self.graph,
+            "digraph": self.digraph,
+            "max_kp": self.max_kp,
+        }
