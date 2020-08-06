@@ -148,8 +148,9 @@ class HandSkeletonDataset(SkeletonDataset):
         assert_all_mapped()
 
     def get_cls(self, name):
-        from .dl_datasets import HandDataSet
         from embedtrain.merge import map_cls
+
+        from .dl_datasets import HandDataSet
 
         if HandDataSet.path_is_excluded(name):
             return None

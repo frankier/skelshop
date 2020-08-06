@@ -164,11 +164,11 @@ class MetGcnLit(LightningModule):
 
     def mk_data_pipeline(self, dataset, no_aug=False):
         from mmskeleton.datasets.skeleton import (
-            normalize_by_resolution,
             mask_by_visibility,
+            normalize_by_resolution,
             simulate_camera_moving,
-            transpose,
             to_tuple,
+            transpose,
         )
 
         aug_steps: List[Dict[str, Any]] = []
