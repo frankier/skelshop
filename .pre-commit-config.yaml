@@ -7,12 +7,8 @@ repos:
     rev: 3.8.2
     hooks:
     -   id: flake8
--   repo: https://github.com/asottile/seed-isort-config
-    rev: ae09e01635e596c87bd9ca33565a65134200881c
-    hooks:
-    -   id: seed-isort-config
 -   repo: git://github.com/timothycrosley/isort 
-    rev: master
+    rev: 5.3.0
     hooks:
     - id: isort
 -   repo: https://github.com/pre-commit/mirrors-mypy
