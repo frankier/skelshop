@@ -7,7 +7,8 @@ shopt -s extglob
 git submodule update --init --recursive
 # Tensorflow has over restrictive dependency versions
 # Install before and then our own versions get to overwrite its
-poetry run pip install tensorflow==2.2.0
+poetry install $@
+poetry run pip install tensorflow==2.3.0
 poetry install $@
 
 PKGS="$(poetry env list --full-path | cut -d' ' -f1)"
@@ -23,4 +24,4 @@ echo "$(pwd)/submodules/lighttrack/graph/torchlight" > "$SITE/torchlight.pth"
 
 poetry run pip install -e $(pwd)/submodules/opencv_wrapper
 poetry run pip install -e $(pwd)/submodules/ufunclab
-poetry run pip install -e $(pwd)/submodules/mmskeleton
+FORCE_CUDA=1 poetry run pip install -e $(pwd)/submodules/mmskeleton
