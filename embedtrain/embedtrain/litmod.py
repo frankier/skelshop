@@ -1,3 +1,4 @@
+from time import perf_counter
 from typing import Any, Dict, List
 
 import torch
@@ -43,6 +44,7 @@ class MetGcnLit(LightningModule):
         # Config
         parser.add_argument("--no-aug", action="store_true")
         parser.add_argument("--include-score", action="store_true")
+        parser.add_argument("--tester-device")
         return parser
 
     def __init__(
@@ -58,12 +60,14 @@ class MetGcnLit(LightningModule):
         vocab=None,
         include_score=False,
         body_labels=None,
+        tester_device=None,
         **kwargs,
     ):
         super().__init__()
         self.data_path = h5fn
         self.hparams.skel_graph_name = graph
         self.skel_graph = SkeletonReducer(EMBED_SKELS[graph])
+        self.tester_device = tester_device
         self.hparams.embed_size = embed_size
         self.hparams.loss_name = loss
         if graph == "HAND":
@@ -238,7 +242,9 @@ class MetGcnLit(LightningModule):
         if self.val_tester is None:
             self.val_tester = testers.GlobalEmbeddingSpaceTester(
                 dataloader_num_workers=4,
-                data_device=self.device,
+                data_device=self.tester_device
+                if self.tester_device is not None
+                else self.device,
                 end_of_testing_hook=self.end_of_testing_hook,
             )
         return self.val_tester
@@ -248,7 +254,9 @@ class MetGcnLit(LightningModule):
             self.test_tester = testers.GlobalEmbeddingSpaceTester(
                 "compared_to_sets_combined",
                 dataloader_num_workers=4,
-                data_device=self.device,
+                data_device=self.tester_device
+                if self.tester_device is not None
+                else self.device,
                 end_of_testing_hook=self.end_of_testing_hook,
             )
         return self.test_tester
@@ -268,12 +276,14 @@ class MetGcnLit(LightningModule):
             return
         val_loss_mean = torch.stack([x["val_loss"] for x in outputs]).mean()
         tester = self.get_val_tester()
+        start = perf_counter()
         tester.test(
             {"train": self.train_dataset, "val": self.val_dataset,},
             self.current_epoch,
             self,
             splits_to_eval=["val"],
         )
+        print("Validation tester took {}s".format(perf_counter() - start))
         return {
             "val_loss": val_loss_mean,
             "log": self.ges_acc_flat(tester.all_accuracies),
