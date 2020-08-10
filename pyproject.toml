@@ -17,8 +17,8 @@ h5py = "^2.10.0"
 imutils = "^0.5.3"
 click = "^7.1.2"
 opencv-python-headless = "^4.2.0"
-torch = "^1.5.1"
-torchvision = "^0.6.0"
+torch = "^1.6.0"
+torchvision = "^0.7.0"
 more_itertools = "^8.3.0"
 click_log = "^0.3.2"
 ordered-set = "^4.0.1"
@@ -39,7 +39,7 @@ tensorboard = {version = "^2.2.2", optional = true}
 scikit-multilearn = {git = "https://github.com/frankier/scikit-multilearn.git", rev = "142f701b5e210db4a65d6518bee19d76931ec72d", optional = true}
 pytorch_lightning = {version = "^0.8.3", optional = true}
 pycocotools = {version = "^2.0.1", optional = true}
-pytorch_metric_learning = {version = "^0.9.88", optional = true}
+pytorch_metric_learning = {version = "^0.9.90", optional = true}
 chardet = {version = "^3.0.4", optional = true}
 requests = {version = "^2.24.0", optional = true}
 umap-learn = {version = "^0.1.1", optional = true}
