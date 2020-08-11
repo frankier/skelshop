@@ -43,7 +43,7 @@ class StratifiedVocab:
 class SkeletonDataset(ABC, Dataset):
     @property
     @abstractmethod
-    def CLASSES_TOTAL(self):
+    def CLASSES_TOTAL(self) -> int:
         ...
 
     @property

@@ -28,6 +28,7 @@ class MetGcnLit(LightningModule):
 
     dataset: SkeletonDataset
     train_dataset: Dataset
+    num_classes: int
 
     # *Setup
 
@@ -52,7 +53,7 @@ class MetGcnLit(LightningModule):
         h5fn,
         mode="eval",
         graph="HAND",
-        embed_size=64,
+        embed_size: int = 64,
         loss="nsm",
         batch_size=32,
         lr=0.001,
@@ -104,11 +105,13 @@ class MetGcnLit(LightningModule):
         # Could optimise...
         if self.hparams.loss_name == "nsm":
             self.loss = losses.NormalizedSoftmaxLoss(
-                0.07, self.hparams.embed_size, self.num_classes
+                num_classes=self.num_classes,
+                embedding_size=self.hparams.embed_size,
+                temperature=0.07,
             )
         else:
             assert self.hparams.loss_name == "msl"
-            self.loss = losses.MultiSimilarityLoss(10, 50, 0.7)
+            self.loss = losses.MultiSimilarityLoss(alpha=10, beta=50, base=0.7)
             self.miner = miners.MultiSimilarityMiner(epsilon=0.5)
 
         self.val_tester = None
@@ -238,27 +241,25 @@ class MetGcnLit(LightningModule):
         loss = self.batch_loss(batch)
         return {"val_loss": loss, "log": {"val_loss": loss}}
 
+    def mk_tester(self, *args, **kwargs):
+        return testers.GlobalEmbeddingSpaceTester(
+            *args,
+            dataloader_num_workers=4,
+            data_device=self.tester_device
+            if self.tester_device is not None
+            else self.device,
+            end_of_testing_hook=self.end_of_testing_hook,
+            **kwargs,
+        )
+
     def get_val_tester(self) -> testers.GlobalEmbeddingSpaceTester:
         if self.val_tester is None:
-            self.val_tester = testers.GlobalEmbeddingSpaceTester(
-                dataloader_num_workers=4,
-                data_device=self.tester_device
-                if self.tester_device is not None
-                else self.device,
-                end_of_testing_hook=self.end_of_testing_hook,
-            )
+            self.val_tester = self.mk_tester()
         return self.val_tester
 
     def get_test_tester(self) -> testers.GlobalEmbeddingSpaceTester:
         if self.test_tester is None:
-            self.test_tester = testers.GlobalEmbeddingSpaceTester(
-                "compared_to_sets_combined",
-                dataloader_num_workers=4,
-                data_device=self.tester_device
-                if self.tester_device is not None
-                else self.device,
-                end_of_testing_hook=self.end_of_testing_hook,
-            )
+            self.test_tester = self.mk_tester("compared_to_sets_combined")
         return self.test_tester
 
     def end_of_testing_hook(self, tester):
