@@ -175,9 +175,8 @@ rule train_pose:
 rule hand_pilots_trained:
     input:
         [
-            f"{TRAIN_LOG}/hand/{loss}-{aug}-{size}"
+            f"{TRAIN_LOG}/hand/{loss}-yesaug-{size}"
             for loss in ["nsm", "msl"]
-            for aug in ["yesaug", "noaug"]
             for size in ["32", "64", "128"]
         ]
 
