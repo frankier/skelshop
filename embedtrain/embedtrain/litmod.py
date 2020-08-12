@@ -269,7 +269,7 @@ class MetGcnLit(LightningModule):
                 embeddings,
                 labels,
                 global_step=self.global_step,
-                tag="proj_{split_name}",
+                tag=f"proj_{split_name}",
             )
 
     def validation_epoch_end(self, outputs):
