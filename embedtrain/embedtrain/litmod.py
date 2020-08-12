@@ -287,7 +287,13 @@ class MetGcnLit(LightningModule):
         print("Validation tester took {}s".format(perf_counter() - start))
         return {
             "val_loss": val_loss_mean,
-            "log": self.ges_acc_flat(tester.all_accuracies),
+            "val_map": tester.all_accuracies["val"][
+                "mean_average_precision_at_r_level0"
+            ],
+            "log": {
+                "val_loss": val_loss_mean,
+                **self.ges_acc_flat(tester.all_accuracies),
+            },
         }
 
     def val_dataloader(self):

@@ -4,6 +4,7 @@ from collections import ChainMap
 from os.path import join as pjoin
 
 from pytorch_lightning import Trainer, loggers
+from pytorch_lightning.callbacks import EarlyStopping
 
 from embedtrain.litmod import MetGcnLit
 
@@ -48,11 +49,14 @@ def train():
         )
     )
     tb_logger = loggers.TensorBoardLogger(pjoin(args.outdir, "logs/"))
+    early_stop_callback = EarlyStopping(
+        monitor="val_map", patience=6, strict=True, verbose=True, mode="max"
+    )
     trainer = Trainer.from_argparse_args(
         args,
         default_root_dir=args.outdir,
         logger=tb_logger,
-        early_stop_callback=True,
+        early_stop_callback=early_stop_callback,
         replace_sampler_ddp=False,
     )
     if args.lr_find_plot:
