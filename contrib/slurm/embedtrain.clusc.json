@@ -27,6 +27,6 @@
         "partition": "gpu",
         "gres": "gpu:1",
         "mem": "40gb",
-        "constraint": "gpu4v100|gpu2v100|gpup100"
+        "constraint": "gpu4v100|gpu2v100"
     }
 }
