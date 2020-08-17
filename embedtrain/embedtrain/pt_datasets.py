@@ -9,6 +9,7 @@ from ordered_set import OrderedSet
 from torch.utils.data import Dataset
 
 from embedtrain.merge import assert_all_mapped
+from skeldump.skelgraphs.openpose import BODY_25_HANDS_LINES
 from skeldump.skelgraphs.utils import flip_kps_inplace
 from skeldump.utils.bbox import x1y1x2y2_to_xywh
 
@@ -377,7 +378,7 @@ class BodySkeletonDataset(SkeletonDataset):
             res, mat = self.norm_mat(mat_reduced)
             self.data.append((res, mat.astype(np.float32), result))
         mat_flip = mat_np[:]
-        flip_kps_inplace(self.skel_graph.sparse_skel.lines, mat_flip)
+        flip_kps_inplace(BODY_25_HANDS_LINES, mat_flip)
         if is_included(self.skel_graph.sparse_skel, mat_flip):
             mat_reduced = self.skel_graph.reduce_arr(mat_flip * [-1, -1, 0])
             res, mat = self.norm_mat(mat_reduced)
