@@ -55,6 +55,7 @@ UPPER_BODY_25_LINES = {
 
 
 FACE_LINES = {
+    # TODO: Are left/right in same order for this one?
     # Jaw
     "jaw": lrange(17),
     # Right eyebrow

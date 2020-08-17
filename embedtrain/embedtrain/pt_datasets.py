@@ -9,6 +9,8 @@ from ordered_set import OrderedSet
 from torch.utils.data import Dataset
 
 from embedtrain.merge import assert_all_mapped
+from skeldump.skelgraphs.utils import flip_kps_inplace
+from skeldump.utils.bbox import x1y1x2y2_to_xywh
 
 
 class DataPipeline(Dataset):
@@ -83,6 +85,11 @@ class SkeletonDataset(ABC, Dataset):
             return None
         return vocab.index(cls)
 
+    def load_item(self, name, obj):
+        result = self.cls_repr_name(self.vocab, name)
+        if result is not None:
+            self.data.append((self.get_res(obj), self.get_mat(obj), result))
+
     def lazy_init(self):
         # Do this lazily so HDF5 files is opened on each worker
         self.h5f = h5py.File(self.data_path, "r")
@@ -94,9 +101,7 @@ class SkeletonDataset(ABC, Dataset):
         def load_item(name, obj):
             if not isinstance(obj, h5py.Dataset):
                 return
-            result = self.cls_repr_name(self.vocab, name)
-            if result is not None:
-                self.data.append((self.get_res(obj), self.get_mat(obj), result))
+            self.load_item(name, obj)
 
         self.h5f.visititems(load_item)
         assert (
@@ -346,8 +351,34 @@ class BodySkeletonDataset(SkeletonDataset):
         return act_id
 
     def get_res(self, ds):
-        grp = ds.parent
-        return (grp.attrs["width"], grp.attrs["height"])
+        raise NotImplementedError("get_res not implemented")
 
     def get_mat(self, ds):
-        return self.skel_graph.reduce_arr(ds)
+        raise NotImplementedError("get_mat not implemented")
+
+    def norm_mat(self, mat):
+        from ufunclab import minmax
+
+        bbox = minmax(mat, axes=[(0,), (1,)])[:2]
+        bbox = np.transpose(bbox).reshape(-1)
+        xywh_bbox = x1y1x2y2_to_xywh(bbox)
+        origin = np.hstack([xywh_bbox[:2], [0]])
+        return xywh_bbox[2:], mat - origin
+
+    def load_item(self, name, mat):
+        from .utils import is_included
+
+        result = self.cls_repr_name(self.vocab, name)
+        if result is None:
+            return
+        mat_np = mat[()]
+        if is_included(self.skel_graph.sparse_skel, mat_np):
+            mat_reduced = self.skel_graph.reduce_arr(mat_np)
+            res, mat = self.norm_mat(mat_reduced)
+            self.data.append((res, mat.astype(np.float32), result))
+        mat_flip = mat_np[:]
+        flip_kps_inplace(self.skel_graph.sparse_skel.lines, mat_flip)
+        if is_included(self.skel_graph.sparse_skel, mat_flip):
+            mat_reduced = self.skel_graph.reduce_arr(mat_flip * [-1, -1, 0])
+            res, mat = self.norm_mat(mat_reduced)
+            self.data.append((res, mat.astype(np.float32), result))

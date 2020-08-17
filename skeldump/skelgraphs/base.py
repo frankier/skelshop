@@ -3,14 +3,6 @@ from typing import Dict, Set
 from more_itertools.recipes import pairwise
 
 
-def flatten(nested):
-    if isinstance(nested, dict):
-        for inner in nested.values():
-            yield from flatten(inner)
-    else:
-        yield nested
-
-
 class SkeletonType:
     def __init__(self, lines, names=None):
         self.lines = lines
@@ -25,11 +17,14 @@ class SkeletonType:
 
     @property
     def lines_flat(self):
+        from .utils import flatten
+
         yield from flatten(self.lines)
 
     def build_graphs(self):
         self.graph: Dict[int, Set[int]] = {}
         self.digraph: Dict[int, Set[int]] = {}
+        self.kp_idxs: Set[int] = set()
         for line in self.lines_flat:
             for n1, n2 in pairwise(line):
                 if n1 > n2:
@@ -37,6 +32,8 @@ class SkeletonType:
                 self.graph.setdefault(n1, set()).add(n2)
                 self.digraph.setdefault(n1, set()).add(n2)
                 self.digraph.setdefault(n2, set()).add(n1)
+                self.kp_idxs.add(n1)
+                self.kp_idxs.add(n2)
 
     def adj(self, idx):
         return self.graph[idx]
