@@ -180,6 +180,14 @@ rule hand_pilots_trained:
             for size in ["32", "64", "128"]
         ]
 
+rule body_pilots_trained:
+    input:
+        [
+            TRAIN_LOG + "/" + skel_name.lower() + "/msl-yesaug-" + size
+            for size in ["64", "128"]
+            for skel_name in BODY_EMBED_SKELS.keys()
+        ]
+
 rule all_best_trained:
     input:
         [
