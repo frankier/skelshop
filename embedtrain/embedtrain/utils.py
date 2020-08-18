@@ -4,8 +4,6 @@ import cv2
 import numpy as np
 from wcmatch.glob import GLOBSTAR, globmatch
 
-THRESH = 0.02
-
 
 def sane_globmatch(path, matchers):
     if len(matchers) == 0:
@@ -82,6 +80,6 @@ def is_included(skel, pose):
     for idx, (x, y, c) in enumerate(pose):
         if idx not in skel.kp_idxs:
             continue
-        if c < THRESH:
+        if c <= 0:
             return False
     return True
