@@ -4,7 +4,7 @@ from typing import Any, Dict, List
 import torch
 from pytorch_lightning.core.lightning import LightningModule
 from pytorch_metric_learning import losses, miners, testers
-from sklearn.model_selection import train_test_split as single_train_test_split
+from sklearn.model_selection import StratifiedShuffleSplit
 from torch.utils.data import DataLoader, Dataset, Subset, WeightedRandomSampler
 
 from skeldump.skelgraphs.reducer import SkeletonReducer
@@ -94,9 +94,9 @@ class MetGcnLit(LightningModule):
         )
 
         if self.hparams.mode == "prod":
-            self.num_classes = self.dataset.CLASSES_TOTAL
+            self.num_classes = self.dataset.num_classes()
         else:
-            self.num_classes = self.dataset.CLASSES_TOTAL - len(
+            self.num_classes = self.dataset.num_classes() - len(
                 self.dataset.LEFT_OUT_EVAL
             )
 
@@ -136,8 +136,11 @@ class MetGcnLit(LightningModule):
                     train_val_idxs.append(idx)
                     train_val_clses.append(cls)
 
-            train_idxs, val_idxs = single_train_test_split(
-                train_val_idxs, test_size=0.1, stratify=train_val_clses
+            shuffle_splitter = StratifiedShuffleSplit(
+                test_size=0.1, train_size=0.9, random_state=0
+            )
+            train_idxs, val_idxs = next(
+                shuffle_splitter.split(train_val_idxs, train_val_clses)
             )
 
             self.train_dataset = Subset(dataset, train_idxs)

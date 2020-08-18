@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 from collections import Counter
-from typing import Any, List, Tuple
+from typing import Any, Dict, List, Tuple
 
 import h5py
 import numpy as np
@@ -9,6 +9,7 @@ from ordered_set import OrderedSet
 from torch.utils.data import Dataset
 
 from embedtrain.merge import assert_all_mapped
+from embedtrain.utils import is_included
 from skeldump.skelgraphs.openpose import BODY_25_HANDS_LINES
 from skeldump.skelgraphs.utils import flip_kps_inplace
 from skeldump.utils.bbox import x1y1x2y2_to_xywh
@@ -44,10 +45,10 @@ class StratifiedVocab:
 
 
 class SkeletonDataset(ABC, Dataset):
-    @property
-    @abstractmethod
-    def CLASSES_TOTAL(self) -> int:
-        ...
+    def num_classes(self):
+        if not self.init_done:
+            self.lazy_init()
+        return len(self.vocab)
 
     @property
     @abstractmethod
@@ -105,9 +106,6 @@ class SkeletonDataset(ABC, Dataset):
             self.load_item(name, obj)
 
         self.h5f.visititems(load_item)
-        assert (
-            len(self.vocab) == self.CLASSES_TOTAL
-        ), "Expected {} classes, got {}".format(self.CLASSES_TOTAL, len(self.vocab))
 
     def get_sample_weights(self, idxs=None):
         if idxs is None:
@@ -160,8 +158,6 @@ class SkeletonDataset(ABC, Dataset):
 
 
 class HandSkeletonDataset(SkeletonDataset):
-    CLASSES_TOTAL = 58
-
     LEFT_OUT_EVAL = [
         # Similar pair (1/2 fingers up)
         ("NUS-Hand-Posture-Dataset-I", "g5"),
@@ -197,145 +193,31 @@ class HandSkeletonDataset(SkeletonDataset):
         return mat
 
 
-MPII_BLACKLISTED = [
-    2,
-    868,
-    12,
-    14,
-    40,
-    688,
-    45,
-    59,
-    63,
-    72,
-    77,
-    83,
-    90,
-    44,
-    50,
-    85,
-    852,
-    102,
-    429,
-    166,
-    187,
-    188,
-    28,
-    393,
-    42,
-    96,
-    875,
-    133,
-    147,
-    879,
-    943,
-    956,
-    178,
-    900,
-    182,
-    191,
-    882,
-    871,
-    322,
-    958,
-    308,
-    964,
-    311,
-    952,
-    921,
-    959,
-    318,
-    344,
-    345,
-    390,
-    922,
-    901,
-    444,
-    606,
-    310,
-    118,
-    153,
-    207,
-    5,
-    240,
-    243,
-    908,
-    298,
-    302,
-    873,
-    949,
-    843,
-    888,
-    383,
-    413,
-    437,
-    438,
-    616,
-    948,
-    481,
-    487,
-    496,
-    934,
-    595,
-    604,
-    613,
-    641,
-    951,
-    655,
-    668,
-    975,
-    8,
-    686,
-    804,
-    716,
-    719,
-    723,
-    724,
-    734,
-    738,
-    747,
-    781,
-    936,
-    939,
-]
-
-
 class BodySkeletonDataset(SkeletonDataset):
-    # Not all 646 classes implied by index actually present in data.  On the
-    # website there is mention `410 human activities' in MPII There are 629 in
-    # the actual data, which after blacklisting comes to...
-    CLASSES_TOTAL = 530
-
-    # Biggest class has 664, members, these all have 6 or less so less than 1%
-
     # miscellaneous
     LEFT_OUT_EVAL = [
-        x
-        for x in [
-            98,
-            532,
-            544,
-            765,
-            547,
-            189,
-            689,
-            890,
-            339,
-            891,
-            344,
-            892,
-            498,
-            481,
-            429,
-            622,
-            59,
-            893,
-            53,
-            982,
-            463,
-            606,
-        ]
-        if x not in MPII_BLACKLISTED
+        98,
+        532,
+        544,
+        765,
+        547,
+        189,
+        689,
+        890,
+        339,
+        891,
+        344,
+        892,
+        498,
+        481,
+        429,
+        622,
+        59,
+        893,
+        53,
+        982,
+        463,
+        606,
     ]
 
     def __init__(self, *args, skel_graph, body_labels, **kwargs):
@@ -347,7 +229,7 @@ class BodySkeletonDataset(SkeletonDataset):
         from .dl_datasets import BodyDataSet
 
         act_id = BodyDataSet.path_to_act_id(self.body_labels, name)
-        if act_id in MPII_BLACKLISTED or act_id == -1:
+        if act_id == -1:
             return None
         return act_id
 
@@ -366,20 +248,47 @@ class BodySkeletonDataset(SkeletonDataset):
         origin = np.hstack([xywh_bbox[:2], [0]])
         return xywh_bbox[2:], mat - origin
 
-    def load_item(self, name, mat):
-        from .utils import is_included
-
-        result = self.cls_repr_name(self.vocab, name)
-        if result is None:
+    def iter_mats(self, obj):
+        if not isinstance(obj, h5py.Dataset):
             return
-        mat_np = mat[()]
+        mat_np = obj[()]
         if is_included(self.skel_graph.sparse_skel, mat_np):
             mat_reduced = self.skel_graph.reduce_arr(mat_np)
-            res, mat = self.norm_mat(mat_reduced)
-            self.data.append((res, mat.astype(np.float32), result))
+            yield self.norm_mat(mat_reduced)
         mat_flip = mat_np[:]
         flip_kps_inplace(BODY_25_HANDS_LINES, mat_flip)
         if is_included(self.skel_graph.sparse_skel, mat_flip):
             mat_reduced = self.skel_graph.reduce_arr(mat_flip * [-1, -1, 0])
-            res, mat = self.norm_mat(mat_reduced)
-            self.data.append((res, mat.astype(np.float32), result))
+            yield self.norm_mat(mat_reduced)
+
+    def lazy_init(self):
+        self.init_done = True
+        grouped: Dict[int, List[Tuple[Tuple[int, int], np.ndarray]]] = {}
+        self.h5f = h5py.File(self.data_path, "r")
+
+        def load_item(name, obj):
+            result = self.get_cls(name)
+            if result is None:
+                return
+            for res, mat in self.iter_mats(obj):
+                grouped.setdefault(result, []).append((res, mat.astype(np.float32)))
+
+        # First pass
+        self.h5f.visititems(load_item)
+
+        # Build vocab
+        vocab_builder = StratifiedVocab(2)
+        for group, instances in grouped.items():
+            if len(instances) < 3:
+                continue
+            statum = 1 if group in self.LEFT_OUT_EVAL else 0
+            vocab_builder.add(group, statum)
+        self.vocab = vocab_builder.finalise()
+
+        # Build data
+        self.data: List[Tuple[Tuple[int, int], np.ndarray, Any]] = []
+        for group, instances in grouped.items():
+            if group not in self.vocab:
+                continue
+            for res, mat in instances:
+                self.data.append((res, mat, self.vocab.index(group)))
