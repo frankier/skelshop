@@ -96,9 +96,7 @@ class MetGcnLit(LightningModule):
         if self.hparams.mode == "prod":
             self.num_classes = self.dataset.num_classes()
         else:
-            self.num_classes = self.dataset.num_classes() - len(
-                self.dataset.LEFT_OUT_EVAL
-            )
+            self.num_classes = self.dataset.num_classes() - self.dataset.num_left_out()
 
         # Parameters are based on ones that seem reasonable given
         # https://github.com/KevinMusgrave/powerful-benchmarker
@@ -142,6 +140,8 @@ class MetGcnLit(LightningModule):
             train_idxs, val_idxs = next(
                 shuffle_splitter.split(train_val_idxs, train_val_clses)
             )
+            train_idxs = [train_val_idxs[idx] for idx in train_idxs]
+            val_idxs = [train_val_idxs[idx] for idx in val_idxs]
 
             self.train_dataset = Subset(dataset, train_idxs)
             sample_weights = dataset.get_sample_weights(train_idxs)

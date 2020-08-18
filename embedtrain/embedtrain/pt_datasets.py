@@ -50,6 +50,9 @@ class SkeletonDataset(ABC, Dataset):
             self.lazy_init()
         return len(self.vocab)
 
+    def num_left_out(self):
+        return len(self.LEFT_OUT_EVAL)
+
     @property
     @abstractmethod
     def LEFT_OUT_EVAL(self):
@@ -281,9 +284,10 @@ class BodySkeletonDataset(SkeletonDataset):
         for group, instances in grouped.items():
             if len(instances) < 3:
                 continue
-            statum = 1 if group in self.LEFT_OUT_EVAL else 0
-            vocab_builder.add(group, statum)
+            stratum = 1 if group in self.LEFT_OUT_EVAL else 0
+            vocab_builder.add(group, stratum)
         self.vocab = vocab_builder.finalise()
+        self._num_left_out = len(vocab_builder.vocabs[1])
 
         # Build data
         self.data: List[Tuple[Tuple[int, int], np.ndarray, Any]] = []
@@ -292,3 +296,8 @@ class BodySkeletonDataset(SkeletonDataset):
                 continue
             for res, mat in instances:
                 self.data.append((res, mat, self.vocab.index(group)))
+
+    def num_left_out(self):
+        if not self.init_done:
+            self.lazy_init()
+        return self._num_left_out
