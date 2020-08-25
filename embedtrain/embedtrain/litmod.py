@@ -64,39 +64,53 @@ class MetGcnLit(LightningModule):
         tester_device=None,
         **kwargs,
     ):
+        from argparse import Namespace
+
         super().__init__()
-        self.data_path = h5fn
-        self.hparams.skel_graph_name = graph
-        self.skel_graph = SkeletonReducer(EMBED_SKELS[graph])
-        self.tester_device = tester_device
-        self.hparams.embed_size = embed_size
-        self.hparams.loss_name = loss
-        if graph == "HAND":
-            self.dataset = HandSkeletonDataset(self.data_path, vocab=vocab)
+        if isinstance(h5fn, dict):
+            # FIXME: This seems to be the only way to get checkpoint loading
+            # working from the hand checkpoint. There must be a better way...
+            self.hparams = Namespace(**h5fn)
+            assert self.hparams.skel_graph_name == "HAND"
+            graph = self.hparams.skel_graph_name
+            self.skel_graph = SkeletonReducer(EMBED_SKELS[graph])
+            self.num_classes = 58 - 5
         else:
-            self.dataset = BodySkeletonDataset(
-                self.data_path,
-                vocab=vocab,
-                skel_graph=self.skel_graph,
-                body_labels=body_labels,
-            )
-        self.hparams.mode = mode
-        assert self.hparams.mode in ("eval", "prod")
-        self.batch_size = batch_size
-        self.hparams.lr = lr
-        self.hparams.no_aug = no_aug
-        self.hparams.include_score = include_score
+            self.data_path = h5fn
+            self.hparams.skel_graph_name = graph
+            self.skel_graph = SkeletonReducer(EMBED_SKELS[graph])
+            self.tester_device = tester_device
+            self.hparams.embed_size = embed_size
+            self.hparams.loss_name = loss
+            print("MetGcnLit", self.data_path)
+            if graph == "HAND":
+                self.dataset = HandSkeletonDataset(self.data_path, vocab=vocab)
+            else:
+                self.dataset = BodySkeletonDataset(
+                    self.data_path,
+                    vocab=vocab,
+                    skel_graph=self.skel_graph,
+                    body_labels=body_labels,
+                )
+            self.hparams.mode = mode
+            assert self.hparams.mode in ("eval", "prod")
+            self.batch_size = batch_size
+            self.hparams.lr = lr
+            self.hparams.no_aug = no_aug
+            self.hparams.include_score = include_score
+
+            if self.hparams.mode == "prod":
+                self.num_classes = self.dataset.num_classes()
+            else:
+                self.num_classes = (
+                    self.dataset.num_classes() - self.dataset.num_left_out()
+                )
 
         self.gcn = FlexStGcn(
             3 if self.hparams.include_score else 2,
             self.hparams.embed_size,
             GraphAdapter(self.skel_graph.dense_skel),
         )
-
-        if self.hparams.mode == "prod":
-            self.num_classes = self.dataset.num_classes()
-        else:
-            self.num_classes = self.dataset.num_classes() - self.dataset.num_left_out()
 
         # Parameters are based on ones that seem reasonable given
         # https://github.com/KevinMusgrave/powerful-benchmarker
