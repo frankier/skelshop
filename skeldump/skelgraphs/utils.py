@@ -31,6 +31,15 @@ def kp_pairs(lines):
             yield from kp_pairs(v)
 
 
+def swap_lines(lines):
+    for k, v in lines.items():
+        if is_left(k):
+            right_k = flip_joint_name(k)
+            lines[right_k], lines[k] = lines[k], lines[right_k]
+        elif not is_right(k) and isinstance(v, dict):
+            yield from swap_lines(v)
+
+
 def flip_kps_inplace(lines, kps):
     for left_kp_idx, right_kp_idx in kp_pairs(lines):
         kps[left_kp_idx], kps[right_kp_idx] = kps[right_kp_idx], kps[left_kp_idx]

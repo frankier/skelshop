@@ -4,7 +4,7 @@ from more_itertools.recipes import pairwise
 
 
 class SkeletonType:
-    def __init__(self, lines, names=None):
+    def __init__(self, lines, names=None, one_sided=None):
         self.lines = lines
         self.names = names
         self.build_graphs()
@@ -14,6 +14,7 @@ class SkeletonType:
                 if kp > self.max_kp:
                     self.max_kp = kp
         self.max_kp += 1
+        self.one_sided = one_sided
 
     @property
     def lines_flat(self):
@@ -63,10 +64,13 @@ class SkeletonType:
                     yield kps[idx], kps[outwards1], kps[outwards2]
 
     def export(self):
-        return {
+        res = {
             "lines": self.lines,
             "names": self.names,
             "graph": self.graph,
             "digraph": self.digraph,
             "max_kp": self.max_kp,
         }
+        if self.one_sided is not None:
+            res["one_sided"] = self.one_sided
+        return res

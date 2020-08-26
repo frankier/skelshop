@@ -95,8 +95,10 @@ HAND_LINES = {
 }
 
 
-def compose_body(body, left_hand=None, right_hand=None, face=None):
-    lines = {"body": body}
+def compose_body(body=None, left_hand=None, right_hand=None, face=None):
+    lines = {}
+    if body is not None:
+        lines["body"] = body
     if left_hand is not None:
         lines["left hand"] = root_0_at(HAND_LINES, 7, 25)
     if right_hand is not None:
@@ -109,7 +111,12 @@ def compose_body(body, left_hand=None, right_hand=None, face=None):
 BODY_25_HANDS_LINES = compose_body(BODY_25_LINES, HAND_LINES, HAND_LINES)
 BODY_135_LINES = compose_body(BODY_25_LINES, HAND_LINES, HAND_LINES, FACE_LINES)
 
-UPPER_BODY_25_LEFT_HAND_LINES = compose_body(UPPER_BODY_25_LINES, HAND_LINES)
+LEFT_HAND_IN_BODY_25_LINES = compose_body(left_hand=HAND_LINES)
+RIGHT_HAND_IN_BODY_25_LINES = compose_body(right_hand=HAND_LINES)
+UPPER_BODY_25_LEFT_HAND_LINES = compose_body(UPPER_BODY_25_LINES, left_hand=HAND_LINES)
+UPPER_BODY_25_RIGHT_HAND_LINES = compose_body(
+    UPPER_BODY_25_LINES, right_hand=HAND_LINES
+)
 UPPER_BODY_25_HANDS_LINES = compose_body(UPPER_BODY_25_LINES, HAND_LINES, HAND_LINES)
 UPPER_BODY_135_LINES = compose_body(
     UPPER_BODY_25_LINES, HAND_LINES, HAND_LINES, FACE_LINES
@@ -122,7 +129,18 @@ BODY_25_HANDS = SkeletonType(BODY_25_HANDS_LINES, BODY_25_JOINTS)
 BODY_135 = SkeletonType(BODY_135_LINES, BODY_25_JOINTS)
 
 UPPER_BODY_25 = SkeletonType(UPPER_BODY_25_LINES, BODY_25_JOINTS)
-UPPER_BODY_25_LEFT_HAND = SkeletonType(UPPER_BODY_25_LEFT_HAND_LINES, BODY_25_JOINTS)
+LEFT_HAND_IN_BODY_25 = SkeletonType(
+    LEFT_HAND_IN_BODY_25_LINES, BODY_25_JOINTS, one_sided="left"
+)
+RIGHT_HAND_IN_BODY_25 = SkeletonType(
+    RIGHT_HAND_IN_BODY_25_LINES, BODY_25_JOINTS, one_sided="right"
+)
+UPPER_BODY_25_LEFT_HAND = SkeletonType(
+    UPPER_BODY_25_LEFT_HAND_LINES, BODY_25_JOINTS, one_sided="left"
+)
+UPPER_BODY_25_RIGHT_HAND = SkeletonType(
+    UPPER_BODY_25_RIGHT_HAND_LINES, BODY_25_JOINTS, one_sided="right"
+)
 UPPER_BODY_25_HANDS = SkeletonType(UPPER_BODY_25_HANDS_LINES, BODY_25_JOINTS)
 UPPER_BODY_135 = SkeletonType(UPPER_BODY_135_LINES, BODY_25_JOINTS)
 
