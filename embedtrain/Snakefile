@@ -235,6 +235,7 @@ rule pre_embed_hands:
     params:
         file_base = lambda wc: strip_h5_ext(wc.input_h5)
     shell:
+        "mkdir -p " + PRE_EMBED_HAND + " && " +
         runscript("pre_embed") + " " +
         EMBED_FLAGS + " " +
         "{input.ckpt} " +
