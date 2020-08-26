@@ -1,4 +1,6 @@
 import re
+
+from os.path import join as pjoin
 from shutil import unpack_archive
 
 from embedtrain.dl_datasets import DataSet
@@ -50,15 +52,17 @@ def strip_h5_ext(name):
 
 def embed_inputs():
     if not EMBED_INPUT:
-        return
+        return []
+    res = []
     for path in Path(EMBED_INPUT).rglob('*_openpose.unsorted.h5'):
         name = path.name
-        yield pjoin(PRE_EMBED_HAND, name + ".done")
+        res.append(pjoin(PRE_EMBED_HAND, name + ".done"))
+    return res
 
 
 rule pre_embed_all:
     input:
-        embed_inputs()
+        [x for x in embed_inputs()]
 
 
 rule ds_download:
@@ -228,7 +232,7 @@ BEST_CKPT = f"{TRAIN_LOG}/hand/msl-yesaug-64/default/version_0/checkpoints/epoch
 
 rule pre_embed_hands:
     input:
-        ckpt = BEST_CKPT
+        ckpt = BEST_CKPT,
         input_h5 = pjoin(EMBED_INPUT, "{input_h5}")
     output:
         touch(pjoin(PRE_EMBED_HAND, "{input_h5}.done"))
@@ -241,4 +245,4 @@ rule pre_embed_hands:
         "{input.ckpt} " +
         EMBED_INPUT + " " +
         "{params.file_base}.lefthand.preembed.h5 " +
-        "{params.file_base}.righthand.preembed.h5 && " +
+        "{params.file_base}.righthand.preembed.h5"
