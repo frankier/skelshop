@@ -28,5 +28,12 @@
         "gres": "gpu:1",
         "mem": "40gb",
         "constraint": "gpu4v100|gpu2v100"
+    },
+    "pre_embed_hands": {
+        "time" : "7-00:00:00",
+        "partition": "gpu",
+        "gres": "gpu:1",
+        "mem": "40gb",
+        "constraint": "gpu4v100|gpu2v100"
     }
 }
