@@ -20,7 +20,10 @@ BODY_H5 = WORK + "/body.h5"
 MAN_TB = WORK + "/man-tb"
 VOCAB = WORK + "/vocab"
 TRAIN_LOG = WORK + "/train-log"
+PRE_EMBED_HAND = WORK + "/pre-embed-hand"
 cnf("TFLAGS", "")
+cnf("EMBED_FLAGS", "")
+cnf("EMBED_INPUT", "")
 
 DataSet.config_datasets(cnf)
 
@@ -32,6 +35,30 @@ rule all:
         HAND_H5,
         BODY_H5,
         [MAN_TB + "/" + skel_name for skel_name in EMBED_SKELS.keys()]
+
+
+STRIP_RE = re.compile(r"(\.h5|_openpose|.unsorted)$")
+
+
+def strip_h5_ext(name):
+    prev_name = None
+    while prev_name != name:
+        prev_name = name
+        name = STRIP_RE.sub("", name)
+    return name
+
+
+def embed_inputs():
+    if not EMBED_INPUT:
+        return
+    for path in Path(EMBED_INPUT).rglob('*_openpose.unsorted.h5'):
+        name = path.name
+        yield pjoin(PRE_EMBED_HAND, name + ".done")
+
+
+rule pre_embed_all:
+    input:
+        embed_inputs()
 
 
 rule ds_download:
@@ -194,3 +221,23 @@ rule all_best_trained:
             TRAIN_LOG + "/" + skel_name.lower() + "/nsm-yesaug-64"
             for skel_name in EMBED_SKELS.keys()
         ]
+
+
+BEST_CKPT = f"{TRAIN_LOG}/hand/msl-yesaug-64/default/version_0/checkpoints/epoch=72.ckpt"
+
+
+rule pre_embed_hands:
+    input:
+        ckpt = BEST_CKPT
+        input_h5 = pjoin(EMBED_INPUT, "{input_h5}")
+    output:
+        touch(pjoin(PRE_EMBED_HAND, "{input_h5}.done"))
+    params:
+        file_base = lambda wc: strip_h5_ext(wc.input_h5)
+    shell:
+        runscript("pre_embed") + " " +
+        EMBED_FLAGS + " " +
+        "{input.ckpt} " +
+        EMBED_INPUT + " " +
+        "{params.file_base}.lefthand.preembed.h5 " +
+        "{params.file_base}.righthand.preembed.h5 && " +
