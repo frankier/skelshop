@@ -70,7 +70,7 @@ class ProcessorWriter:
             )
         )
         for vec, info in zip(result, batch_info):
-            self.process_one(vec.detach().numpy(), info)
+            self.process_one(vec.detach().cpu().numpy(), info)
 
     def process_one(self, vec, info):
         frame_idx, pose_idx, is_left = info

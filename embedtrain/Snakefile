@@ -243,6 +243,6 @@ rule pre_embed_hands:
         runscript("pre_embed") + " " +
         EMBED_FLAGS + " " +
         "{input.ckpt} " +
-        EMBED_INPUT + " " +
-        "{params.file_base}.lefthand.preembed.h5 " +
-        "{params.file_base}.righthand.preembed.h5"
+        "{input.input_h5} " +
+        PRE_EMBED_HAND + "/{params.file_base}.lefthand.preembed.h5 " +
+        PRE_EMBED_HAND + "/{params.file_base}.righthand.preembed.h5"
