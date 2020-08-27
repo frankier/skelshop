@@ -47,8 +47,8 @@ FrameBuf = Tuple[int, List[numpy.ndarray]]
 class ProcessorWriter:
     def __init__(self, model, left_out, right_out):
         self.model = model
-        self.left_out = h5py.File(left_out, "w")
-        self.right_out = h5py.File(right_out, "w")
+        self.left_out = h5py.File(left_out, "w", track_order=True)
+        self.right_out = h5py.File(right_out, "w", track_order=True)
         self.mat_buf: Dict[bool, Optional[FrameBuf]] = {False: None, True: None}
 
     def process_batch(self, batch, batch_info):
