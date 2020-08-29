@@ -1,10 +1,13 @@
+import json
 import sys
 
 import h5py
 
 print("[")
 with h5py.File(sys.argv[1], "r") as h5in:
-    for k, v in h5in.items():
-        arr = [[x for x in p] for p in v]
-        print(f"[{k}, {arr}]")
+    entries = len(h5in)
+    for i, (k, v) in enumerate(h5in.items()):
+        arr = json.dumps([[float(x) for x in p] for p in v])
+        comma = "," if i < entries - 1 else ""
+        print(f"[{k}, {arr}]{comma}")
 print("]")
