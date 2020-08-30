@@ -6,6 +6,11 @@ def flatten(nested):
         yield nested
 
 
+def full_flatten(nested):
+    for line in flatten(nested):
+        yield from line
+
+
 def lrange(*args):
     return list(range(*args))
 
@@ -26,7 +31,10 @@ def kp_pairs(lines):
     for k, v in lines.items():
         if is_left(k):
             flipped_v = lines[flip_joint_name(k)]
-            yield from zip(flatten(v), flatten(flipped_v))
+            for p1, p2 in zip(full_flatten(v), full_flatten(flipped_v)):
+                if p1 == p2:
+                    continue
+                yield p1, p2
         elif not is_right(k) and isinstance(v, dict):
             yield from kp_pairs(v)
 
