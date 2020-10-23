@@ -7,13 +7,13 @@ from os.path import join as pjoin
 
 import click
 
-from skeldump.dump import add_fmt_metadata, add_metadata, write_shots
-from skeldump.infmt.ordered_tar import ordered_tar_source
-from skeldump.infmt.tar import ShardedJsonDumpSource, iter_tarinfos
-from skeldump.infmt.zip import zip_json_source
-from skeldump.io import AsIfOrdered, UnsegmentedWriter
-from skeldump.openpose import LIMBS, MODES
-from skeldump.utils.h5py import h5out
+from skelshop.dump import add_fmt_metadata, add_metadata, write_shots
+from skelshop.infmt.ordered_tar import ordered_tar_source
+from skelshop.infmt.tar import ShardedJsonDumpSource, iter_tarinfos
+from skelshop.infmt.zip import zip_json_source
+from skelshop.io import AsIfOrdered, UnsegmentedWriter
+from skelshop.openpose import LIMBS, MODES
+from skelshop.utils.h5py import h5out
 
 
 def write_conv(h5f, mode, basename, json_source, input_fmt):

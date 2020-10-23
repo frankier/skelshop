@@ -4,8 +4,8 @@ from typing import Optional, Tuple, cast
 import numpy as np
 from numpy.linalg import norm
 
-from skeldump.pose import PoseBase
-from skeldump.skelgraphs.openpose import BODY_135
+from skelshop.pose import PoseBase
+from skelshop.skelgraphs.openpose import BODY_135
 
 SIZE_REF_ORDER = [
     ("body", "trunk"),

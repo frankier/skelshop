@@ -7,8 +7,8 @@ import numpy as np
 import opencv_wrapper as cvw
 from more_itertools.recipes import grouper
 
-from skeldump.skelgraphs.openpose import MODE_SKELS
-from skeldump.skelgraphs.posetrack import POSETRACK18_SKEL
+from skelshop.skelgraphs.openpose import MODE_SKELS
+from skelshop.skelgraphs.posetrack import POSETRACK18_SKEL
 
 logger = logging.getLogger(__name__)
 

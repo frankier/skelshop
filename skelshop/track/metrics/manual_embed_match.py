@@ -1,6 +1,6 @@
 from typing import TYPE_CHECKING
 
-from skeldump.embed.manual import man_dist
+from skelshop.embed.manual import man_dist
 
 from .base import Metric
 

@@ -8,14 +8,14 @@ import h5py
 import opencv_wrapper as cvw
 from numpy import ndarray
 
-from skeldump.drawsticks import (
+from skelshop.drawsticks import (
     ScaledVideo,
     VideoSticksWriter,
     drawsticks_shots,
     drawsticks_unseg,
     get_skel,
 )
-from skeldump.io import AsIfOrdered, ShotSegmentedReader, UnsegmentedReader
+from skelshop.io import AsIfOrdered, ShotSegmentedReader, UnsegmentedReader
 
 logger = logging.getLogger(__name__)
 

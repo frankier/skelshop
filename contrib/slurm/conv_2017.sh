@@ -10,7 +10,7 @@
 cd /mnt/rds/redhen/gallina
 module load singularity
 
-srun singularity exec ~/gsoc2020_skeldump.sif python \
-    /opt/skelshop/skeldump.py \
+srun singularity exec ~/gsoc2020_skelshop.sif python \
+    /opt/skelshop/skelshop \
     conv --cores 40 --mode BODY_25_HANDS \
     monolithic-tar projects/2017_openpose_body_hand.tar home/frr7/openpose2017

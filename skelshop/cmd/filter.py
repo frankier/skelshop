@@ -2,10 +2,10 @@ import click
 import h5py
 from more_itertools import take
 
-from skeldump.dump import add_fmt_metadata, write_shots
-from skeldump.io import UnsegmentedReader
-from skeldump.pipebase import IterStage
-from skeldump.pipeline import pipeline_options
+from skelshop.dump import add_fmt_metadata, write_shots
+from skelshop.io import UnsegmentedReader
+from skelshop.pipebase import IterStage
+from skelshop.pipeline import pipeline_options
 
 
 @click.command()

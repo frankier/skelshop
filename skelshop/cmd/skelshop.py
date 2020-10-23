@@ -13,13 +13,13 @@ click_log.basic_config()
 
 @click.group()
 @click_log.simple_verbosity_option()
-def skeldump():
+def skelshop():
     pass
 
 
-skeldump.add_command(dump)
-skeldump.add_command(drawsticks)
-skeldump.add_command(playsticks)
-skeldump.add_command(filter)
-skeldump.add_command(conv)
-skeldump.add_command(stats)
+skelshop.add_command(dump)
+skelshop.add_command(drawsticks)
+skelshop.add_command(playsticks)
+skelshop.add_command(filter)
+skelshop.add_command(conv)
+skelshop.add_command(stats)

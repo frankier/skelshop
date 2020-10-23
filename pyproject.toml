@@ -6,10 +6,6 @@ description = "Utilities for dealing with pose skeleton data, currently from Ope
 authors = ["Frankie Robertson <frankie@robertson.name>"]
 license = "MIT"
 
-packages = [
-    { include = "skeldump" },
-]
-
 [tool.poetry.dependencies]
 python = "^3.6.1"
 h5py = "^2.10.0"

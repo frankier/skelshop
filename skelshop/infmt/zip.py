@@ -3,9 +3,9 @@ from zipfile import ZipFile
 
 import orjson
 
-from skeldump.openpose import POSE_CLASSES
-from skeldump.pipebase import PipelineStageBase
-from skeldump.pose import JsonPoseBundle
+from skelshop.openpose import POSE_CLASSES
+from skelshop.pipebase import PipelineStageBase
+from skelshop.pose import JsonPoseBundle
 
 from .utils import mk_keypoints_name, slice_frame_idx
 

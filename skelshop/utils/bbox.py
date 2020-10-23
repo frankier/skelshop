@@ -3,7 +3,7 @@ from typing import List
 import numpy as np
 from ufunclab import minmax
 
-from skeldump.utils.geom import x1y1x2y2_to_xywh
+from skelshop.utils.geom import x1y1x2y2_to_xywh
 
 
 def keypoints_bbox_x1y1x2y2(keypoints: np.ndarray, enlarge_scale=0.2) -> List[float]:

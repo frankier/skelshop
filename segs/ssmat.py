@@ -7,8 +7,8 @@ from numba import jit
 from scipy.ndimage import median_filter
 from sklearn.preprocessing import normalize
 
-from skeldump.skelgraphs.openpose import BODY_25
-from skeldump.sparsepose import as_scipy_csrs
+from skelshop.skelgraphs.openpose import BODY_25
+from skelshop.sparsepose import as_scipy_csrs
 
 JOINT_IDXS = (
     BODY_25.names.index("left wrist"),

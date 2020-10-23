@@ -1,4 +1,4 @@
-from skeldump.track import PoseTrack
+from skelshop.track import PoseTrack
 
 from .pipebase import FilterStageBase
 from .pose import IdPoseBundle

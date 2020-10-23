@@ -3,11 +3,11 @@ from typing import Type, Union
 import click
 from imutils.video.count_frames import count_frames
 
-from skeldump.dump import add_fmt_metadata, add_metadata, write_shots
-from skeldump.io import AsIfOrdered, ShotSegmentedWriter, UnsegmentedWriter
-from skeldump.openpose import LIMBS, MODES, OpenPoseStage
-from skeldump.pipeline import pipeline_options
-from skeldump.utils.h5py import h5out
+from skelshop.dump import add_fmt_metadata, add_metadata, write_shots
+from skelshop.io import AsIfOrdered, ShotSegmentedWriter, UnsegmentedWriter
+from skelshop.openpose import LIMBS, MODES, OpenPoseStage
+from skelshop.pipeline import pipeline_options
+from skelshop.utils.h5py import h5out
 
 
 @click.command()

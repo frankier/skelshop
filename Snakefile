@@ -89,7 +89,7 @@ rule skel_unsorted:
     output:
         pjoin(DUMP_BASE, "{base}.unsorted.h5")
     shell:
-        "python skelshop.py dump " +
+        "python -m skelshop dump " +
         "--mode BODY_25_ALL " + 
         "{input.video} " + 
         "{output}"
@@ -102,7 +102,7 @@ rule skel_filter_csvshotseg_opt_lighttrack:
     output:
         pjoin(DUMP_BASE, "{base}.opt_lighttrack.h5")
     shell:
-        "python skelshop.py filter " +
+        "python -m skelshop filter " +
         "--track " +
         "--track-conf opt_lighttrack " +
         "--pose-matcher-config {input.gcn_config} " +
@@ -117,5 +117,5 @@ rule drawsticks:
     output:
         pjoin(DUMP_BASE, "{base}.{var}.sticks.mp4")
     shell:
-        "python skelshop.py drawsticks " +
+        "python -m skelshop drawsticks " +
         "{input.skels} {input.video} {output}"

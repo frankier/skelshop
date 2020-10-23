@@ -6,8 +6,8 @@ import click
 import h5py
 import opencv_wrapper as cvw
 
-from skeldump.drawsticks import ScaledVideo, SkelDraw, get_skel
-from skeldump.io import AsIfOrdered, ShotSegmentedReader, UnsegmentedReader
+from skelshop.drawsticks import ScaledVideo, SkelDraw, get_skel
+from skelshop.io import AsIfOrdered, ShotSegmentedReader, UnsegmentedReader
 
 logger = logging.getLogger(__name__)
 
@@ -27,7 +27,7 @@ def playsticks(h5fn, videoin, posetrack, seek_time, seek_frame, scale, paused):
     """
     Play a video with stick figures from pose dump superimposed.
     """
-    from skeldump.player import PlayerBase, SegPlayer, UnsegPlayer
+    from skelshop.player import PlayerBase, SegPlayer, UnsegPlayer
 
     with h5py.File(h5fn, "r") as h5f, cvw.load_video(videoin) as vid_read:
         vid_read = ScaledVideo(vid_read, scale)

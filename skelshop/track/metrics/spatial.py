@@ -1,7 +1,7 @@
 from typing import TYPE_CHECKING
 
-from skeldump.utils.bbox import iou
-from skeldump.utils.geom import xywh_to_x1y1x2y2
+from skelshop.utils.bbox import iou
+from skelshop.utils.geom import xywh_to_x1y1x2y2
 
 from .base import Metric
 

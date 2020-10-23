@@ -2,13 +2,13 @@ from functools import wraps
 
 import click
 
-from skeldump.bbshotseg import ShotSegStage
-from skeldump.bbtrack import TrackStage
-from skeldump.csvshotseg import CsvShotSegStage
-from skeldump.pipebase import RewindStage
-from skeldump.track import PoseMatcher
-from skeldump.track.confs import CONFS as TRACK_CONFS
-from skeldump.track.metrics.lighttrack_pose_match import LightTrackPoseMatchMetric
+from skelshop.bbshotseg import ShotSegStage
+from skelshop.bbtrack import TrackStage
+from skelshop.csvshotseg import CsvShotSegStage
+from skelshop.pipebase import RewindStage
+from skelshop.track import PoseMatcher
+from skelshop.track.confs import CONFS as TRACK_CONFS
+from skelshop.track.metrics.lighttrack_pose_match import LightTrackPoseMatchMetric
 
 
 class Pipeline:

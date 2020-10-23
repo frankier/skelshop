@@ -2,7 +2,7 @@ import collections
 from itertools import islice
 from typing import Deque, Iterable, List, Set
 
-from skeldump.utils.bbox import keypoints_bbox_xywh
+from skelshop.utils.bbox import keypoints_bbox_xywh
 
 from ..pose import PoseBase
 from .models import Candidate, TrackedPose, TrackingState
