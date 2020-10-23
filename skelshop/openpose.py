@@ -1,4 +1,5 @@
 import logging
+import os
 
 from .pipebase import PipelineStageBase
 from .pose import (
@@ -26,15 +27,20 @@ POSE_CLASSES = {
     "BODY_25_FACE": PoseBody25Face,
 }
 
-
 LIMBS = {
-    "BODY_25_ALL": 135,
-    "BODY_25_HANDS": 65,
+    "BODY_25_ALL": 138,
+    "BODY_25_HANDS": 67,
     "BODY_25": 25,
-    "BODY_135": 135,
+    "BODY_135": 138,
     "FACE": 70,
-    "BODY_25_FACE": 95,
+    "BODY_25_FACE": 96,
 }
+
+if "LEGACY_SKELS" in os.environ:
+    LIMBS["BODY_25_ALL"] = 135
+    LIMBS["BODY_25_HANDS"] = 65
+    LIMBS["BODY_135"] = 135
+    LIMBS["BODY_25_FACE"] = 95
 
 
 def print_all(datum, print=print):

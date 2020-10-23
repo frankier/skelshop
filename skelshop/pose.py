@@ -1,3 +1,4 @@
+import os
 from typing import Iterator, Tuple, Type
 
 import numpy as np
@@ -105,7 +106,10 @@ class PoseBody25Hands(PoseBody25):
 
     @classmethod
     def from_parts(cls, pose, lhand, rhand):
-        return cls.from_keypoints(np.vstack([pose, lhand[1:], rhand[1:]]))
+        if "LEGACY_SKELS" in os.environ:
+            return cls.from_keypoints(np.vstack([pose, lhand[1:], rhand[1:]]))
+        else:
+            return cls.from_keypoints(np.vstack([pose, lhand, rhand]))
 
     @classmethod
     def from_datum(cls, datum, idx):
@@ -131,7 +135,10 @@ class PoseBody25All(PoseBody25):
 
     @classmethod
     def from_parts(cls, pose, lhand, rhand, face):
-        return cls.from_keypoints(np.vstack([pose, lhand[1:], rhand[1:], face]))
+        if "LEGACY_SKELS" in os.environ:
+            return cls.from_keypoints(np.vstack([pose, lhand[1:], rhand[1:], face]))
+        else:
+            return cls.from_keypoints(np.vstack([pose, lhand, rhand]))
 
     @classmethod
     def from_datum(cls, datum, idx):

@@ -1,6 +1,6 @@
 import numpy as np
 
-from .openpose import BODY_25_JOINTS
+from .openpose_base import BODY_25_JOINTS
 from .posetrack import POSETRACK18_JOINTS
 
 SAME_THING = {

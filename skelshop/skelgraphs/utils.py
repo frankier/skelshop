@@ -85,3 +85,7 @@ def root_0_at(lines, at_idx, incr_amt):
         label: [val - 1 + incr_amt if val >= 1 else at_idx for val in vals]
         for label, vals in lines.items()
     }
+
+
+def start_from(lines, incr_amt):
+    return {label: [val + incr_amt for val in vals] for label, vals in lines.items()}

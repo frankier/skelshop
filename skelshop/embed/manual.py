@@ -5,7 +5,7 @@ import numpy as np
 from numpy.linalg import norm
 
 from skelshop.pose import PoseBase
-from skelshop.skelgraphs.openpose import BODY_135
+from skelshop.skelgraphs.openpose import BODY_ALL
 
 SIZE_REF_ORDER = [
     ("body", "trunk"),
@@ -40,7 +40,7 @@ def angle_embed_pose_joints(skel, keypoints, kp_idxs=None):
 
 def iter_size_lines(kp_idxs):
     for big_part, small_part in SIZE_REF_ORDER:
-        line = BODY_135.lines[big_part][small_part]
+        line = BODY_ALL.lines[big_part][small_part]
         if not all((np.isin(idx, kp_idxs) for idx in line)):
             continue
         yield line
@@ -90,8 +90,8 @@ def man_dist(pose1: PoseBase, pose2: PoseBase) -> float:
     sdist = size_dist(pose1_kps, pose2_kps, kp_idxs)
     if sdist is None:
         return float("inf")
-    angle_embed1 = angle_embed_pose_joints(BODY_135, pose1_kps, kp_idxs)
-    angle_embed2 = angle_embed_pose_joints(BODY_135, pose2_kps, kp_idxs)
+    angle_embed1 = angle_embed_pose_joints(BODY_ALL, pose1_kps, kp_idxs)
+    angle_embed2 = angle_embed_pose_joints(BODY_ALL, pose2_kps, kp_idxs)
     angle_diffs = np.asarray(angle_embed1) - np.asarray(angle_embed2)
     stacked_diff = np.hstack([angle_diffs, sdist])
     return cast(float, norm(stacked_diff))

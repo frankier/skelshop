@@ -51,6 +51,7 @@ def extract_cmake_flags(cwd, flags):
 def add_fmt_metadata(h5f, fmt_type, running_op=False):
     h5f.attrs["fmt_type"] = fmt_type
     h5f.attrs["fmt_ver"] = FMT_VERSION
+    h5f.attrs["legacy_skels"] = "LEGACY_SKELS" in os.environ
     skeldump_ver = "{}={}".format(fmt_type, git_describe_safe(CUR_DIR))
     if "skeldump_ver" in h5f.attrs:
         h5f.attrs["skeldump_ver"] = skeldump_ver + ";" + h5f.attrs["skeldump_ver"]
