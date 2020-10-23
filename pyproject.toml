@@ -8,7 +8,6 @@ license = "MIT"
 
 packages = [
     { include = "skeldump" },
-    { include = "embedtrain/embedtrain" },
 ]
 
 [tool.poetry.dependencies]
@@ -50,7 +49,6 @@ pynndescent = "^0.4.8"
 pipeline = ["scenedetect", "snakemake"]
 play = ["pygame"]
 ssmat = ["numba", "matplotlib", "scikit-learn", "scipy"]
-embedtrain = ["wcmatch", "snakemake", "imagesize", "scikit-multilearn", "pytorch_lightning", "pycocotools", "pytorch_metric_learning", "chardet", "requests", "umap-learn", "faiss-gpu"]
 embedvis = ["tensorboard"]
 
 [tool.poetry.dev-dependencies]
