@@ -103,7 +103,7 @@ def pipeline_options(allow_empty=True):
                 "--track-conf", type=click.Choice(TRACK_CONFS.keys()), default=None
             ),
             click.option(
-                "--pose-matcher-config", envvar="POSE_MATCHER_CONFIG", required=True
+                "--pose-matcher-config", envvar="POSE_MATCHER_CONFIG", required=False
             ),
             click.option("--shot-csv", type=click.Path(exists=True)),
         ]
