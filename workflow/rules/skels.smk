@@ -1,3 +1,7 @@
+from os.path import dirname
+from os.path import join as pjoin
+
+
 rule scenedetect:
     input:
         pjoin(VIDEO_BASE, "{base}.mp4")
