@@ -16,6 +16,7 @@ From: frankier/gsoc2020:frankier_gsoc2020
     cd /opt/skelshop && \
         ./install_all.sh && \
         snakemake --cores 4
+    rm -rf /root/.cache
 
 %runscript
     cd /opt/skelshop && snakemake "$@"
@@ -24,4 +25,4 @@ From: frankier/gsoc2020:frankier_gsoc2020
     export LC_ALL=C.UTF-8
     export LANG=C.UTF-8
     export LD_LIBRARY_PATH=$OPENPOSE/src/openpose/:$LD_LIBRARY_PATH
-    export MODEL_FOLDER=$OPENPOSE_SRC/models
+    export MODEL_FOLDER=$OPENPOSE_MODELS
