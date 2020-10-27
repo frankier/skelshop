@@ -8,8 +8,6 @@ git submodule update --init --recursive
 # Tensorflow has over restrictive dependency versions
 # Install before and then our own versions get to overwrite its
 poetry install $@
-poetry run pip install tensorflow==2.3.0
-poetry install $@
 
 PKGS="$(poetry env list --full-path | cut -d' ' -f1)"
 if [ -z "$PKGS" ]; then
