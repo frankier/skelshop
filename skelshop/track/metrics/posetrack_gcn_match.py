@@ -8,7 +8,10 @@ from lighttrack.graph.gcn_utils.processor_siamese_gcn import SGCN_Processor
 class PoseMatcher(SGCN_Processor):
     def __init__(self, config):
         self.config = config
-        self.load_arg([])
+        argv = []
+        if not torch.cuda.is_available():
+            argv.extend(["--use_gpu", "0"])
+        self.load_arg(argv)
         self.init_environment()
         self.load_model()
         self.load_weights()
