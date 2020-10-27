@@ -7,6 +7,9 @@
 <a href="https://singularity-hub.org/collections/4494">
   <img alt="SingularityHub hosted images" src="https://www.singularity-hub.org/static/img/hosted-singularity--hub-%23e32929.svg" />
 </a>
+<a href='https://skelshop.readthedocs.io/en/latest/?badge=latest'>
+    <img src='https://readthedocs.org/projects/skelshop/badge/?version=latest' alt='Documentation Status' />
+</a>
 </p>
 
 ## Features
