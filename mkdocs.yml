@@ -1,0 +1,29 @@
+site_name: SkelShop Documentation
+site_description: " Utilities for dealing with pose skeleton data, currently from OpenPose"
+repo_url: "https://github.com/frankier/skelshop"
+repo_name: "frankier/skelshop"
+
+nav:
+  - Home: index.md
+  - Pipeline internals: pipeline-internals.md
+  - Tracking: tracking.md
+  - CLI: cli.md
+
+theme:
+  name: "material"
+
+markdown_extensions:
+  - admonition
+  - mkdocs-click
+  - footnotes
+
+plugins:
+  - search
+  - mkdocstrings:
+      default_handler: python
+      handlers:
+        python:
+          rendering:
+            show_root_heading: true
+      watch:
+        - skelshop

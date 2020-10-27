@@ -12,6 +12,13 @@ PENALTY_WEIGHT = 1e6
 
 @dataclass
 class TrackingSpec:
+    """
+    A domain specific language for threshold distance-based style tracking.
+
+    Candidate poses are first filtered using `cand_filter` and then `procedure`
+    is executed to decide how to assign the candidates.
+    """
+
     enlarge_scale: float
     prev_frame_buf_size: int
     cand_filter: "CandFilter"

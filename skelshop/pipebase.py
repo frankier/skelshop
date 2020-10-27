@@ -5,6 +5,10 @@ from .utils.iter import RewindableIter
 
 
 class PipelineStageBase(ABC):
+    """
+    The abstract base class for a pipeline stage.
+    """
+
     prev: Optional["PipelineStageBase"] = None
 
     def __iter__(self):
@@ -12,9 +16,16 @@ class PipelineStageBase(ABC):
 
     @abstractmethod
     def __next__(self):
+        """
+        Get the payload for the next frame
+        """
         ...
 
-    def send_back(self, name, *args, **kwargs):
+    def send_back(self, name: str, *args, **kwargs):
+        """
+        Send a message back down the pipeline by calling a method with `name`,
+        `*args`, and `*kwargs
+        """
         meth = getattr(self, name, None)
         if meth is not None:
             meth(*args, **kwargs)

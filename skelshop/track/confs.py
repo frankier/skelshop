@@ -67,3 +67,11 @@ CONFS = {
         ),
     ),
 }
+"""
+A dictionary of ready-made tracking specs
+
+Attributes:
+    "lighttrackish" (TrackingSpec): A LightTrack-like algoirhtm using greedy matching
+    "opt_lighttrack" (TrackingSpec): A LightTrack-like algorithm which attempts to make optimal matches
+    "deepsortlike" (TrackingSpec): A DeepSort-like algorithm (currently missing Kalman filtering)
+"""

@@ -39,6 +39,10 @@ isort = {extras = ["pyproject"], version = "^4.3.21"}
 pre-commit = "^2.4.0"
 mypy = "^0.782"
 tox = "^3.15.2"
+mkdocs = "^1.1.2"
+mkdocstrings = "^0.13.6"
+mkdocs-material = "^6.1.0"
+mkdocs-click = { version = "^0.1.1", python = ">=3.7" }
 
 [build-system]
 requires = ["poetry-core>=1.0.0a5"]

@@ -6,6 +6,7 @@ from skelshop.utils.bbox import keypoints_bbox_xywh
 
 from ..pose import PoseBase
 from .models import Candidate, TrackedPose, TrackingState
+from .spec import TrackingSpec
 
 FrameBuf = Deque[List[TrackedPose]]
 
@@ -39,7 +40,15 @@ class ReferenceBufView:
 
 
 class PoseTrack:
-    def __init__(self, spec):
+    """
+    Performs generic distance-based pose tracking.
+    """
+
+    def __init__(self, spec: TrackingSpec):
+        """
+        Takes a TrackingSpec and constructs the corresponding tracking
+        algorithm.
+        """
         self.next_id = 0
         self.prev_tracked: FrameBuf = (
             collections.deque(maxlen=spec.prev_frame_buf_size)

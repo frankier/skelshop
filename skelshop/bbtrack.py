@@ -5,6 +5,11 @@ from .pose import IdPoseBundle
 
 
 class TrackStage(FilterStageBase):
+    """
+    A pipeline stage wrapping the `skelshop.track.PoseTrack` generic approach
+    to distance-based tracking.
+    """
+
     def __init__(self, prev, **kwargs):
         self.tracker = PoseTrack(**kwargs)
         self.prev = prev
