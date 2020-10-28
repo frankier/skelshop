@@ -7,12 +7,9 @@ rule scenedetect:
         pjoin(VIDEO_BASE, "{base}.mp4")
     output:
         pjoin(DUMP_BASE, "{base}-Scenes.csv")
-    run:
-        workdir = dirname(wildcards.base)
-        shell(
-            "scenedetect --input {input} --output " + workdir +
-            " detect-content --min-scene-len 2s list-scenes"
-        )
+    shell:
+        "scenedetect --input {input} --output " + DUMP_BASE +
+        " detect-content --min-scene-len 2s list-scenes"
 
 rule skel_unsorted:
     input:
