@@ -6,7 +6,6 @@ from face_recognition.api import (
     face_encoder,
     pose_predictor_68_point,
 )
-from more_itertools import peekable
 
 from skelshop.io import grow_ds
 
@@ -42,7 +41,7 @@ class FaceWriter:
             self.face_grp["embed"][-num_new_faces:] = faces
             if self.write_bbox and bboxes is not None:
                 grow_ds(self.face_grp["bbox"], num_new_faces)
-                self.face_grp["bbox"][-num_new_faces:] = faces
+                self.face_grp["bbox"][-num_new_faces:] = bboxes
 
 
 def write_faces(face_iter, face_writer):
@@ -85,8 +84,7 @@ def iter_faces(videoin, batch_size=DEFAULT_FRAME_BATCH_SIZE):
             all_image_face_locations = []
             all_shape_predictions = []
             used_frames = []
-            idxs = []
-            idx = 0
+            mask = []
             for frame, image_face_locations in zip(frames, face_locations):
                 frame_shape_predictions = []
                 for image_face_location in image_face_locations:
@@ -94,24 +92,26 @@ def iter_faces(videoin, batch_size=DEFAULT_FRAME_BATCH_SIZE):
                         pose_predictor_68_point(frame, image_face_location)
                     )
                 if frame_shape_predictions:
+                    mask.append(True)
                     all_image_face_locations.append(image_face_locations)
                     used_frames.append(frame)
-                    idxs.append(idx)
                     all_shape_predictions.append(
                         to_full_object_detections(frame_shape_predictions)
                     )
-                idx += 1
+                else:
+                    mask.append(False)
             embeddings = face_encoder.compute_face_descriptor(
                 used_frames, all_shape_predictions
             )
-            frame_embeddings_peek = peekable(zip(idxs, embeddings))
+            embeddings_it = iter(embeddings)
             all_image_face_locations_it = iter(all_image_face_locations)
-            for idx in range(cur_batch_size):
-                face_locations = []
-                embeddings = []
-                while idx == frame_embeddings_peek.peek((None, None))[0]:
-                    embeddings.append(next(frame_embeddings_peek)[1])
-                    face_locations.append(next(all_image_face_locations_it))
+            for val in mask:
+                if val:
+                    embeddings = next(embeddings_it)
+                    face_locations = next(all_image_face_locations_it)
+                else:
+                    face_locations = []
+                    embeddings = []
                 yield {
                     "face_locations": face_locations,
                     "embeddings": embeddings,

@@ -17,5 +17,5 @@ def face(video, h5fn, write_bbox):
     num_frames = count_frames(video)
     with h5out(h5fn) as h5f:
         add_basic_metadata(h5f, video, num_frames)
-        writer = FaceWriter(h5f)
+        writer = FaceWriter(h5f, write_bbox=write_bbox)
         write_faces(iter_faces(video), writer)
