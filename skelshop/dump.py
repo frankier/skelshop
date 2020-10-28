@@ -15,9 +15,13 @@ FMT_VERSION = 1
 CUR_DIR = fulldir(__file__)
 
 
-def add_metadata(h5f, video, num_frames, mode, limbs):
+def add_basic_metadata(h5f, video, num_frames):
     h5f.attrs["video"] = basename(video)
     h5f.attrs["num_frames"] = num_frames
+
+
+def add_metadata(h5f, video, num_frames, mode, limbs):
+    add_basic_metadata(h5f, video, num_frames)
     h5f.attrs["mode"] = mode
     h5f.attrs["limbs"] = limbs
 

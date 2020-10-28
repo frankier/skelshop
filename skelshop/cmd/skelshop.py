@@ -18,6 +18,14 @@ def skelshop():
 
 
 skelshop.add_command(dump)
+try:
+    import face_recognition  # noqa
+except ImportError:
+    pass
+else:
+    from .face import face
+
+    skelshop.add_command(face)
 skelshop.add_command(drawsticks)
 skelshop.add_command(playsticks)
 skelshop.add_command(filter)
