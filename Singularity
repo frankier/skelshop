@@ -1,5 +1,5 @@
 Bootstrap: shub
-From: frankier/gsoc2020:frankier_gsoc2020
+From: frankier/openpose_containers:frankier_gsoc2020
 
 %post
     export LC_ALL=C.UTF-8
