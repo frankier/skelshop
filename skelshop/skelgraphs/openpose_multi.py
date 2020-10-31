@@ -6,6 +6,7 @@ from .openpose_base import (
     FACE_LINES,
     HAND_LINES,
 )
+from .reducer import SkeletonReducer
 from .utils import incr, start_from
 
 
@@ -14,19 +15,23 @@ def compose_body(body=None, left_hand=None, right_hand=None, face=None):
     if body is not None:
         lines["body"] = body
     if left_hand is not None:
-        lines["left hand"] = start_from(HAND_LINES, 25)
+        lines["left hand"] = start_from(left_hand, 25)
     if right_hand is not None:
-        lines["right hand"] = start_from(HAND_LINES, 45)
+        lines["right hand"] = start_from(right_hand, 45)
     if face is not None:
-        lines["face"] = incr(65, FACE_LINES)
+        lines["face"] = incr(65, face)
     return lines
 
 
 BODY_25_HANDS_LINES = compose_body(BODY_25_LINES, HAND_LINES, HAND_LINES)
 BODY_25_ALL_LINES = compose_body(BODY_25_LINES, HAND_LINES, HAND_LINES, FACE_LINES)
+FACE_IN_BODY_25_ALL_LINES = compose_body(face=FACE_LINES)
 
 BODY_25_HANDS = SkeletonType(BODY_25_HANDS_LINES, BODY_25_JOINTS)
 BODY_25_ALL = SkeletonType(BODY_25_ALL_LINES, BODY_25_JOINTS)
+FACE_IN_BODY_25_ALL = SkeletonType(FACE_IN_BODY_25_ALL_LINES, BODY_25_JOINTS)
+
+FACE_IN_BODY_25_ALL_REDUCER = SkeletonReducer(FACE_IN_BODY_25_ALL)
 
 MODE_SKELS = {
     "BODY_25": BODY_25,

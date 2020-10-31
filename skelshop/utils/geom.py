@@ -40,3 +40,7 @@ def clip_mat_x1y1x2y2(mat, rect):
     if rect[3] > 0:
         rect[3] = max_y
     return mat[rect[1] : rect[3], rect[0] : rect[2]]
+
+
+def rnd(x):
+    return int(x + 0.5)

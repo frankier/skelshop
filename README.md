@@ -9,15 +9,31 @@
 </a>
 </p>
 
+SkelShop is a toolkit usable either as a suite of command line tools or a
+Python library aimed at *offline analysis* of the ``talking heads'' genre of
+videos, typically created in a television studio. This genre includes news
+and current affairs programmes, variety shows and some documentaries. The
+main attributes of this type of material is:
+ * Multiple fixed place cameras in a studio with shot changes to different
+   cameras and non-studio material.
+ * Mainly upper bodies are visible.
+ * Frontal shots are the most frequent type.
+ * Faces are usually visible and most often frontal.
+ * Occlusion is as often by an OSD (On Screen Display) than by some other
+   object in the scene.
+
 ## Features
 
  * Dump OpenPose skeletons to a fast-to-read HDF5 file format
+ * A processing pipeline starting with shot segmentation
  * Apply black box person tracking on OpenPose skeletons
  * Draw skeletons over video and...
    * View the result in real time
    * Output the result to another video
  * Convert from some existing JSON based dump formats
- * More coming soon...
+ * Embed faces using dlib
+   * Using OpenPose's face detection and keypoint estimation
+   * Or using dlib's own face detection/keypoint estimation
 
 ## Documentation
 

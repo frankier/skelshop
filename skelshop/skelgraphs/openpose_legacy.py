@@ -7,6 +7,7 @@ from .openpose_base import (
     HAND_LINES,
     UPPER_BODY_25_LINES,
 )
+from .reducer import SkeletonReducer
 from .utils import incr, root_0_at
 
 
@@ -55,6 +56,10 @@ UPPER_BODY_25_RIGHT_HAND = SkeletonType(
 )
 UPPER_BODY_25_HANDS = SkeletonType(UPPER_BODY_25_HANDS_LINES, BODY_25_JOINTS)
 UPPER_BODY_135 = SkeletonType(UPPER_BODY_135_LINES, BODY_25_JOINTS)
+
+FACE_IN_BODY_25_ALL_LINES = compose_body(face=FACE_LINES)
+FACE_IN_BODY_25_ALL = SkeletonType(FACE_IN_BODY_25_ALL_LINES, BODY_25_JOINTS)
+FACE_IN_BODY_25_ALL_REDUCER = SkeletonReducer(FACE_IN_BODY_25_ALL)
 
 MODE_SKELS = {
     "BODY_25": BODY_25,

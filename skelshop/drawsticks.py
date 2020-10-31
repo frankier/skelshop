@@ -9,12 +9,9 @@ from more_itertools.recipes import grouper
 
 from skelshop.skelgraphs.openpose import MODE_SKELS
 from skelshop.skelgraphs.posetrack import POSETRACK18_SKEL
+from skelshop.utils.geom import rnd
 
 logger = logging.getLogger(__name__)
-
-
-def rnd(x):
-    return int(x + 0.5)
 
 
 def scale_video(vid_read, dim) -> Iterator[np.ndarray]:
@@ -105,6 +102,36 @@ class SkelDraw:
             self.draw_skel(frame, numarr)
         for (pers_id, person), numarr in zip(bundle, numarrs):
             self.draw_ann(frame, pers_id, numarr)
+
+    def get_hover(self, mouse_pos, bundle):
+        return None
+
+
+class FaceDraw:
+    def draw_bbox(self, frame, bbox, color=(0, 0, 255)):
+        cv2.rectangle(
+            frame,
+            pt1=(bbox[0], bbox[1]),
+            pt2=(bbox[2], bbox[3]),
+            color=color,
+            thickness=1,
+        )
+
+    def is_point_in_bbox(self, point, bbox):
+        import pygame as pg
+
+        rect = pg.Rect(bbox[0], bbox[1], bbox[2] - bbox[0], bbox[3] - bbox[1])
+        return rect.collidepoint(point)
+
+    def draw_bundle(self, frame, bundle):
+        for bbox in bundle.get("fod_bbox", ()):
+            self.draw_bbox(frame, bbox, color=(0, 255, 0))
+
+    def get_hover(self, mouse_pos, bundle):
+        for bbox, chip in zip(bundle.get("fod_bbox", ()), bundle.get("chip", ())):
+            if self.is_point_in_bbox(mouse_pos, bbox):
+                return chip
+        return None
 
 
 class VideoSticksWriter:

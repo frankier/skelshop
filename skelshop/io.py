@@ -289,12 +289,35 @@ class ShotReader:
             yield self.mk_bundle(bundle)
 
 
+class EnumerateIterable:
+    def __init__(self, wrapped):
+        self.wrapped = wrapped
+
+    def __iter__(self):
+        return enumerate(self.wrapped)
+
+
 class AsIfOrdered:
     def __init__(self, wrapped):
         self.wrapped = wrapped
 
     def __iter__(self):
-        return (enumerate(frame) for frame in iter(self.wrapped))
+        return (EnumerateIterable(frame) for frame in iter(self.wrapped))
 
     def iter_from(self, start_frame):
-        return (enumerate(frame) for frame in self.wrapped.iter_from(start_frame))
+        return (
+            EnumerateIterable(frame) for frame in self.wrapped.iter_from(start_frame)
+        )
+
+
+class AsIfSingleShot:
+    def __init__(self, wrapped):
+        self.wrapped = wrapped
+
+    def __iter__(self):
+        return self.iter_from(0)
+
+    def iter_from(self, start_frame):
+        for shot in self.wrapped.iter_from_frame(start_frame):
+            for payload in shot:
+                yield payload

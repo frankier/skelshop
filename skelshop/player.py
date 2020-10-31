@@ -41,16 +41,16 @@ class PlayerBase(ABC):
         "[click] dump info",
     ]
 
-    def __init__(self, vid_read, skel_draw, title=None, rewind_size=300):
+    def __init__(self, vid_read, title=None, rewind_size=300):
         self.started = False
         self.vid_read = vid_read
-        self.skel_draw = skel_draw
         self.size = (self.vid_read.width, self.vid_read.height)
         self.frame_time = 1 / vid_read.fps
         self.playing = False
         self.osd_disp = True
         self.help_disp = False
         self.shown_cur = False
+        self.hover = None
         self.title = title
         self.rewind_size = rewind_size
         self._reset_frames_vid()
@@ -109,6 +109,25 @@ class PlayerBase(ABC):
             print(f"{self.time_info()}")
             print(f"pos: {x}, {y}")
 
+    def draw_hover(self, img):
+        if self.hover is None:
+            return
+        (x_orig, y_orig), hover_img = self.hover
+        i_height, i_width = img.shape[:2]
+        h_height, h_width = hover_img.shape[:2]
+        if y_orig + h_height > i_height:
+            y_orig = i_height - h_height
+            if y_orig < 0:
+                print("Warning: Not enough space to display hover image")
+                return
+        if x_orig + h_width > i_width:
+            x_orig = i_width - h_width
+            if x_orig < 0:
+                print("Warning: Not enough space to display hover image")
+                return
+
+        img[y_orig : y_orig + h_height, x_orig : x_orig + h_width,] = hover_img
+
     def set_icon(self):
         dir_path = os.path.dirname(os.path.realpath(__file__))
         try:
@@ -131,12 +150,13 @@ class PlayerBase(ABC):
 
     def disp(self):
         img = self.frame_iter.peek().copy()
-        bundle = self.cur_skel()
-        self.skel_draw.draw_bundle(img, bundle)
+        self.draw_cur(img)
         if self.help_disp:
             self.draw_help(img)
         elif self.osd_disp:
             self.draw_osd(img)
+        self.update_hover()
+        self.draw_hover(img)
         imdisplay(img, self.screen)
         pg.display.flip()
         self.shown_cur = True
@@ -145,8 +165,14 @@ class PlayerBase(ABC):
         t0 = time.time()
         first_iter = True
         while 1:
+            got_mousemotion = False
             for event in pg.event.get():
-                self.handle_event(event)
+                if event.type == pg.MOUSEMOTION:
+                    got_mousemotion = True
+                else:
+                    self.handle_event(event)
+            if got_mousemotion:
+                self.disp()
             if self.playing or first_iter:
                 if self.shown_cur:
                     next(self.frame_iter)
@@ -200,7 +226,11 @@ class PlayerBase(ABC):
         self.seek_to_frame(max(self.frame_idx + rel, 0))
 
     @abstractmethod
-    def cur_skel(self):
+    def update_hover(self):
+        ...
+
+    @abstractmethod
+    def draw_cur(self, img):
         ...
 
     @abstractmethod
@@ -225,19 +255,41 @@ class PlayerBase(ABC):
 
 
 class UnsegPlayer(PlayerBase):
-    def __init__(self, vid_read, skel_read, skel_draw, **kwargs):
-        self.skel_read = skel_read
-        self.skel_iter = peekable(self.skel_read)
-        super().__init__(vid_read, skel_draw, **kwargs)
+    def __init__(self, vid_read, skel_reads, skel_draws, **kwargs):
+        self.skel_reads = skel_reads
+        self.skel_draws = skel_draws
+        self.skel_iters = [peekable(skel_read) for skel_read in skel_reads]
+        super().__init__(vid_read, **kwargs)
 
-    def cur_skel(self):
-        return self.skel_iter.peek()
+    def update_hover(self):
+        mouse_pos = pg.mouse.get_pos()
+        bundles = self.cur_skels()
+        hover_img = None
+        for skel_draw, bundle in zip(self.skel_draws, bundles):
+            hover_img = skel_draw.get_hover(mouse_pos, bundle)
+            if hover_img is not None:
+                break
+        if hover_img is None:
+            self.hover = None
+        else:
+            self.hover = (mouse_pos, hover_img)
+
+    def draw_cur(self, img):
+        bundles = self.cur_skels()
+        for skel_draw, bundle in zip(self.skel_draws, bundles):
+            skel_draw.draw_bundle(img, bundle)
+
+    def cur_skels(self):
+        return (skel_iter.peek() for skel_iter in self.skel_iters)
 
     def next_skel(self):
-        next(self.skel_iter)
+        for skel_iter in self.skel_iters:
+            next(skel_iter)
 
     def seek_to_frame(self, frame):
-        self.skel_iter = peekable(self.skel_read.iter_from(frame))
+        self.skel_iters = [
+            peekable(skel_read.iter_from(frame)) for skel_read in self.skel_reads
+        ]
         self._seek_to_frame_vid(frame)
 
     def frame_info(self):
@@ -259,9 +311,16 @@ class UnsegPlayer(PlayerBase):
 class SegPlayer(PlayerBase):
     def __init__(self, vid_read, skel_read: ShotSegmentedReader, skel_draw, **kwargs):
         self.skel_read = skel_read
+        self.skel_draw = skel_draw
         self.shot_iter = peekable(iter(self.skel_read))
         self.skel_iter = peekable(iter(self.shot_iter.peek()))
-        super().__init__(vid_read, skel_draw, **kwargs)
+        super().__init__(vid_read, **kwargs)
+
+    def update_hover(self):
+        pass
+
+    def draw_cur(self, img):
+        self.skel_draw.draw_bundle(img, self.cur_skel())
 
     def cur_skel(self):
         return self.skel_iter.peek()
