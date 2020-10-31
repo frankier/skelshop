@@ -109,9 +109,20 @@ class PlayerBase(ABC):
             print(f"{self.time_info()}")
             print(f"pos: {x}, {y}")
 
+    def set_icon(self):
+        dir_path = os.path.dirname(os.path.realpath(__file__))
+        try:
+            icon_path = os.path.join(dir_path, "news.png")
+            icon = pg.image.load(icon_path)
+        except pg.error as err:
+            print("Warning: Error loading icon:", err)
+        else:
+            pg.display.set_icon(icon)
+
     def start(self, playing):
         self.started = True
         self.playing = playing
+        self.set_icon()
         self.screen = pg.display.set_mode(self.size)
         if self.title is not None:
             pg.display.set_caption(self.title)

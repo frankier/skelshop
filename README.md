@@ -141,5 +141,9 @@ Contributions are welcome! Feel free to use the issues to ask any questions.
 
 ## Acknowledgments
 
-Apart from the useful libraries, some of the black box tracking code is based
+Thanks to the authors of all the useful libraries I have used.
+
+Some of the black box tracking code is based
 on [this repository](https://github.com/lxy5513/cvToolkit).
+
+[Icon by Adrien Coquet, FR from the Noun Project used under CC-BY.](https://thenounproject.com/term/news/2673777)
