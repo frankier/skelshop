@@ -3,13 +3,13 @@ From: frankierr/openpose_containers:bionic_nvcaffe
 
 %post
     export LC_ALL=C.UTF-8
-    apt-get update
-    apt-get remove -y cython3
-    apt-get install -y --no-install-recommends python3-venv
+    apt-get update && 
+      apt-get remove -y cython3 &&
+      apt-get install -y --no-install-recommends python3.7-venv
     git clone https://github.com/frankier/skelshop/ /opt/skelshop
     curl -sSL \
         https://raw.githubusercontent.com/python-poetry/poetry/master/get-poetry.py \
-        | python || true
+        | python3.7 || true
     export PATH=$HOME/.poetry/bin/:$PATH
     poetry config virtualenvs.create false
     pip install --upgrade pip setuptools
@@ -22,12 +22,7 @@ From: frankierr/openpose_containers:bionic_nvcaffe
     cd /opt/skelshop && snakemake "$@"
 
 %environment
-    export OPENPOSE_SRC=/opt/openpose
-    export OPENPOSE_VAR=gpu
-    export OPENPOSE=$OPENPOSE_SRC/build
-    export OPENPOSE_BIN=$OPENPOSE/examples/openpose/openpose.bin
-    export PYTHONPATH="$OPENPOSE/python:$PYTHONPATH"
-    export OPENPOSE_MODELS=/opt/openpose_models
+    source /.openpose_env
 
     export LC_ALL=C.UTF-8
     export LANG=C.UTF-8
