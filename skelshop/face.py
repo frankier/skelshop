@@ -1,3 +1,4 @@
+import cv2
 import dlib
 import numpy as np
 from face_recognition.api import (
@@ -107,6 +108,8 @@ def to_full_object_detections(shape_preds):
 
 
 def fods_to_embeddings(batch_frames, batch_fods, mask, include_chip=False):
+    for frame in batch_frames:
+        cv2.cvtColor(frame, cv2.COLOR_BGR2RGB, frame)
     embeddings = face_encoder.compute_face_descriptor(batch_frames, batch_fods)
     embeddings_it = iter(embeddings)
     batch_fods_it = iter(batch_fods)

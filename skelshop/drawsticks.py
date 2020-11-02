@@ -130,7 +130,7 @@ class FaceDraw:
     def get_hover(self, mouse_pos, bundle):
         for bbox, chip in zip(bundle.get("fod_bbox", ()), bundle.get("chip", ())):
             if self.is_point_in_bbox(mouse_pos, bbox):
-                return chip
+                return cv2.cvtColor(chip, cv2.COLOR_RGB2BGR)
         return None
 
 
