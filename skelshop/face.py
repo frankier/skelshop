@@ -22,7 +22,7 @@ def create_face_grp(
     h5f, path, add_fod_bbox=False, add_chip=False,
 ):
     group = h5f.create_group(path)
-    group.create_dataset("indices", (0,), dtype=np.int32, maxshape=(None,))
+    group.create_dataset("indices", (0,), dtype=np.uint32, maxshape=(None,))
     group.create_dataset(
         "embed", (0, EMBED_SIZE), dtype=np.float32, maxshape=(None, EMBED_SIZE)
     )
@@ -30,7 +30,7 @@ def create_face_grp(
         group.create_dataset("fod_bbox", (0, 4), dtype=np.float32, maxshape=(None, 4))
     if add_chip:
         group.create_dataset(
-            "chip", (0, 150, 150, 3), dtype=np.int8, maxshape=(None, 150, 150, 3)
+            "chip", (0, 150, 150, 3), dtype=np.uint8, maxshape=(None, 150, 150, 3)
         )
     return group
 
