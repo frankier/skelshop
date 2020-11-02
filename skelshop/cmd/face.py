@@ -27,6 +27,7 @@ from skelshop.utils.h5py import h5out
     default=DEFAULT_THRESH_POOL,
 )
 @click.option("--skel-thresh-val", type=float, default=DEFAULT_THRESH_VAL)
+@click.option("--batch-size", type=int)
 @click.option("--write-bbox/--no-write-bbox")
 @click.option("--write-chip/--no-write-chip")
 def face(
@@ -36,6 +37,7 @@ def face(
     start_frame,
     skel_thresh_pool,
     skel_thresh_val,
+    batch_size,
     write_bbox,
     write_chip,
 ):
@@ -46,6 +48,9 @@ def face(
     with h5out(h5fn) as h5f, cvw.load_video(video) as vid_read:
         add_basic_metadata(h5f, video, num_frames)
         writer = FaceWriter(h5f, write_fod_bbox=write_bbox, write_chip=write_chip,)
+        kwargs = {}
+        if batch_size is not None:
+            kwargs["batch_size"] = batch_size
         if from_skels:
             skels_h5 = h5py.File(from_skels, "r")
             skel_read = AsIfSingleShot(ShotSegmentedReader(skels_h5))
@@ -55,7 +60,8 @@ def face(
                 include_chip=write_chip,
                 thresh_pool=skel_thresh_pool,
                 thresh_val=skel_thresh_val,
+                **kwargs,
             )
         else:
-            face_iter = iter_faces(vid_read, include_chip=write_chip)
+            face_iter = iter_faces(vid_read, include_chip=write_chip, **kwargs)
         write_faces(face_iter, writer)
