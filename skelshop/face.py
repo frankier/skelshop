@@ -14,6 +14,8 @@ from skelshop.utils.geom import rnd
 EMBED_SIZE = 128
 DEFAULT_FRAME_BATCH_SIZE = 16
 DEFAULT_FACES_BATCH_SIZE = 64
+DEFAULT_THRESH_POOL = "mean"
+DEFAULT_THRESH_VAL = 0.05
 
 
 def create_face_grp(
@@ -174,11 +176,29 @@ def iter_faces(
             break
 
 
-def skel_bundle_to_fods(skel_bundle):
+def mk_conf_thresh(thresh_pool, thresh_val):
+    if thresh_pool == "min":
+        func = np.min
+    elif thresh_pool == "max":
+        func = np.max
+    elif thresh_pool == "mean":
+        func = np.mean
+    else:
+        assert False
+
+    def inner(arr):
+        return func(arr) >= thresh_val
+
+    return inner
+
+
+def skel_bundle_to_fods(skel_bundle, conf_thresh):
     skel_ids = []
     fods = []
     for skel_id, skel in skel_bundle:
         face_kps = FACE_IN_BODY_25_ALL_REDUCER.reduce_arr(skel.keypoints)[:68]
+        if not conf_thresh(face_kps[:, 2]):
+            continue
         kps_existing = face_kps[:, :2][np.nonzero(face_kps[:, 2])]
         if not len(kps_existing):
             continue
@@ -196,7 +216,12 @@ def skel_bundle_to_fods(skel_bundle):
 
 
 def iter_faces_from_skel(
-    vid_read, skel_read, batch_size=DEFAULT_FACES_BATCH_SIZE, include_chip=False,
+    vid_read,
+    skel_read,
+    batch_size=DEFAULT_FACES_BATCH_SIZE,
+    include_chip=False,
+    thresh_pool=DEFAULT_THRESH_POOL,
+    thresh_val=DEFAULT_THRESH_VAL,
 ):
     frame_skels = zip(vid_read, skel_read)
     while 1:
@@ -212,7 +237,9 @@ def iter_faces_from_skel(
             if not list(skel_bundle):
                 mask.append(False)
                 continue
-            num_fods, fods = skel_bundle_to_fods(skel_bundle)
+            num_fods, fods = skel_bundle_to_fods(
+                skel_bundle, mk_conf_thresh(thresh_pool, thresh_val)
+            )
             if not num_fods:
                 mask.append(False)
                 continue
