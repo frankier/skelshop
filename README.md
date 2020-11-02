@@ -4,6 +4,9 @@
 <a href="https://gitlab.com/frankier/skelshop/-/commits/master">
   <img alt="pipeline status" src="https://gitlab.com/frankier/skelshop/badges/master/pipeline.svg" />
 </a>
+<a href="https://hub.docker.com/r/frankierr/skelshop/builds">
+  <img alt="DockerHub hosted images" src="https://img.shields.io/docker/pulls/frankierr/skelshop?style=flat" />
+</a>
 <a href="https://singularity-hub.org/collections/4494">
   <img alt="SingularityHub hosted images" src="https://www.singularity-hub.org/static/img/hosted-singularity--hub-%23e32929.svg" />
 </a>
