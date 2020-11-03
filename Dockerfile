@@ -8,12 +8,10 @@ RUN export LC_ALL=C.UTF-8 && \
     apt-get remove -y cython3 && \
     apt-get install -y --no-install-recommends python3.7-venv
 
-RUN git clone https://github.com/frankier/skelshop/ /opt/skelshop && \
-    curl -sSL \
-      https://raw.githubusercontent.com/python-poetry/poetry/master/get-poetry.py \
-      | python3 || true
-
-RUN python3 -m pip install --upgrade pip setuptools
+RUN python3 -m pip install --upgrade \
+    pip==20.2.4 \
+    setuptools==50.3.2 \
+    poetry==1.1.4
 
 RUN $HOME/.poetry/bin/poetry config virtualenvs.create false
 
