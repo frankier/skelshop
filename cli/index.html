@@ -327,6 +327,20 @@ pipeline.</p>
   --track / --no-track
   --shot-seg [bbskel|csv|none]
 </code></pre>
+<h2 id="face">face</h2>
+<p>Create a HDF5 face dump from a video using dlib.</p>
+<p>Usage:</p>
+<pre><code>skelshop face [OPTIONS] VIDEO H5FN
+</code></pre>
+<p>Options:</p>
+<pre><code>  --from-skels PATH
+  --start-frame INTEGER
+  --skel-thresh-pool [min|max|mean]
+  --skel-thresh-val FLOAT
+  --batch-size INTEGER
+  --write-bbox / --no-write-bbox
+  --write-chip / --no-write-chip
+</code></pre>
 <h2 id="filter">filter</h2>
 <p>Apply tracking to an untracked HDF5 pose dump.</p>
 <p>Usage:</p>
@@ -344,10 +358,12 @@ pipeline.</p>
 <h2 id="playsticks">playsticks</h2>
 <p>Play a video with stick figures from pose dump superimposed.</p>
 <p>Usage:</p>
-<pre><code>skelshop playsticks [OPTIONS] H5FN VIDEOIN
+<pre><code>skelshop playsticks [OPTIONS] VIDEOIN
 </code></pre>
 <p>Options:</p>
-<pre><code>  --posetrack / --no-posetrack  Whether to convert BODY_25 keypoints to
+<pre><code>  --skel PATH
+  --face PATH
+  --posetrack / --no-posetrack  Whether to convert BODY_25 keypoints to
                                 PoseTrack-style keypoints
 
   --seek-time FLOAT
