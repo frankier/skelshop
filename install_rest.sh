@@ -4,7 +4,6 @@ set -o xtrace
 set -euo pipefail
 
 shopt -s extglob
-git submodule update --init --recursive
 
 PKGS="$(poetry env list --full-path | cut -d' ' -f1)"
 if [ -z "$PKGS" ]; then
