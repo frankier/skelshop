@@ -179,7 +179,7 @@ def iter_faces(
             break
 
 
-def mk_conf_thresh(thresh_pool, thresh_val):
+def mk_conf_thresh(thresh_pool=DEFAULT_THRESH_POOL, thresh_val=DEFAULT_THRESH_VAL):
     if thresh_pool == "min":
         func = np.min
     elif thresh_pool == "max":
@@ -195,11 +195,15 @@ def mk_conf_thresh(thresh_pool, thresh_val):
     return inner
 
 
+def get_face_kps(skel_kps):
+    return FACE_IN_BODY_25_ALL_REDUCER.reduce_arr(skel_kps)[:68]
+
+
 def skel_bundle_to_fods(skel_bundle, conf_thresh):
     skel_ids = []
     fods = []
     for skel_id, skel in skel_bundle:
-        face_kps = FACE_IN_BODY_25_ALL_REDUCER.reduce_arr(skel.keypoints)[:68]
+        face_kps = get_face_kps(skel.all())
         if not conf_thresh(face_kps[:, 2]):
             continue
         kps_existing = face_kps[:, :2][np.nonzero(face_kps[:, 2])]
