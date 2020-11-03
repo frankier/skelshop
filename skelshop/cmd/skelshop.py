@@ -1,6 +1,7 @@
 import click
 import click_log
 
+from .bench import bench
 from .conv import conv
 from .drawsticks import drawsticks
 from .dump import dump
@@ -31,3 +32,4 @@ skelshop.add_command(playsticks)
 skelshop.add_command(filter)
 skelshop.add_command(conv)
 skelshop.add_command(stats)
+skelshop.add_command(bench)
