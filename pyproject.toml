@@ -7,7 +7,7 @@ authors = ["Frankie Robertson <frankie@robertson.name>"]
 license = "MIT"
 
 [tool.poetry.dependencies]
-python = "^3.6.1"
+python = "^3.7"
 h5py = "^2.10.0"
 imutils = "^0.5.3"
 click = "^7.1.2"
@@ -17,7 +17,6 @@ more_itertools = "^8.3.0"
 click_log = "^0.3.2"
 ordered-set = "^4.0.1"
 orjson = "^3.1.0"
-dataclasses = { version = "^0.7", python = "~3.6" }
 numpy = "^1.19.0"
 
 snakemake = { version = "^5.18.1", optional = true}
@@ -44,7 +43,7 @@ tox = "^3.15.2"
 mkdocs = "^1.1.2"
 mkdocstrings = "^0.13.6"
 mkdocs-material = "^6.1.0"
-mkdocs-click = { version = "^0.1.1", python = ">=3.7" }
+mkdocs-click = { version = "^0.1.1" }
 
 [build-system]
 requires = ["poetry-core>=1.0.0a5"]
