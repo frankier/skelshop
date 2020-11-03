@@ -13,17 +13,16 @@ RUN python3 -m pip install --upgrade \
     setuptools==50.3.2 \
     poetry==1.1.4
 
-RUN $HOME/.poetry/bin/poetry config virtualenvs.create false
+RUN poetry config virtualenvs.create false
 
 WORKDIR /opt/skelshop
 
 COPY pyproject.toml poetry.lock ./
 
-RUN $HOME/.poetry/bin/poetry install && \
+RUN poetry install -E pipeline -E play -E ssmat -E face && \
     rm -rf /root/.cache
 
 COPY . /opt/skelshop
 
-RUN export PATH=$HOME/.poetry/bin/:$PATH && \
-    ./install_rest.sh && \
+RUN ./install_rest.sh && \
     python3 -m snakemake --cores 4
