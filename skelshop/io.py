@@ -164,12 +164,13 @@ def read_grp(grp) -> Tuple[int, int, Iterator[Any]]:
 
 
 class ShotSegmentedReader:
-    def __init__(self, h5f, bundle_cls=DumpReaderPoseBundle):
+    def __init__(self, h5f, bundle_cls=DumpReaderPoseBundle, infinite=True):
         self.h5f = h5f
         self.limbs = self.h5f.attrs["limbs"]
         assert self.h5f.attrs["fmt_type"] == "trackshots"
         self.mk_bundle = partial(bundle_cls, cls=POSE_CLASSES[self.h5f.attrs["mode"]])
         self.empty_bundle = self.mk_bundle({})
+        self.infinite = infinite
 
     def _mk_reader(self, start_frame, end_frame, bundles):
         return ShotReader(start_frame, end_frame, bundles, self.limbs, self.mk_bundle)
@@ -196,13 +197,14 @@ class ShotSegmentedReader:
                 end_frame,
                 lambda: self._mk_reader(start_frame, end_frame, bundles),
             )
-        yield (
-            shot_idx + 1,
-            "empty_shot",
-            end_frame,
-            None,
-            lambda: EmptyShot(end_frame, None, self.empty_bundle),
-        )
+        if self.infinite:
+            yield (
+                shot_idx + 1,
+                "empty_shot",
+                end_frame,
+                None,
+                lambda: EmptyShot(end_frame, None, self.empty_bundle),
+            )
 
     def __iter__(self):
         for shot_idx, shot_name, start_frame, end_frame, mk_shot in self._iter():
