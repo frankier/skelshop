@@ -34,4 +34,4 @@ RUN pip install virtualenv && \
 RUN pip install virtualenv && \
     ./install_rest.sh && \
     python3 -m snakemake --cores 4 && \
-    pip cache purge
+    rm -rf ~/.cache/pip/
