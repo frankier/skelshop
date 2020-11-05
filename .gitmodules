@@ -7,7 +7,3 @@
 [submodule "submodules/ufunclab"]
 	path = submodules/ufunclab
 	url = https://github.com/WarrenWeckesser/ufunclab.git
-[submodule "submodules/mmskeleton"]
-	path = submodules/mmskeleton
-	url = https://github.com/frankier/mmskeleton.git
-	branch = gsoc2020
