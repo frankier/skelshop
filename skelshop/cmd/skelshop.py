@@ -1,4 +1,4 @@
-import importlib
+from importlib.util import find_spec
 
 import click
 import click_log
@@ -21,7 +21,7 @@ def skelshop():
 
 
 skelshop.add_command(dump)
-face_recognition_loader = importlib.util.find_spec("face_recognition")
+face_recognition_loader = find_spec("face_recognition")
 if face_recognition_loader is not None:
     from .face import face
 
