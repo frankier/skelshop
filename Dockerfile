@@ -30,6 +30,8 @@ RUN pip install virtualenv && \
     poetry install --no-dev -E pipeline -E play -E ssmat -E face && \
     rm -rf /root/.cache
 
-RUN ./install_rest.sh && \
+# And reinstall again...(!)
+RUN pip install virtualenv && \
+    ./install_rest.sh && \
     python3 -m snakemake --cores 4 && \
     pip cache purge
