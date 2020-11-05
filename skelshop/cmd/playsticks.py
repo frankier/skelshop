@@ -9,7 +9,7 @@ import h5py
 import opencv_wrapper as cvw
 
 from skelshop.drawsticks import FaceDraw, ScaledVideo, SkelDraw, get_skel
-from skelshop.face import FaceReader
+from skelshop.face.io import FaceReader
 from skelshop.io import AsIfOrdered, ShotSegmentedReader, UnsegmentedReader
 
 logger = logging.getLogger(__name__)

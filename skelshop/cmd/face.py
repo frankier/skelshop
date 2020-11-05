@@ -4,14 +4,8 @@ import opencv_wrapper as cvw
 from imutils.video.count_frames import count_frames
 
 from skelshop.dump import add_basic_metadata
-from skelshop.face import (
-    DEFAULT_THRESH_POOL,
-    DEFAULT_THRESH_VAL,
-    FaceWriter,
-    iter_faces,
-    iter_faces_from_skel,
-    write_faces,
-)
+from skelshop.face.consts import DEFAULT_THRESH_POOL, DEFAULT_THRESH_VAL
+from skelshop.face.io import FaceWriter, write_faces
 from skelshop.io import AsIfSingleShot, ShotSegmentedReader
 from skelshop.utils.h5py import h5out
 
@@ -44,6 +38,8 @@ def face(
     """
     Create a HDF5 face dump from a video using dlib.
     """
+    from skelshop.face.pipe import iter_faces, iter_faces_from_skel
+
     num_frames = count_frames(video) - start_frame
     with h5out(h5fn) as h5f, cvw.load_video(video) as vid_read:
         add_basic_metadata(h5f, video, num_frames)
