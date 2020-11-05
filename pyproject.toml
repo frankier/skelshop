@@ -1,5 +1,4 @@
 [tool.poetry]
-
 name = "skelshop"
 version = "0.1.0"
 description = "Utilities for dealing with pose skeleton data, currently from OpenPose"
@@ -46,5 +45,5 @@ mkdocs-material = "^6.1.0"
 mkdocs-click = { version = "^0.1.1" }
 
 [build-system]
-requires = ["poetry-core>=1.0.0a5"]
+requires = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"
