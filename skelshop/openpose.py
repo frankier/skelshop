@@ -98,7 +98,8 @@ class OpenPoseStage(PipelineStageBase):
     def __next__(self):
         from openpose import pyopenpose as op
 
-        print(f"i: {self.i}")
+        if logger.isEnabledFor(logging.DEBUG):
+            print(f"i: {self.i}")
         vec_datum = op.VectorDatum()
         res = self.op_wrap.waitAndPop(vec_datum)
         if not res:
