@@ -24,8 +24,10 @@ RUN poetry install --no-dev -E pipeline -E play -E ssmat -E face && \
 
 COPY . /opt/skelshop
 
+# Install virtualenv because it gets removed for some reason in the previous step
 # Install again to get the skelshop package itself
-RUN poetry install --no-dev -E pipeline -E play -E ssmat -E face && \
+RUN pip install virtualenv && \
+    poetry install --no-dev -E pipeline -E play -E ssmat -E face && \
     rm -rf /root/.cache
 
 RUN ./install_rest.sh && \
