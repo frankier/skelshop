@@ -1,4 +1,6 @@
-FROM frankierr/openpose_containers:bionic_multi
+ARG BASE
+
+FROM frankierr/openpose_containers:bionic_multi AS bionic_base
 
 RUN ln -sf /usr/bin/python3.7 /usr/bin/python3 && \
     ln -sf /usr/bin/python3.7 /usr/bin/python
@@ -7,6 +9,10 @@ RUN export LC_ALL=C.UTF-8 && \
     apt-get update && \
     apt-get remove -y cython3 && \
     apt-get install -y --no-install-recommends python3.7-venv
+
+FROM frankierr/openpose_containers:focal_multi AS focal_base
+
+FROM ${BASE}_base
 
 RUN python3 -m pip install --upgrade \
     pip==20.2.4 \
