@@ -24,6 +24,8 @@ class Pipeline:
 
     def apply_metadata(self, h5out):
         for k, v in self.metadata.items():
+            if v is None:
+                v = ""
             h5out.attrs[k] = v
 
     def __call__(self, source):
