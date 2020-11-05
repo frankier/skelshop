@@ -1,5 +1,5 @@
 Bootstrap: docker
-From: frankierr/skelshop:latest
+From: frankierr/skelshop:focal
 
 %runscript
     cd /opt/skelshop && snakemake "$@"
