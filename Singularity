@@ -5,6 +5,12 @@ From: frankierr/skelshop:latest
     cd /opt/skelshop && snakemake "$@"
 
 %environment
+    if [ -z "$LD_LIBRARY_PATH" ]; then
+        LD_LIBRARY_PATH="/.singularity.d/libs"
+    else
+        LD_LIBRARY_PATH="$LD_LIBRARY_PATH:/.singularity.d/libs"
+    fi
+
     source /.openpose_env
 
     export LC_ALL=C.UTF-8
