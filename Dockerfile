@@ -19,10 +19,15 @@ WORKDIR /opt/skelshop
 
 COPY pyproject.toml poetry.lock ./
 
-RUN poetry install -E pipeline -E play -E ssmat -E face && \
+RUN poetry install --no-dev -E pipeline -E play -E ssmat -E face && \
     rm -rf /root/.cache
 
 COPY . /opt/skelshop
 
+# Install again to get the skelshop package itself
+RUN poetry install --no-dev -E pipeline -E play -E ssmat -E face && \
+    rm -rf /root/.cache
+
 RUN ./install_rest.sh && \
-    python3 -m snakemake --cores 4
+    python3 -m snakemake --cores 4 && \
+    pip cache purge
