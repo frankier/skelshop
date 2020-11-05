@@ -35,3 +35,5 @@ RUN pip install virtualenv && \
     ./install_rest.sh && \
     python3 -m snakemake --cores 4 && \
     rm -rf ~/.cache/pip/
+
+COPY docker/skelshop_env /.skelshop_env
