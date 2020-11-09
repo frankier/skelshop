@@ -17,9 +17,9 @@ def compose_body(body=None, left_hand=None, right_hand=None, face=None):
     if left_hand is not None:
         lines["left hand"] = start_from(left_hand, 25)
     if right_hand is not None:
-        lines["right hand"] = start_from(right_hand, 45)
+        lines["right hand"] = start_from(right_hand, 46)
     if face is not None:
-        lines["face"] = incr(65, face)
+        lines["face"] = start_from(face, 67) #TODO there's no difference between start_from and incr?
     return lines
 
 

@@ -14,7 +14,6 @@ from skelshop.io import AsIfOrdered, ShotSegmentedReader, UnsegmentedReader
 
 logger = logging.getLogger(__name__)
 
-
 def log_open(h5fn, h5f, type="skeleton pose"):
     if logger.isEnabledFor(logging.INFO):
         logging.info(
@@ -60,6 +59,7 @@ def get_skels_read_and_draws(
         yield is_seg, result
 
 
+# <editor-fold desc="click-decorators">
 @click.command()
 @click.argument("videoin", type=click.Path(exists=True))
 @click.option("--skel", type=click.Path(exists=True), multiple=True)
@@ -72,7 +72,13 @@ def get_skels_read_and_draws(
 @click.option("--seek-frame", type=int)
 @click.option("--scale", type=int, default=1)
 @click.option("--paused/--playing")
-def playsticks(videoin, skel, face, posetrack, seek_time, seek_frame, scale, paused):
+@click.option(
+    "--ffprobe-bin",
+    type=click.Path(exists=True),
+    help='If you cannot install ffprobe globally, you can provide the path to the version you want to use here'
+)
+# </editor-fold>
+def playsticks(videoin, skel, face, posetrack, seek_time, seek_frame, scale, paused, ffprobe_bin=None):
     """
     Play a video with stick figures from pose dump superimposed.
     """
@@ -90,7 +96,7 @@ def playsticks(videoin, skel, face, posetrack, seek_time, seek_frame, scale, pau
     with cvw.load_video(videoin) as vid_read, get_skels_read_and_draws(
         skel, face, get_skel_draw, get_face_draw
     ) as (is_seg, read_and_draws):
-        vid_read = ScaledVideo(vid_read, scale)
+        vid_read = ScaledVideo(vid_read, videoin, scale, ffprobe_bin)
         play: PlayerBase
         if is_seg:
             play = SegPlayer(vid_read, *read_and_draws[0], title=title)
