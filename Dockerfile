@@ -47,3 +47,6 @@ RUN pip install virtualenv && \
     rm -rf ~/.cache/pip/
 
 COPY docker/skelshop_env /.skelshop_env
+COPY docker/skelshop_entrypoint /.skelshop_entrypoint
+
+ENTRYPOINT ["/usr/bin/bash", "/.skelshop_entrypoint"]
