@@ -161,7 +161,7 @@ Contributions are welcome! Feel free to use the issues to ask any questions.
 Please install the [pre-commit](https://pre-commit.com/) based git
 hooks to run black and some basic code checks. For example:
 
- $ pip install --user pre-commit && pre-commit install
+   $ pip install --user pre-commit && pre-commit install
 
 ## Acknowledgments
 
