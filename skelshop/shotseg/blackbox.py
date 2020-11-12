@@ -1,8 +1,9 @@
 import collections
 from typing import Any, Deque, Set
 
+from skelshop.pipebase import FilterStageBase
+
 from .base import SHOT_CHANGE
-from .pipebase import FilterStageBase
 
 
 def ex_pose_ids(pose_bundle) -> Set[int]:
