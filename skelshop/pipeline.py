@@ -2,10 +2,10 @@ from functools import wraps
 
 import click
 
-from skelshop.bbshotseg import ShotSegStage
 from skelshop.bbtrack import TrackStage
-from skelshop.csvshotseg import CsvShotSegStage
 from skelshop.pipebase import RewindStage
+from skelshop.shotseg.blackbox import BlackBoxShotSegStage
+from skelshop.shotseg.psdcsv import PsdCsvShotSegStage
 from skelshop.track import PoseMatcher
 from skelshop.track.confs import CONFS as TRACK_CONFS
 from skelshop.track.metrics.lighttrack_pose_match import LightTrackPoseMatchMetric
@@ -80,10 +80,10 @@ def process_options(options, allow_empty, kwargs):
             TrackStage, spec=TRACK_CONFS[kwargs.get("track_conf")],
         )
     if kwargs.get("shot_seg") == "bbskel":
-        pipeline.add_stage(ShotSegStage)
+        pipeline.add_stage(BlackBoxShotSegStage)
     elif kwargs.get("shot_seg") == "csv":
         pipeline.add_stage(
-            CsvShotSegStage, shot_csv=kwargs.get("shot_csv"), start_frame=start_frame
+            PsdCsvShotSegStage, shot_csv=kwargs.get("shot_csv"), start_frame=start_frame
         )
     if not allow_empty and not pipeline.stages:
         raise click.UsageError("Cannot construct empty pipeline",)

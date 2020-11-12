@@ -3,8 +3,8 @@ from os.path import basename
 from pathlib import Path
 from subprocess import CalledProcessError, check_output
 
-from skelshop.bbshotseg import SHOT_CHANGE
 from skelshop.io import ShotSegmentedWriter
+from skelshop.shotseg.base import SHOT_CHANGE
 
 
 def fulldir(path):

@@ -1,6 +1,7 @@
 import collections
 from typing import Any, Deque, Set
 
+from .base import SHOT_CHANGE
 from .pipebase import FilterStageBase
 
 
@@ -8,10 +9,7 @@ def ex_pose_ids(pose_bundle) -> Set[int]:
     return {id for id, _pose in pose_bundle}
 
 
-SHOT_CHANGE = object()
-
-
-class ShotSegStage(FilterStageBase):
+class BlackBoxShotSegStage(FilterStageBase):
     def __init__(self, prev, behind_len=3, ahead_len=5):
         self.prev = prev
         self.behind_buf: Deque[Any] = collections.deque(maxlen=behind_len)
