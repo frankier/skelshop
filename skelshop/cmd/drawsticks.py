@@ -56,7 +56,7 @@ def drawsticks(h5fn, videoin, videoout, posetrack, scale, overlay):
         )
         frames: Iterator[Optional[ndarray]]
         if overlay:
-            frames = iter(ScaledVideo(vid_read, scale))
+            frames = iter(ScaledVideo(vid_read, videoin, scale))
         else:
             frames = repeat(None, h5f.attrs["num_frames"])
         if h5f.attrs["fmt_type"] == "trackshots":

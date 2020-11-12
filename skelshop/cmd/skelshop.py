@@ -3,6 +3,8 @@ from importlib.util import find_spec
 import click
 import click_log
 
+from skelshop.drawsticks import set_ffprobe_bin
+
 from .bench import bench
 from .conv import conv
 from .drawsticks import drawsticks
@@ -16,8 +18,14 @@ click_log.basic_config()
 
 @click.group()
 @click_log.simple_verbosity_option()
-def skelshop():
-    pass
+@click.option(
+    "--ffprobe-bin",
+    type=click.Path(exists=True),
+    help="If you cannot install ffprobe globally, you can provide the path to the version you want to use here",
+)
+def skelshop(ffprobe_bin):
+    if ffprobe_bin is not None:
+        set_ffprobe_bin(ffprobe_bin)
 
 
 skelshop.add_command(dump)

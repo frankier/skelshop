@@ -1,8 +1,8 @@
 import logging
-from itertools import zip_longest
-from typing import Iterator
 import subprocess
+from itertools import zip_longest
 from shutil import which
+from typing import Iterator
 
 import cv2
 import numpy as np
@@ -16,16 +16,37 @@ from skelshop.utils.geom import rnd
 logger = logging.getLogger(__name__)
 
 
-def get_fps(vid_file, video_capture, ffprobe_bin=None):
-    ffprobe_string = ffprobe_bin or 'ffprobe'
-    if which(ffprobe_string) is None:
-        logger.error("You don't have ffmpeg installed on your system or provided a wrong executable-Path! It thus not be used to get the video's FPS!")
+_ffprobe_bin = "ffprobe"
+
+
+def set_ffprobe_bin(ffprobe_bin):
+    global _ffprobe_bin
+    _ffprobe_bin = ffprobe_bin
+
+
+def get_fps(vid_file, video_capture):
+    if which(_ffprobe_bin) is None:
+        logger.error(
+            "You don't have ffmpeg installed on your system or provided a wrong executable-Path! It thus not be used to get the video's FPS!"
+        )
         return video_capture.fps
-    fps_string = subprocess.Popen(f'{ffprobe_string} -v 0 -of csv=p=0 -select_streams v:0 -show_entries stream=r_frame_rate'.split(' ')+[vid_file], stdout=subprocess.PIPE, stderr=subprocess.STDOUT).communicate()[0].decode('UTF-8')[:-1]
-    if fps_string != '0/0':
-        fps = eval(fps_string)
+    fps_string = (
+        subprocess.Popen(
+            f"{_ffprobe_bin} -v 0 -of csv=p=0 -select_streams v:0 -show_entries stream=r_frame_rate".split(
+                " "
+            )
+            + [vid_file],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+        )
+        .communicate()[0]
+        .decode("UTF-8")[:-1]
+    )
+    if fps_string != "0/0":
+        num, denom = fps_string.split("/", 1)
+        fps = float(num) / float(denom)
     else:
-        fps = video_capture.fps #.get(cv2.CAP_PROP_FPS)
+        fps = video_capture.fps  # .get(cv2.CAP_PROP_FPS)
     return fps
 
 
@@ -35,14 +56,13 @@ def scale_video(vid_read, dim) -> Iterator[np.ndarray]:
 
 
 class ScaledVideo:
-    def __init__(self, vid_read, vid_path, scale, ffprobe_bin):
+    def __init__(self, vid_read, vid_path: str, scale: float):
         self.vid_read = vid_read
         self.vid_path = vid_path
         self.scale = scale
         self.width = int(vid_read.width) * scale
         self.height = int(vid_read.height) * scale
-        self.fps = get_fps(vid_path, vid_read, ffprobe_bin)
-
+        self.fps = get_fps(vid_path, vid_read)
 
     def reset(self):
         # XXX: In general CAP_PROP_POS_FRAMES will cause problems with

@@ -7,7 +7,7 @@ from .openpose_base import (
     HAND_LINES,
 )
 from .reducer import SkeletonReducer
-from .utils import incr, start_from
+from .utils import incr
 
 
 def compose_body(body=None, left_hand=None, right_hand=None, face=None):
@@ -15,11 +15,11 @@ def compose_body(body=None, left_hand=None, right_hand=None, face=None):
     if body is not None:
         lines["body"] = body
     if left_hand is not None:
-        lines["left hand"] = start_from(left_hand, 25)
+        lines["left hand"] = incr(left_hand, 25)
     if right_hand is not None:
-        lines["right hand"] = start_from(right_hand, 46)
+        lines["right hand"] = incr(right_hand, 46)
     if face is not None:
-        lines["face"] = start_from(face, 67) #TODO there's no difference between start_from and incr?
+        lines["face"] = incr(face, 67)
     return lines
 
 
