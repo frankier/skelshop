@@ -25,6 +25,23 @@ def add_empty_rows_grp(indptr, data, new_rows):
     indptr[-new_rows:] = len(data)
 
 
+class NullWriter:
+    def __init__(self, h5f):
+        pass
+
+    def add_pose(self, frame_num, pose_id, pose):
+        pass
+
+    def start_shot(self, start_frame=None):
+        pass
+
+    def register_frame(self, frame_num):
+        pass
+
+    def end_shot(self):
+        pass
+
+
 class UnsegmentedWriter:
     def __init__(self, h5f):
         self.h5f = h5f
