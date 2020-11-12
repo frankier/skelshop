@@ -15,11 +15,11 @@ def compose_body(body=None, left_hand=None, right_hand=None, face=None):
     if body is not None:
         lines["body"] = body
     if left_hand is not None:
-        lines["left hand"] = incr(left_hand, 25)
+        lines["left hand"] = incr(25, left_hand)
     if right_hand is not None:
-        lines["right hand"] = incr(right_hand, 46)
+        lines["right hand"] = incr(46, right_hand)
     if face is not None:
-        lines["face"] = incr(face, 67)
+        lines["face"] = incr(67, face)
     return lines
 
 
