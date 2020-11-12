@@ -4,12 +4,13 @@ from os.path import join as pjoin
 
 rule scenedetect:
     input:
-        pjoin(VIDEO_BASE, "{base}.mp4")
+        video = pjoin(VIDEO_BASE, "{base}.mp4")
+    params:
+        out_dir = DUMP_BASE
     output:
         pjoin(DUMP_BASE, "{base}-Scenes.csv")
-    shell:
-        "scenedetect --input {input} --output " + DUMP_BASE +
-        " detect-content --min-scene-len 2s list-scenes"
+    script:
+        "scripts/scenedetect.py"
 
 rule skel_unsorted:
     input:

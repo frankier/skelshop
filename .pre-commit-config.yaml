@@ -7,6 +7,7 @@ repos:
     rev: 3.8.2
     hooks:
     -   id: flake8
+        exclude: ^workflow/
 -   repo: git://github.com/timothycrosley/isort 
     rev: 5.3.0
     hooks:
@@ -15,3 +16,4 @@ repos:
     rev: v0.782
     hooks:
     -   id: mypy
+        exclude: ^workflow/
