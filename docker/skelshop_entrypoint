@@ -1,4 +1,4 @@
 #!/usr/bin/env bash
 
-source /.skelshop_env
+. /.skelshop_env
 exec $@
