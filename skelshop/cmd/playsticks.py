@@ -1,7 +1,5 @@
-import logging
 from contextlib import ExitStack, contextmanager
 from os.path import basename
-from pprint import pformat
 from typing import Any, Iterator, List, Tuple
 
 import click
@@ -11,18 +9,7 @@ import opencv_wrapper as cvw
 from skelshop.drawsticks import FaceDraw, ScaledVideo, SkelDraw, get_skel
 from skelshop.face.io import FaceReader
 from skelshop.io import AsIfOrdered, ShotSegmentedReader, UnsegmentedReader
-
-logger = logging.getLogger(__name__)
-
-
-def log_open(h5fn, h5f, type="skeleton pose"):
-    if logger.isEnabledFor(logging.INFO):
-        logging.info(
-            "Opened HDF5 %s file %s with metadata:\n%s",
-            h5fn,
-            type,
-            pformat(dict(h5f.attrs.items())),
-        )
+from skelshop.utils.h5py import log_open
 
 
 @contextmanager
