@@ -1,10 +1,13 @@
 from functools import wraps
+from typing import Type
 
 import click
 
 from skelshop.bbtrack import TrackStage
 from skelshop.pipebase import RewindStage
+from skelshop.shotseg.base import FileBasedSegStage
 from skelshop.shotseg.blackbox import BlackBoxShotSegStage
+from skelshop.shotseg.ffprobe import FFProbeShotSegStage
 from skelshop.shotseg.psdcsv import PsdCsvShotSegStage
 from skelshop.track import PoseMatcher
 from skelshop.track.confs import CONFS as TRACK_CONFS
@@ -45,16 +48,16 @@ PIPELINE_CONF_OPTIONS = [
 
 ALL_OPTIONS = PIPELINE_CONF_OPTIONS + [
     "pose_matcher_config",
-    "shot_csv",
+    "segs_file",
 ]
 
 
 def process_options(options, allow_empty, kwargs):
     pipeline = Pipeline()
     # Check argument validity
-    if kwargs.get("shot_seg") == "csv" and not kwargs.get("shot_csv"):
+    if kwargs.get("shot_seg") in ("psd", "ffprobe") and not kwargs.get("segs_file"):
         raise click.BadOptionUsage(
-            "--shot-csv", "--shot-csv required when --shot-seg=csv",
+            "--segs-file", f"--segs-file required when --shot-seg={kwargs['shot_seg']}",
         )
     if kwargs.get("track") and not kwargs.get("pose_matcher_config"):
         raise click.BadOptionUsage(
@@ -81,9 +84,14 @@ def process_options(options, allow_empty, kwargs):
         )
     if kwargs.get("shot_seg") == "bbskel":
         pipeline.add_stage(BlackBoxShotSegStage)
-    elif kwargs.get("shot_seg") == "csv":
+    elif kwargs.get("shot_seg") in ("psd", "ffprobe"):
+        stage_cls: Type[FileBasedSegStage]
+        if kwargs["shot_seg"] == "psd":
+            stage_cls = PsdCsvShotSegStage
+        else:
+            stage_cls = FFProbeShotSegStage
         pipeline.add_stage(
-            PsdCsvShotSegStage, shot_csv=kwargs.get("shot_csv"), start_frame=start_frame
+            stage_cls, segs_file=kwargs.get("segs_file"), start_frame=start_frame
         )
     if not allow_empty and not pipeline.stages:
         raise click.UsageError("Cannot construct empty pipeline",)
@@ -97,7 +105,7 @@ def pipeline_options(allow_empty=True):
         options = [
             click.option(
                 "--shot-seg",
-                type=click.Choice(["bbskel", "csv", "none"]),
+                type=click.Choice(["bbskel", "psd", "ffprobe", "none"]),
                 default="none",
             ),
             click.option("--track/--no-track", default=False),
@@ -107,7 +115,7 @@ def pipeline_options(allow_empty=True):
             click.option(
                 "--pose-matcher-config", envvar="POSE_MATCHER_CONFIG", required=False
             ),
-            click.option("--shot-csv", type=click.Path(exists=True)),
+            click.option("--segs-file", type=click.Path(exists=True)),
         ]
 
         @wraps(wrapped)

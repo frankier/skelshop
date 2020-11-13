@@ -13,5 +13,5 @@ def get_cuts_from_csv(shot_csv):
 
 
 class PsdCsvShotSegStage(FileBasedSegStage):
-    def get_cuts_from_file(segs_file):
+    def get_cuts_from_file(self, segs_file):
         return get_cuts_from_csv(segs_file)

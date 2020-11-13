@@ -35,6 +35,6 @@ rule skel_filter_csvshotseg_opt_lighttrack:
         "--track " +
         "--track-conf opt_lighttrack " +
         "--pose-matcher-config {input.gcn_config} " +
-        "--shot-seg=csv " +
-        "--shot-csv {input.scenes_csv} " +
+        "--shot-seg=psd " +
+        "--segs-file {input.scenes_csv} " +
         "{input.unsorted} {output}"
