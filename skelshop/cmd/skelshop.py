@@ -10,6 +10,7 @@ from .conv import conv
 from .drawsticks import drawsticks
 from .dump import dump
 from .filter import filter
+from .idsegs import idsegs
 from .playsticks import playsticks
 from .stats import stats
 
@@ -40,3 +41,4 @@ skelshop.add_command(filter)
 skelshop.add_command(conv)
 skelshop.add_command(stats)
 skelshop.add_command(bench)
+skelshop.add_command(idsegs)
