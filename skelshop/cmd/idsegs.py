@@ -88,16 +88,11 @@ def shot_bboxes(skel_iter, skel_idxs) -> List[Optional[List[float]]]:
 @click.argument("segsout", type=click.Path())
 @click.option("--scene-bboxes/--no-scene-bboxes")
 def idsegs(refin, skelin, facein, segsout, scene_bboxes):
+    """
+    Identifying shots with a particular person from reference headshots and
+    optionally get their bbox within the whole shot.
+    """
     ref = ref_embeddings(refin)
-    """
-    @click.option("--segsintype", type=click.Choice(["psd", "ffprobe"]), default="psd")
-    if segsintype == "psd":
-        from skelshop.shotseg.psdcsv import get_cuts_from_csv
-        segs = get_cuts_from_csv(segsin)
-    else:
-        from skelshop.shotseg.ffprobe import get_cuts_from_file
-        segs = get_cuts_from_file(segsin)
-    """
     seg_idx = 0
     with h5py.File(skelin, "r") as skel_h5f, h5py.File(facein, "r") as face_h5f, open(
         segsout, "w"
