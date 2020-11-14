@@ -1,6 +1,7 @@
 import logging
 import os
 
+from skelshop.utils.vidreadwrapper import VidReadWrapper as cvw
 from .pipebase import PipelineStageBase
 from .pose import (
     PoseBody25,
@@ -11,6 +12,7 @@ from .pose import (
     PoseBundle,
     PoseFace,
 )
+
 
 logger = logging.getLogger(__name__)
 
@@ -72,6 +74,11 @@ class OpenPoseStage(PipelineStageBase):
         from openpose import pyopenpose as op
 
         assert (video is not None) + (image_dir is not None) == 1
+
+        if video:
+            self.total_frames = cvw.load_video(video).num_frames
+        else:
+            self.total_frames = len(os.listdir(image_dir))
 
         self.op_wrap = op.WrapperPython(op.ThreadManagerMode.AsynchronousOut)
         # 2 => synchronous input => OpenPose handles reads internally

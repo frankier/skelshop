@@ -7,6 +7,7 @@ from face_recognition.api import (
     pose_predictor_68_point,
 )
 from ufunclab import minmax
+from tqdm import tqdm
 
 from skelshop.skelgraphs.openpose import FACE_IN_BODY_25_ALL_REDUCER
 from skelshop.utils.geom import rnd
@@ -59,42 +60,44 @@ def iter_faces(
 ):
     vid_it = iter(vid_read)
     last = False
-    while 1:
-        frames = []
-        cur_batch_size = 0
-        for _ in range(batch_size):
-            try:
-                frame = next(vid_it)
-            except StopIteration:
+    with tqdm(total=vid_read.total_frames) as pbar:
+        while 1:
+            frames = []
+            cur_batch_size = 0
+            for _ in range(batch_size):
+                try:
+                    frame = next(vid_it)
+                    pbar.update(1)
+                except StopIteration:
+                    break
+                frames.append(frame)
+                cur_batch_size += 1
+            if cur_batch_size < batch_size:
+                last = True
+            face_locations = [
+                [mmod_rect.rect for mmod_rect in mmod_rects]
+                for mmod_rects in cnn_face_detector(frames, batch_size=cur_batch_size)
+            ]
+            batch_fods = []
+            used_frames = []
+            mask = []
+            for frame, image_face_locations in zip(frames, face_locations):
+                frame_shape_predictions = []
+                for image_face_location in image_face_locations:
+                    frame_shape_predictions.append(
+                        pose_predictor_68_point(frame, image_face_location)
+                    )
+                if frame_shape_predictions:
+                    mask.append(True)
+                    used_frames.append(frame)
+                    batch_fods.append(to_full_object_detections(frame_shape_predictions))
+                else:
+                    mask.append(False)
+            yield from fods_to_embeddings(
+                used_frames, batch_fods, mask, include_chip=include_chip
+            )
+            if last:
                 break
-            frames.append(frame)
-            cur_batch_size += 1
-        if cur_batch_size < batch_size:
-            last = True
-        face_locations = [
-            [mmod_rect.rect for mmod_rect in mmod_rects]
-            for mmod_rects in cnn_face_detector(frames, batch_size=cur_batch_size)
-        ]
-        batch_fods = []
-        used_frames = []
-        mask = []
-        for frame, image_face_locations in zip(frames, face_locations):
-            frame_shape_predictions = []
-            for image_face_location in image_face_locations:
-                frame_shape_predictions.append(
-                    pose_predictor_68_point(frame, image_face_location)
-                )
-            if frame_shape_predictions:
-                mask.append(True)
-                used_frames.append(frame)
-                batch_fods.append(to_full_object_detections(frame_shape_predictions))
-            else:
-                mask.append(False)
-        yield from fods_to_embeddings(
-            used_frames, batch_fods, mask, include_chip=include_chip
-        )
-        if last:
-            break
 
 
 def mk_conf_thresh(thresh_pool=DEFAULT_THRESH_POOL, thresh_val=DEFAULT_THRESH_VAL):

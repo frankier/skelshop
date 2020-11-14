@@ -2,6 +2,7 @@ import os.path
 from os.path import basename
 from pathlib import Path
 from subprocess import CalledProcessError, check_output
+from tqdm import tqdm
 
 from skelshop.bbshotseg import SHOT_CHANGE
 from skelshop.io import ShotSegmentedWriter
@@ -76,7 +77,7 @@ def write_shots(h5f, limbs, frame_iter, writer_cls=ShotSegmentedWriter, start_fr
     writer = writer_cls(h5f)
     writer.start_shot(start_frame)
     frame_num = start_frame
-    for frame in frame_iter:
+    for frame in tqdm(frame_iter, total=frame_iter.total_frames):
         if frame is SHOT_CHANGE:
             writer.end_shot()
             writer.start_shot()

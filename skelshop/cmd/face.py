@@ -1,6 +1,5 @@
 import click
 import h5py
-import opencv_wrapper as cvw
 from imutils.video.count_frames import count_frames
 
 from skelshop.dump import add_basic_metadata
@@ -8,12 +7,13 @@ from skelshop.face.consts import DEFAULT_THRESH_POOL, DEFAULT_THRESH_VAL
 from skelshop.face.io import FaceWriter, write_faces
 from skelshop.io import AsIfSingleShot, ShotSegmentedReader
 from skelshop.utils.h5py import h5out
+from skelshop.utils.vidreadwrapper import VidReadWrapper as cvw
 
 
 @click.command()
 @click.argument("video", type=click.Path())
 @click.argument("h5fn", type=click.Path())
-@click.option("--from-skels", type=click.Path())
+@click.option("--from-skels", type=click.Path()) #TODO #PRECOMMIT Docu - if this is given, it still uses face_detection but doesn't need to _find_ the faces using face_detection?
 @click.option("--start-frame", type=int, default=0)
 @click.option(
     "--skel-thresh-pool",
@@ -41,7 +41,7 @@ def face(
     from skelshop.face.pipe import iter_faces, iter_faces_from_skel
 
     num_frames = count_frames(video) - start_frame
-    with h5out(h5fn) as h5f, cvw.load_video(video) as vid_read:
+    with h5out(h5fn) as h5f, cvw.load_video(video) as vid_read: #TODO we need a wrapper around vid_read that includes the ffmpeg framerate detection!
         add_basic_metadata(h5f, video, num_frames)
         writer = FaceWriter(h5f, write_fod_bbox=write_bbox, write_chip=write_chip,)
         kwargs = {}

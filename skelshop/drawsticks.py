@@ -12,20 +12,34 @@ from more_itertools.recipes import grouper
 from skelshop.skelgraphs.openpose import MODE_SKELS
 from skelshop.skelgraphs.posetrack import POSETRACK18_SKEL
 from skelshop.utils.geom import rnd
+import skelshop.config as config
 
 logger = logging.getLogger(__name__)
 
 
 def get_fps(vid_file, video_capture, ffprobe_bin=None):
-    ffprobe_string = ffprobe_bin or 'ffprobe'
+    ffprobe_string = ffprobe_bin or "ffprobe"
     if which(ffprobe_string) is None:
-        logger.error("You don't have ffmpeg installed on your system or provided a wrong executable-Path! It thus not be used to get the video's FPS!")
+        logger.error(
+            "You don't have ffmpeg installed on your system or provided a wrong executable-Path! It thus not be used to get the video's FPS!"
+        )
         return video_capture.fps
-    fps_string = subprocess.Popen(f'{ffprobe_string} -v 0 -of csv=p=0 -select_streams v:0 -show_entries stream=r_frame_rate'.split(' ')+[vid_file], stdout=subprocess.PIPE, stderr=subprocess.STDOUT).communicate()[0].decode('UTF-8')[:-1]
-    if fps_string != '0/0':
+    fps_string = (
+        subprocess.Popen(
+            f"{ffprobe_string} -v 0 -of csv=p=0 -select_streams v:0 -show_entries stream=r_frame_rate".split(
+                " "
+            )
+            + [vid_file],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+        )
+        .communicate()[0]
+        .decode("UTF-8")[:-1]
+    )
+    if fps_string != "0/0":
         fps = eval(fps_string)
     else:
-        fps = video_capture.fps #.get(cv2.CAP_PROP_FPS)
+        fps = video_capture.fps  # .get(cv2.CAP_PROP_FPS)
     return fps
 
 
@@ -42,7 +56,6 @@ class ScaledVideo:
         self.width = int(vid_read.width) * scale
         self.height = int(vid_read.height) * scale
         self.fps = get_fps(vid_path, vid_read, ffprobe_bin)
-
 
     def reset(self):
         # XXX: In general CAP_PROP_POS_FRAMES will cause problems with
@@ -65,11 +78,14 @@ class SkelDraw:
         self.conv_to_posetrack = conv_to_posetrack
         self.ann_ids = ann_ids
         self.scale = scale
+        # self.skel_hist = []
 
     def draw_skel(self, frame, numarr):
-        for (x1, y1, c1), (x2, y2, c2) in self.skel.iter_limbs(numarr):
+        for (x1, y1, c1), (x2, y2, c2), subskel in self.skel.iter_limbs(numarr):
             c = min(c1, c2)
-            if c == 0:
+            if c == 0 or (
+                config.THRESHOLDS[subskel] and c < config.THRESHOLDS[subskel]
+            ):  # TODO if I interpolate limbs, have special confidence-values reserved for that
                 continue
             cv2.line(
                 frame,
@@ -116,7 +132,7 @@ class SkelDraw:
                 numarr.append([point[0] * self.scale, point[1] * self.scale, point[2]])
             numarrs.append(numarr)
         for numarr in numarrs:
-            self.draw_skel(frame, numarr)
+            self.draw_skel(frame, numarr) #TODO we need a history of poses for each body
         for (pers_id, person), numarr in zip(bundle, numarrs):
             self.draw_ann(frame, pers_id, numarr)
 
