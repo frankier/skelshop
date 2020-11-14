@@ -104,7 +104,7 @@ def playsticks(
     def get_face_draw(h5f):
         return FaceDraw()
 
-    with cvw.load_video(videoin, ffprobe_bin) as vid_read, get_skels_read_and_draws(
+    with cvw.load_video(videoin) as vid_read, get_skels_read_and_draws(
         skel, face, get_skel_draw, get_face_draw
     ) as (is_seg, read_and_draws):
         vid_read = ScaledVideo(vid_read, videoin, scale, ffprobe_bin)
