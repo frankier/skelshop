@@ -1,6 +1,7 @@
 import numpy as np
 
 from skelshop.io import grow_ds
+from skelshop.utils.dlib import rect_to_x1y1x2y2
 
 from .consts import EMBED_SIZE
 
@@ -68,10 +69,6 @@ def create_face_grp(
             "chip", (0, 150, 150, 3), dtype=np.uint8, maxshape=(None, 150, 150, 3)
         )
     return group
-
-
-def rect_to_x1y1x2y2(rect):
-    return [rect.left(), rect.top(), rect.right(), rect.bottom()]
 
 
 def write_faces(face_iter, face_writer):

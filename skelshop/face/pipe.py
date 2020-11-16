@@ -27,8 +27,6 @@ def to_full_object_detections(shape_preds):
 
 
 def fods_to_embeddings(batch_frames, batch_fods, mask, include_chip=False):
-    for frame in batch_frames:
-        cv2.cvtColor(frame, cv2.COLOR_BGR2RGB, frame)
     embeddings = face_encoder.compute_face_descriptor(batch_frames, batch_fods)
     embeddings_it = iter(embeddings)
     batch_fods_it = iter(batch_fods)
@@ -55,9 +53,7 @@ def fods_to_embeddings(batch_frames, batch_fods, mask, include_chip=False):
         yield res
 
 
-def iter_faces(
-    vid_read, batch_size=DEFAULT_FRAME_BATCH_SIZE, include_chip=False,
-):
+def face_detection_batched(vid_read, batch_size=DEFAULT_FRAME_BATCH_SIZE):
     vid_it = iter(vid_read)
     last = False
     with tqdm(total=vid_read.total_frames) as pbar:
@@ -70,6 +66,7 @@ def iter_faces(
                     pbar.update(1)
                 except StopIteration:
                     break
+                cv2.cvtColor(frame, cv2.COLOR_BGR2RGB, frame)
                 frames.append(frame)
                 cur_batch_size += 1
             if cur_batch_size < batch_size:
@@ -93,11 +90,18 @@ def iter_faces(
                     batch_fods.append(to_full_object_detections(frame_shape_predictions))
                 else:
                     mask.append(False)
-            yield from fods_to_embeddings(
-                used_frames, batch_fods, mask, include_chip=include_chip
-            )
+            yield used_frames, batch_fods, mask
             if last:
                 break
+
+
+def iter_faces(
+    vid_read, batch_size=DEFAULT_FRAME_BATCH_SIZE, include_chip=False,
+):
+    for used_frames, batch_fods, mask in face_detection_batched(vid_read, batch_size):
+        yield from fods_to_embeddings(
+            used_frames, batch_fods, mask, include_chip=include_chip
+        )
 
 
 def mk_conf_thresh(thresh_pool=DEFAULT_THRESH_POOL, thresh_val=DEFAULT_THRESH_VAL):
@@ -127,7 +131,7 @@ def skel_bundle_to_fods(skel_bundle, conf_thresh):
         face_kps = get_face_kps(skel.all())
         if not conf_thresh(face_kps[:, 2]):
             continue
-        kps_existing = face_kps[:, :2][np.nonzero(face_kps[:, 2])]
+        kps_existing = face_kps[:, :2][face_kps[:, 2] > 0]
         if not len(kps_existing):
             continue
         bbox = minmax(kps_existing, axes=[(0,), (1,)])
@@ -172,6 +176,7 @@ def iter_faces_from_skel(
                 mask.append(False)
                 continue
             batch_fods.append(fods)
+            cv2.cvtColor(frame, cv2.COLOR_BGR2RGB, frame)
             used_frames.append(frame)
             mask.append(True)
             cur_batch_size += 1

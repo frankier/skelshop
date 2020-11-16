@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, cast
 
 import numpy as np
 from ufunclab import minmax
@@ -6,10 +6,28 @@ from ufunclab import minmax
 from skelshop.utils.geom import x1y1x2y2_to_xywh
 
 
-def keypoints_bbox_x1y1x2y2(keypoints: np.ndarray, enlarge_scale=0.2) -> List[float]:
-    bbox = minmax(keypoints[:, :2][np.nonzero(keypoints[:, 2])], axes=[(0,), (1,)])
+def keypoints_bbox_x1y1x2y2(
+    keypoints: np.ndarray, enlarge_scale=0.2, thresh=None
+) -> List[float]:
+    if thresh is None:
+        thresh_kps = keypoints[:, :2][np.nonzero(keypoints[:, 2])]
+    else:
+        thresh_kps = keypoints[:, :2][keypoints[:, 2] > thresh]
+    bbox = minmax(thresh_kps, axes=[(0,), (1,)])
     bbox = np.transpose(bbox).reshape(-1)
-    return enlarge_bbox(bbox, enlarge_scale)
+    if enlarge_scale is not None:
+        return enlarge_bbox(bbox, enlarge_scale)
+    else:
+        return cast(List[float], list(bbox))
+
+
+def bbox_hull(bbox1: List[float], bbox2: List[float]) -> List[float]:
+    return [
+        min(bbox1[0], bbox2[0]),
+        min(bbox1[1], bbox2[1]),
+        max(bbox1[1], bbox2[1]),
+        max(bbox1[2], bbox2[2]),
+    ]
 
 
 def keypoints_bbox_xywh(keypoints: np.ndarray, enlarge_scale=0.2) -> List[float]:

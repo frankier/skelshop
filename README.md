@@ -158,6 +158,11 @@ The dump format is a HDF5 file:
 
 Contributions are welcome! Feel free to use the issues to ask any questions.
 
+Please install the [pre-commit](https://pre-commit.com/) based git
+hooks to run black and some basic code checks. For example:
+
+    $ pip install --user pre-commit && pre-commit install
+
 ## Acknowledgments
 
 Thanks to the authors of all the useful libraries I have used.

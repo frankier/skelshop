@@ -4,8 +4,8 @@ from pathlib import Path
 from subprocess import CalledProcessError, check_output
 from tqdm import tqdm
 
-from skelshop.bbshotseg import SHOT_CHANGE
 from skelshop.io import ShotSegmentedWriter
+from skelshop.shotseg.base import SHOT_CHANGE
 
 
 def fulldir(path):
