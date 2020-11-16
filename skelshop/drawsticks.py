@@ -1,13 +1,12 @@
 import logging
 from itertools import zip_longest
 from typing import Iterator
-import subprocess
-from shutil import which
 
 import cv2
 import numpy as np
 import opencv_wrapper as cvw
 from more_itertools.recipes import grouper
+from tqdm import tqdm
 
 from skelshop.skelgraphs.openpose import MODE_SKELS
 from skelshop.skelgraphs.posetrack import POSETRACK18_SKEL
@@ -16,46 +15,19 @@ import skelshop.config as config
 
 logger = logging.getLogger(__name__)
 
-
-def get_fps(vid_file, video_capture, ffprobe_bin=None):
-    ffprobe_string = ffprobe_bin or "ffprobe"
-    if which(ffprobe_string) is None:
-        logger.error(
-            "You don't have ffmpeg installed on your system or provided a wrong executable-Path! It thus not be used to get the video's FPS!"
-        )
-        return video_capture.fps
-    fps_string = (
-        subprocess.Popen(
-            f"{ffprobe_string} -v 0 -of csv=p=0 -select_streams v:0 -show_entries stream=r_frame_rate".split(
-                " "
-            )
-            + [vid_file],
-            stdout=subprocess.PIPE,
-            stderr=subprocess.STDOUT,
-        )
-        .communicate()[0]
-        .decode("UTF-8")[:-1]
-    )
-    if fps_string != "0/0":
-        fps = eval(fps_string)
-    else:
-        fps = video_capture.fps  # .get(cv2.CAP_PROP_FPS)
-    return fps
-
-
 def scale_video(vid_read, dim) -> Iterator[np.ndarray]:
     for frame in vid_read:
         yield cv2.resize(frame, dim)
 
 
 class ScaledVideo:
-    def __init__(self, vid_read, vid_path, scale, ffprobe_bin):
+    def __init__(self, vid_read, vid_path, scale):
         self.vid_read = vid_read
         self.vid_path = vid_path
         self.scale = scale
         self.width = int(vid_read.width) * scale
         self.height = int(vid_read.height) * scale
-        self.fps = get_fps(vid_path, vid_read, ffprobe_bin)
+        self.fps = vid_read.fps
 
     def reset(self):
         # XXX: In general CAP_PROP_POS_FRAMES will cause problems with
@@ -240,7 +212,7 @@ def drawsticks_shots(vid_read, stick_read, vid_write):
 
 
 def drawsticks_unseg(vid_read, stick_read, vid_write):
-    for frame, bundle in zip_longest(vid_read, stick_read):
+    for frame, bundle in tqdm(zip_longest(vid_read, stick_read), total=stick_read.total_frames):
         vid_write.draw(frame, bundle)
 
 

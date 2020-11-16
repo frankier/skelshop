@@ -77,6 +77,8 @@ def iter_faces(
             face_locations = [
                 [mmod_rect.rect for mmod_rect in mmod_rects]
                 for mmod_rects in cnn_face_detector(frames, batch_size=cur_batch_size)
+                # TODO this is always empty - which is interesting, because
+                # face_recognition.face_locations(frames[0]) works just fine
             ]
             batch_fods = []
             used_frames = []

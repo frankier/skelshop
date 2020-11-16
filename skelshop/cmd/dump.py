@@ -17,7 +17,12 @@ from skelshop.utils.h5py import h5out
 @click.option("--model-folder", envvar="MODEL_FOLDER", required=True)
 @click.option("--debug/--no-debug")
 @pipeline_options(allow_empty=True)
-def dump(video, h5fn, mode, model_folder, pipeline, debug):
+@click.option(
+    "--ffprobe-bin",
+    type=click.Path(exists=True),
+    help="If you cannot install ffprobe globally, you can provide the path to the version you want to use here",
+)
+def dump(video, h5fn, mode, model_folder, pipeline, debug, ffprobe_bin=None):
     """
     Create a HDF5 pose dump from a video using OpenPose.
 
@@ -27,7 +32,7 @@ def dump(video, h5fn, mode, model_folder, pipeline, debug):
     num_frames = count_frames(video)
     with h5out(h5fn) as h5f:
         limbs = LIMBS[mode]
-        stage = OpenPoseStage(model_folder, mode, video=video, debug=debug)
+        stage = OpenPoseStage(model_folder, mode, video=video, debug=debug, ffprobe_bin=ffprobe_bin)
         writer_cls: Union[Type[ShotSegmentedWriter], Type[UnsegmentedWriter]]
         if pipeline.stages:
             frame_iter = pipeline(stage)
