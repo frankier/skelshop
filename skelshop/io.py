@@ -313,7 +313,7 @@ class AsIfOrdered:
 
     @property
     def total_frames(self):
-        return self.wrapped.total_frames
+        return self.wrapped.total_frames #TODO not everything has this..
 
 class AsIfSingleShot:
     def __init__(self, wrapped):

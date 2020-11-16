@@ -1,5 +1,5 @@
 import logging
-from itertools import zip_longest
+from itertools import zip_longest, chain
 from typing import Iterator
 
 import cv2
@@ -41,6 +41,13 @@ class ScaledVideo:
         else:
             return scale_video(frame_iter, (self.width, self.height))
 
+def limb_invisible(confidence, subskel):
+    # TODO if I interpolate limbs, have special confidence-values reserved for that
+    return (
+            confidence == 0 or
+            (config.THRESHOLDS[subskel] and confidence < config.THRESHOLDS[subskel])
+    )
+
 
 class SkelDraw:
     def __init__(
@@ -54,16 +61,25 @@ class SkelDraw:
 
     def draw_skel(self, frame, numarr):
         for (x1, y1, c1), (x2, y2, c2), subskel in self.skel.iter_limbs(numarr):
+            interpolated = False
+            if c1 > 1:
+                interpolated = True
+                c1 -= 1
+            if c2 > 1:
+                interpolated = True
+                c2 -= 1
             c = min(c1, c2)
-            if c == 0 or (
-                config.THRESHOLDS[subskel] and c < config.THRESHOLDS[subskel]
-            ):  # TODO if I interpolate limbs, have special confidence-values reserved for that
+            if limb_invisible(c, subskel):
                 continue
+            if interpolated:
+                color = (rnd(128 * (1 - c)), rnd(128 * (1 - c)), 255)
+            else:
+                color = (255, rnd(255 * (1 - c)), rnd(255 * (1 - c)))
             cv2.line(
                 frame,
                 (rnd(x1), rnd(y1)),
                 (rnd(x2), rnd(y2)),
-                (255, rnd(255 * (1 - c)), rnd(255 * (1 - c))),
+                color,
                 1,
             )
 
@@ -92,7 +108,7 @@ class SkelDraw:
             frame, str(pers_id), (rnd(x + 2), rnd(y + 2)), (0, 0, 255), scale=0.5
         )
 
-    def draw_bundle(self, frame, bundle):
+    def draw_bundle(self, frame, bundle, iter=None):
         numarrs = []
         for pers_id, person in bundle:
             if self.conv_to_posetrack:
@@ -102,14 +118,35 @@ class SkelDraw:
             numarr = []
             for point in grouper(flat, 3):
                 numarr.append([point[0] * self.scale, point[1] * self.scale, point[2]])
-            numarrs.append(numarr)
+            if config.INTERPOLATE_LIMBS > 0:
+                numarr = self.interpolate_limbs(numarr, iter, pers_id)
+            numarrs.append(numarr) #TODO why is numarr 138 long and the skeleton 137?
         for numarr in numarrs:
-            self.draw_skel(frame, numarr) #TODO we need a history of poses for each body
+            self.draw_skel(frame, numarr)
         for (pers_id, person), numarr in zip(bundle, numarrs):
             self.draw_ann(frame, pers_id, numarr)
 
+
+    def interpolate_limbs(self, numarr, iter, pers_id):
+        if np.array(numarr)[...,:].max() == 0:
+            return numarr
+        interpolate_win = [iter[i] for i in
+                           chain(range(-config.INTERPOLATE_LIMBS, 0), range(1, config.INTERPOLATE_LIMBS + 1))]
+        if config.INTERPOLATE_TACTIC == 'highest_conf':
+            for num, elem in enumerate(numarr[:-1]): #numarr is 137 long, skeletons 137
+                if limb_invisible(elem[2], self.skel._get_subskel(num)):
+                    # THIS DOES: replace non-existing bodyparts by their counterpart inside the interpolation-window with the highest confidence
+                    other_frames = np.array([i.wrapped.bundle[pers_id][num] for i in interpolate_win])
+                    highest_conf = other_frames[other_frames[:,2].argmax()]
+                    if not limb_invisible(highest_conf[2], self.skel._get_subskel(num)):
+                        numarr[num] = list(highest_conf)
+                        numarr[num][2] += 1
+            return numarr
+
+
     def get_hover(self, mouse_pos, bundle):
         return None
+
 
 
 class FaceDraw:
