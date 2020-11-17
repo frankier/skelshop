@@ -70,13 +70,13 @@ def mode_conf(mode):
 
 
 class OpenPoseStage(PipelineStageBase):
-    def __init__(self, model_folder, mode, video=None, image_dir=None, debug=False, ffprobe_bin=None):
+    def __init__(self, model_folder, mode, video=None, image_dir=None, debug=False):
         from openpose import pyopenpose as op
 
         assert (video is not None) + (image_dir is not None) == 1
 
         if video:
-            self.total_frames = cvw.load_video(video, ffprobe_bin).num_frames
+            self.total_frames = cvw.load_video(video).num_frames
         else:
             self.total_frames = len(os.listdir(image_dir))
 

@@ -38,7 +38,7 @@ def drawsticks(h5fn, videoin, videoout, posetrack, scale, overlay):
     """
     Output a video with stick figures from pose dump superimposed.
     """
-    with h5py.File(h5fn, "r") as h5f, cvw.load_video(videoin, _ffprobe_bin) as vid_read:
+    with h5py.File(h5fn, "r") as h5f, cvw.load_video(videoin) as vid_read:
         if logger.isEnabledFor(logging.INFO):
             logging.info(
                 "Opened HDF5 pose file with metadata: %s",

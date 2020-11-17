@@ -24,11 +24,6 @@ from skelshop.utils.vidreadwrapper import VidReadWrapper as cvw
 @click.option("--batch-size", type=int)
 @click.option("--write-bbox/--no-write-bbox")
 @click.option("--write-chip/--no-write-chip")
-@click.option(
-    "--ffprobe-bin",
-    type=click.Path(exists=True),
-    help="If you cannot install ffprobe globally, you can provide the path to the version you want to use here",
-)
 def face(
     video,
     h5fn,
@@ -38,8 +33,7 @@ def face(
     skel_thresh_val,
     batch_size,
     write_bbox,
-    write_chip,
-    ffprobe_bin=None
+    write_chip
 ):
     """
     Create a HDF5 face dump from a video using dlib.
@@ -47,7 +41,7 @@ def face(
     from skelshop.face.pipe import iter_faces, iter_faces_from_skel
 
     num_frames = count_frames(video) - start_frame
-    with h5out(h5fn) as h5f, cvw.load_video(video, ffprobe_bin) as vid_read:
+    with h5out(h5fn) as h5f, cvw.load_video(video) as vid_read:
         add_basic_metadata(h5f, video, num_frames)
         writer = FaceWriter(h5f, write_fod_bbox=write_bbox, write_chip=write_chip,)
         kwargs = {}

@@ -29,12 +29,7 @@ def maybe_h5out(h5fn, dry_run):
 @click.option("--debug/--no-debug")
 @click.option("--dry-run/--write")
 @pipeline_options(allow_empty=True)
-@click.option(
-    "--ffprobe-bin",
-    type=click.Path(exists=True),
-    help="If you cannot install ffprobe globally, you can provide the path to the version you want to use here",
-)
-def dump(video, h5fn, mode, model_folder, pipeline, debug, dry_run, ffprobe_bin=None):
+def dump(video, h5fn, mode, model_folder, pipeline, debug, dry_run):
     """
     Create a HDF5 pose dump from a video using OpenPose.
 
@@ -44,7 +39,7 @@ def dump(video, h5fn, mode, model_folder, pipeline, debug, dry_run, ffprobe_bin=
     num_frames = count_frames(video)
     with maybe_h5out(h5fn, dry_run) as h5f:
         limbs = LIMBS[mode]
-        stage = OpenPoseStage(model_folder, mode, video=video, debug=debug, ffprobe_bin=ffprobe_bin)
+        stage = OpenPoseStage(model_folder, mode, video=video, debug=debug)
         writer_cls: Union[
             Type[ShotSegmentedWriter], Type[UnsegmentedWriter], Type[NullWriter]
         ]

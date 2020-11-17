@@ -58,13 +58,8 @@ def get_skels_read_and_draws(
 @click.option("--seek-frame", type=int)
 @click.option("--scale", type=int, default=1)
 @click.option("--paused/--playing")
-@click.option(
-    "--ffprobe-bin",
-    type=click.Path(exists=True),
-    help="If you cannot install ffprobe globally, you can provide the path to the version you want to use here",
-)
 def playsticks(
-    videoin, skel, face, posetrack, seek_time, seek_frame, scale, paused, ffprobe_bin
+    videoin, skel, face, posetrack, seek_time, seek_frame, scale, paused
 ):
     """
     Play a video with stick figures from pose dump superimposed.

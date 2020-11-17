@@ -12,16 +12,16 @@ def set_ffprobe_bin(ffprobe_bin):
     global _ffprobe_bin
     _ffprobe_bin = ffprobe_bin
 
+
 class VidReadWrapper():
     @staticmethod
-    def load_video(vid_file, ffprobe_bin=None):
-        ffprobe_string = ffprobe_bin or "ffprobe"
-        if which(ffprobe_string) is None:
+    def load_video(vid_file):
+        if which(_ffprobe_bin) is None:
             logger.error(
                 "You don't have ffmpeg installed on your system or provided a wrong executable-Path! It thus not be used to get the video's FPS!"
             )
             return LoadedVidWrapper(vid_file, None)
-        return LoadedVidWrapper(vid_file, ffprobe_string)
+        return LoadedVidWrapper(vid_file, _ffprobe_bin)
 
 
 def execute(cmd, **kwargs):
