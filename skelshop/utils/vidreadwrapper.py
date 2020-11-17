@@ -5,6 +5,13 @@ from shutil import which
 
 logger = logging.getLogger(__name__)
 
+
+_ffprobe_bin = "ffprobe"
+
+def set_ffprobe_bin(ffprobe_bin):
+    global _ffprobe_bin
+    _ffprobe_bin = ffprobe_bin
+
 class VidReadWrapper():
     @staticmethod
     def load_video(vid_file, ffprobe_bin=None):

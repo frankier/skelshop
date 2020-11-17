@@ -3,8 +3,6 @@ from importlib.util import find_spec
 import click
 import click_log
 
-from skelshop.drawsticks import set_ffprobe_bin
-
 from .bench import bench
 from .conv import conv
 from .drawsticks import drawsticks
@@ -13,6 +11,7 @@ from .filter import filter
 from .idsegs import idsegs
 from .playsticks import playsticks
 from .stats import stats
+from ..utils.vidreadwrapper import set_ffprobe_bin
 
 click_log.basic_config()
 
