@@ -36,7 +36,7 @@ pipeline = ["scenedetect", "snakemake"]
 play = ["pygame"]
 face = ["face_recognition"]
 ssmat = ["numba", "matplotlib", "scikit-learn", "scipy"]
-graph = ["pandas", "seaborn", "pyarrow"]
+calibrate = ["pandas", "seaborn", "pyarrow"]
 
 [tool.poetry.dev-dependencies]
 black = "^19.10b0"
