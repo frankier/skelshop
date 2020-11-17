@@ -5,6 +5,7 @@ import opencv_wrapper as cvw
 import pandas as pd
 import seaborn as sns
 from matplotlib import pyplot
+from matplotlib.patches import Rectangle
 
 from skelshop.face.pipe import face_detection_batched
 from skelshop.io import UnsegmentedReader
@@ -50,18 +51,21 @@ def process(video, h5infn, dfout):
                 continue
             fods_iter = iter(batch_fods)
             for included in mask:
+                print()
+                print("frame", frame_idx, "included", included)
                 if not included:
                     continue
                 fods = next(fods_iter)
                 skel_bundle = next(skel_bundle_iter)
                 batch_chip_details = get_face_chip_details(fods)
-                for chip_idx, chip in enumerate(batch_chip_details):
+                for chip_idx, (chip, fod) in enumerate(zip(batch_chip_details, fods)):
                     for skel_idx, skel in enumerate(skel_bundle):
                         skel_all = skel.all()
                         if skel_all[0, 2] < THRESH:
                             continue
-                        if not chip.rect.contains(
-                            int(skel_all[0, 0]), int(skel_all[0, 1])
+                        skel_nose = (int(skel_all[0, 0]), int(skel_all[0, 1]))
+                        if not chip.rect.contains(*skel_nose) and not fod.rect.contains(
+                            *skel_nose
                         ):
                             continue
                         box = rect_to_x1y1x2y2(chip.rect)
@@ -76,24 +80,26 @@ def process(video, h5infn, dfout):
                         # Rotate
                         kps = (rot(chip.angle) @ kps.T).T
                         # Origin to top left of rect
-                        kps += np.array([0.5, 0.5,])
+                        kps += np.array([0.5, 0.5])
                         for kp_idx, (kp, exists) in enumerate(
-                            zip(kps, skel_all[2] > THRESH)
+                            zip(kps, skel_all[:, 2] > THRESH)
                         ):
                             if not exists:
                                 continue
-                            data.append(
-                                (
-                                    frame_idx,
-                                    chip_idx,
-                                    skel_idx,
-                                    BODY_25_JOINTS[kp_idx],
-                                    *kp,
-                                )
+                            row = (
+                                frame_idx,
+                                chip_idx,
+                                skel_idx,
+                                BODY_25_JOINTS[kp_idx],
+                                *kp,
                             )
+                            print(row)
+                            data.append(row)
+                frame_idx += 1
 
-        index = pd.Index(["frame_idx", "chip_idx", "skel_idx", "kp", "x", "y",])
-        df = pd.DataFrame.from_records(data, index=index)
+        df = pd.DataFrame.from_records(
+            data, columns=["frame_idx", "chip_idx", "skel_idx", "kp", "x", "y"]
+        )
         df.to_parquet(dfout)
 
 
@@ -103,4 +109,11 @@ def analyse(dfin):
     df = pd.read_parquet(dfin)
     sns.scatterplot(data=df, x="x", y="y", hue="kp")
     print(df.groupby("kp").mean())
+    ax = pyplot.gca()
+    ax.legend(bbox_to_anchor=(1.04, 1), loc="upper left")
+    ax.add_patch(
+        Rectangle((0, 0), 1, 1, alpha=1, facecolor="none", edgecolor="b", linewidth=1)
+    )
+    ax.set_aspect(1)
+    ax.invert_yaxis()
     pyplot.show()
