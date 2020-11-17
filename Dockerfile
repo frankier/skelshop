@@ -1,4 +1,5 @@
 ARG BASE
+ARG VAR
 
 FROM frankierr/openpose_containers:bionic_multi AS bionic_base
 
@@ -10,7 +11,7 @@ RUN export LC_ALL=C.UTF-8 && \
     apt-get remove -y cython3 && \
     apt-get install -y --no-install-recommends python3.7-venv
 
-FROM frankierr/openpose_containers:focal_multi AS focal_base
+FROM frankierr/openpose_containers:focal_${VAR} AS focal_base
 
 RUN ln -sf /usr/bin/python3 /usr/bin/python
 
