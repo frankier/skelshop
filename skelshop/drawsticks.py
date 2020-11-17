@@ -21,7 +21,7 @@ def scale_video(vid_read, dim) -> Iterator[np.ndarray]:
 
 
 class ScaledVideo:
-    def __init__(self, vid_read, vid_path, scale):
+    def __init__(self, vid_read, vid_path: str, scale: float):
         self.vid_read = vid_read
         self.vid_path = vid_path
         self.scale = scale
@@ -57,7 +57,6 @@ class SkelDraw:
         self.conv_to_posetrack = conv_to_posetrack
         self.ann_ids = ann_ids
         self.scale = scale
-        # self.skel_hist = []
 
     def draw_skel(self, frame, numarr):
         for (x1, y1, c1), (x2, y2, c2), subskel in self.skel.iter_limbs(numarr):
@@ -146,7 +145,6 @@ class SkelDraw:
 
     def get_hover(self, mouse_pos, bundle):
         return None
-
 
 
 class FaceDraw:

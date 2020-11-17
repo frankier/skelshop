@@ -1,3 +1,4 @@
+from tempfile import TemporaryDirectory
 from typing import Any
 
 PoseMatcher: Any
@@ -16,6 +17,8 @@ def _mk_pose_matcher():
             argv = []
             if not torch.cuda.is_available():
                 argv.extend(["--use_gpu", "0"])
+            self.temp_dir = TemporaryDirectory()
+            argv.extend(["--work_dir", self.temp_dir.name])
             self.load_arg(argv)
             self.init_environment()
             self.load_model()
@@ -43,6 +46,9 @@ def _mk_pose_matcher():
                 data = data.float().to(self.dev)
                 data = self.model.extract_feature(data)
                 return data.cpu().numpy()[0]
+
+        def __del__(self):
+            self.temp_dir.cleanup()
 
     return PoseMatcher
 

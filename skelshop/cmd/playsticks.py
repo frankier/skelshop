@@ -1,7 +1,5 @@
-import logging
 from contextlib import ExitStack, contextmanager
 from os.path import basename
-from pprint import pformat
 from typing import Any, Iterator, List, Tuple
 
 import click
@@ -10,20 +8,8 @@ import h5py
 from skelshop.drawsticks import FaceDraw, ScaledVideo, SkelDraw, get_skel
 from skelshop.face.io import FaceReader
 from skelshop.io import AsIfOrdered, ShotSegmentedReader, UnsegmentedReader
+from skelshop.utils.h5py import log_open
 from skelshop.utils.vidreadwrapper import VidReadWrapper as cvw
-
-logger = logging.getLogger(__name__)
-
-
-def log_open(h5fn, h5f, type="skeleton pose"):
-    if logger.isEnabledFor(logging.INFO):
-        logging.info(
-            "Opened HDF5 %s file %s with metadata:\n%s",
-            h5fn,
-            type,
-            pformat(dict(h5f.attrs.items())),
-        )
-
 
 @contextmanager
 def get_skels_read_and_draws(
@@ -78,15 +64,7 @@ def get_skels_read_and_draws(
     help="If you cannot install ffprobe globally, you can provide the path to the version you want to use here",
 )
 def playsticks(
-    videoin,
-    skel,
-    face,
-    posetrack,
-    seek_time,
-    seek_frame,
-    scale,
-    paused,
-    ffprobe_bin=None,
+    videoin, skel, face, posetrack, seek_time, seek_frame, scale, paused, ffprobe_bin
 ):
     """
     Play a video with stick figures from pose dump superimposed.
@@ -102,7 +80,7 @@ def playsticks(
     def get_face_draw(h5f):
         return FaceDraw()
 
-    with cvw.load_video(videoin, ffprobe_bin) as vid_read, get_skels_read_and_draws(
+    with cvw.load_video(videoin) as vid_read, get_skels_read_and_draws(
         skel, face, get_skel_draw, get_face_draw
     ) as (is_seg, read_and_draws):
         vid_read = ScaledVideo(vid_read, videoin, scale)

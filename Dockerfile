@@ -12,6 +12,8 @@ RUN export LC_ALL=C.UTF-8 && \
 
 FROM frankierr/openpose_containers:focal_multi AS focal_base
 
+RUN ln -sf /usr/bin/python3 /usr/bin/python
+
 RUN apt-get install -y --no-install-recommends unzip
 
 FROM ${BASE}_base
@@ -45,3 +47,6 @@ RUN pip install virtualenv && \
     rm -rf ~/.cache/pip/
 
 COPY docker/skelshop_env /.skelshop_env
+COPY docker/skelshop_entrypoint /.skelshop_entrypoint
+
+ENTRYPOINT ["/usr/bin/bash", "/.skelshop_entrypoint"]
