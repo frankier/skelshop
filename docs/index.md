@@ -1,8 +1,9 @@
 # What is this?
 
 This is the documentation for [SkelShop](https://github.com/frankier/skelshop).
-See also the README there for a little bit of extra background. Feel free to
-ask in the issues for help.
+See also the [README](https://github.com/frankier/skelshop) for a bit of extra
+background. Feel free to ask in the
+[issues](https://github.com/frankier/skelshop/issues) for help.
 
 ## Getting started
 

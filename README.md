@@ -10,7 +10,7 @@
 <a href="https://singularity-hub.org/collections/4494">
   <img alt="SingularityHub hosted images" src="https://www.singularity-hub.org/static/img/hosted-singularity--hub-%23e32929.svg" />
 </a>
-<a href="https://singularity-hub.org/collections/4494">
+<a href="https://frankier.github.io/skelshop/">
   <img alt="Documentation on GitHub pages" src="https://img.shields.io/badge/Docs-MkDocs-informational" />
 </a>
 </p>
@@ -28,7 +28,9 @@ main attributes of this type of material is:
  * Occlusion is as often by an OSD (On Screen Display) than by some other
    object in the scene.
 
-## [Documentation is available](https://frankier.github.io/skelshop/)
+## Getting started
+
+[See the documentation.](https://frankier.github.io/skelshop/)
 
 ## Features
 
@@ -43,14 +45,14 @@ main attributes of this type of material is:
    * Using OpenPose's face detection and keypoint estimation
    * Or using dlib's own face detection/keypoint estimation
 
-## [Read the Documentation to get started](https://frankier.github.io/skelshop/)
-
 ## Screenshot
 
 Here's a screenshot of the playsticks command:
 
 ![Screenshot of the playsticks
 command](https://user-images.githubusercontent.com/299380/87277551-2d9f6180-c4eb-11ea-917c-4336ad36a97f.png)
+
+[Find out more about what SkelShop can do in the documentation.](https://frankier.github.io/skelshop/)
 
 ## Contributions & Questions
 
