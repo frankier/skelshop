@@ -56,10 +56,10 @@ things to dump or convert skeletons.
 
 ### Manual setup
 
-You need to install Poetry and [my OpenPose
-fork](https://github.com/frankier/openpose/tree/enable-identification).
+You need to install Poetry and [OpenPose v1.7.0
+](https://github.com/CMU-Perceptual-Computing-Lab/openpose/tree/v1.7.0).
 
-    $ ./install.sh -E pipeline -E play -E ssmat -E embedvis
+    $ ./install_all.sh
     $ poetry run snakemake
 
 ## Usage examples
