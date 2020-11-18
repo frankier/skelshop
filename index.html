@@ -6,12 +6,13 @@
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
       
-        <meta name="description" content=" Utilities for dealing with pose skeleton data, currently from OpenPose">
+        <meta name="description" content="Documentation of SkelShop, a toolkit for offline skeleton and face analysis of talking heads videos">
+      
       
       
       
       <link rel="shortcut icon" href="assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.1.2, mkdocs-material-6.1.0">
+      <meta name="generator" content="mkdocs-1.1.2, mkdocs-material-6.1.5">
     
     
       
@@ -19,10 +20,10 @@
       
     
     
-      <link rel="stylesheet" href="assets/stylesheets/main.bc7e593a.min.css">
+      <link rel="stylesheet" href="assets/stylesheets/main.21aed14c.min.css">
       
         
-        <link rel="stylesheet" href="assets/stylesheets/palette.ab28b872.min.css">
+        <link rel="stylesheet" href="assets/stylesheets/palette.196e0c26.min.css">
         
       
     
@@ -58,7 +59,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#skelshop-documentation" class="md-skip">
+        <a href="#what-is-this" class="md-skip">
           Skip to content
         </a>
       
@@ -88,7 +89,7 @@
           </span>
           <span class="md-header-nav__topic md-ellipsis">
             
-              Home
+              Getting started
             
           </span>
         </div>
@@ -103,7 +104,7 @@
   <label class="md-search__overlay" for="__search"></label>
   <div class="md-search__inner" role="search">
     <form class="md-search__form" name="search">
-      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" data-md-state="active">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" data-md-state="active" required>
       <label class="md-search__icon md-icon" for="__search">
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0116 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 019.5 16 6.5 6.5 0 013 9.5 6.5 6.5 0 019.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5z"/></svg>
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12z"/></svg>
@@ -196,9 +197,65 @@
       
     
     
+      <label class="md-nav__link md-nav__link--active" for="__toc">
+        Getting started
+        <span class="md-nav__icon md-icon"></span>
+      </label>
+    
     <a href="." class="md-nav__link md-nav__link--active">
-      Home
+      Getting started
     </a>
+    
+      
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#getting-started" class="md-nav__link">
+    Getting started
+  </a>
+  
+    <nav class="md-nav" aria-label="Getting started">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#docker-container" class="md-nav__link">
+    Docker container
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#singularity-container" class="md-nav__link">
+    Singularity container
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#manual-setup" class="md-nav__link">
+    Manual setup
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
     
   </li>
 
@@ -206,6 +263,87 @@
       
       
       
+
+
+  <li class="md-nav__item md-nav__item--nested">
+    
+    <input class="md-nav__toggle md-toggle" data-md-toggle="nav-2" type="checkbox" id="nav-2" >
+    <label class="md-nav__link" for="nav-2">
+      User guide (for users of the command line tools)
+      <span class="md-nav__icon md-icon"></span>
+    </label>
+    <nav class="md-nav" aria-label="User guide (for users of the command line tools)" data-md-level="1">
+      <label class="md-nav__title" for="nav-2">
+        <span class="md-nav__icon md-icon"></span>
+        User guide (for users of the command line tools)
+      </label>
+      <ul class="md-nav__list" data-md-scrollfix>
+        
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="pipelines-overview/" class="md-nav__link">
+      Pipelines overview
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="usage-examples/" class="md-nav__link">
+      Usage examples
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="snakemake/" class="md-nav__link">
+      HPC extraction with Snakemake
+    </a>
+  </li>
+
+        
+      </ul>
+    </nav>
+  </li>
+
+    
+      
+      
+      
+
+
+  <li class="md-nav__item md-nav__item--nested">
+    
+    <input class="md-nav__toggle md-toggle" data-md-toggle="nav-3" type="checkbox" id="nav-3" >
+    <label class="md-nav__link" for="nav-3">
+      Developer guide (for users of the library & contributors)
+      <span class="md-nav__icon md-icon"></span>
+    </label>
+    <nav class="md-nav" aria-label="Developer guide (for users of the library & contributors)" data-md-level="1">
+      <label class="md-nav__title" for="nav-3">
+        <span class="md-nav__icon md-icon"></span>
+        Developer guide (for users of the library & contributors)
+      </label>
+      <ul class="md-nav__list" data-md-scrollfix>
+        
+        
+          
+          
+          
 
 
   <li class="md-nav__item">
@@ -214,16 +352,94 @@
     </a>
   </li>
 
-    
-      
-      
-      
+        
+          
+          
+          
 
 
   <li class="md-nav__item">
     <a href="tracking/" class="md-nav__link">
       Tracking
     </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="formats/" class="md-nav__link">
+      Formats
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="io/" class="md-nav__link">
+      Reading and writing the formats from your own code
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="development/" class="md-nav__link">
+      Contributing
+    </a>
+  </li>
+
+        
+      </ul>
+    </nav>
+  </li>
+
+    
+      
+      
+      
+
+
+  <li class="md-nav__item md-nav__item--nested">
+    
+    <input class="md-nav__toggle md-toggle" data-md-toggle="nav-4" type="checkbox" id="nav-4" >
+    <label class="md-nav__link" for="nav-4">
+      Reference
+      <span class="md-nav__icon md-icon"></span>
+    </label>
+    <nav class="md-nav" aria-label="Reference" data-md-level="1">
+      <label class="md-nav__title" for="nav-4">
+        <span class="md-nav__icon md-icon"></span>
+        Reference
+      </label>
+      <ul class="md-nav__list" data-md-scrollfix>
+        
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="cli/" class="md-nav__link">
+      CLI reference
+    </a>
+  </li>
+
+        
+      </ul>
+    </nav>
   </li>
 
     
@@ -233,8 +449,8 @@
 
 
   <li class="md-nav__item">
-    <a href="cli/" class="md-nav__link">
-      CLI
+    <a href="https://github.com/frankier/skelshop/issues" class="md-nav__link">
+      Issues & Questions
     </a>
   </li>
 
@@ -256,6 +472,48 @@
     
   
   
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#getting-started" class="md-nav__link">
+    Getting started
+  </a>
+  
+    <nav class="md-nav" aria-label="Getting started">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#docker-container" class="md-nav__link">
+    Docker container
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#singularity-container" class="md-nav__link">
+    Singularity container
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#manual-setup" class="md-nav__link">
+    Manual setup
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
 </nav>
                   </div>
                 </div>
@@ -271,9 +529,51 @@
                   </a>
                 
                 
-                <h1 id="skelshop-documentation">SkelShop Documentation</h1>
+                <h1 id="what-is-this">What is this?</h1>
 <p>This is the documentation for <a href="https://github.com/frankier/skelshop">SkelShop</a>.
-See also the README there for installation and high level CLI usage.</p>
+See also the README there for a little bit of extra background. Feel free to
+ask in the issues for help.</p>
+<h2 id="getting-started">Getting started</h2>
+<p>There are 3 options:</p>
+<ol>
+<li>A Docker container, recommended for general usage.</li>
+<li>A Singularity container, for HPC environments.</li>
+<li>Manual setup, which may be convenient for development of SkelShop, usage as
+   a library, or if you want to use GUI components such as the <code>playsticks</code>
+   command. (It may also be possible to run <code>playsticks</code> with
+   <a href="https://github.com/mviereck/x11docker">x11docker</a>. Please let me know if
+   you get this working so I can add it to these instructions.)</li>
+</ol>
+<p>You may find it easiest to combine these, e.g. dump skeletons from one of the
+container, while only running <code>playsticks</code> with the manual installation.</p>
+<h3 id="docker-container">Docker container</h3>
+<p>There are two Docker containers, one based on CUDA and one able to run
+(slowly...) using only a CPU. For the CUDA (10.2) version, make sure you have
+CUDA 10 and <a href="https://github.com/NVIDIA/nvidia-docker">nvidia-docker</a> on the
+host and then run:</p>
+<pre><code>$ docker run --nv frankierr/skelshop:focal_nvcaffe python -m skelshop --help
+</code></pre>
+<p>For the CPU version:</p>
+<pre><code>$ docker run frankierr/skelshop:focal_cpu python -m skelshop --help
+</code></pre>
+<p>For more information about the Docker containers see <a href="https://hub.docker.com/repository/frankierr/skelshop">their page on Docker
+Hub</a> and <a href="https://github.com/frankier/openpose_containers">the
+openpose_containers repository where the bases are
+built</a>.</p>
+<h3 id="singularity-container">Singularity container</h3>
+<p>There is a GPU Singularity container. Run it like so:</p>
+<pre><code>$ singularity run --nv shub://frankier/skelshop:latest python -m skelshop --help
+</code></pre>
+<h3 id="manual-setup">Manual setup</h3>
+<p>You need to install <a href="https://github.com/python-poetry/poetry">Poetry</a> and
+<a href="https://github.com/CMU-Perceptual-Computing-Lab/openpose/tree/v1.7.0">OpenPose v1.7.0
+</a>.</p>
+<pre><code>$ ./install_all.sh
+$ poetry run snakemake
+</code></pre>
+<p>If you only want to run the <code>playsticks</code> command you do not need to install OpenPose, can instead run</p>
+<pre><code>$ ./install.sh -E playsticks
+</code></pre>
                 
               
               
@@ -293,13 +593,13 @@ See also the README there for installation and high level CLI usage.</p>
       <nav class="md-footer-nav__inner md-grid" aria-label="Footer">
         
         
-          <a href="pipeline-internals/" class="md-footer-nav__link md-footer-nav__link--next" rel="next">
+          <a href="pipelines-overview/" class="md-footer-nav__link md-footer-nav__link--next" rel="next">
             <div class="md-footer-nav__title">
               <div class="md-ellipsis">
                 <span class="md-footer-nav__direction">
                   Next
                 </span>
-                Pipeline internals
+                Pipelines overview
               </div>
             </div>
             <div class="md-footer-nav__button md-icon">
@@ -326,8 +626,8 @@ See also the README there for installation and high level CLI usage.</p>
       
     </div>
     
-      <script src="assets/javascripts/vendor.6a3d08fc.min.js"></script>
-      <script src="assets/javascripts/bundle.71201edf.min.js"></script><script id="__lang" type="application/json">{"clipboard.copy": "Copy to clipboard", "clipboard.copied": "Copied to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.placeholder": "Search", "search.result.placeholder": "Type to start searching", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.term.missing": "Missing"}</script>
+      <script src="assets/javascripts/vendor.7e0ee788.min.js"></script>
+      <script src="assets/javascripts/bundle.b3a72adc.min.js"></script><script id="__lang" type="application/json">{"clipboard.copy": "Copy to clipboard", "clipboard.copied": "Copied to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.placeholder": "Search", "search.result.placeholder": "Type to start searching", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.term.missing": "Missing"}</script>
       
       <script>
         app = initialize({

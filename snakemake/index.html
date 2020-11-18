@@ -16,7 +16,7 @@
     
     
       
-        <title>CLI reference - SkelShop Documentation</title>
+        <title>HPC extraction with Snakemake - SkelShop Documentation</title>
       
     
     
@@ -59,7 +59,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#cli-reference" class="md-skip">
+        <a href="#hpc-extraction-with-snakemake" class="md-skip">
           Skip to content
         </a>
       
@@ -89,7 +89,7 @@
           </span>
           <span class="md-header-nav__topic md-ellipsis">
             
-              CLI reference
+              HPC extraction with Snakemake
             
           </span>
         </div>
@@ -199,10 +199,12 @@
       
       
 
+  
 
-  <li class="md-nav__item md-nav__item--nested">
+
+  <li class="md-nav__item md-nav__item--active md-nav__item--nested">
     
-    <input class="md-nav__toggle md-toggle" data-md-toggle="nav-2" type="checkbox" id="nav-2" >
+    <input class="md-nav__toggle md-toggle" data-md-toggle="nav-2" type="checkbox" id="nav-2" checked>
     <label class="md-nav__link" for="nav-2">
       User guide (for users of the command line tools)
       <span class="md-nav__icon md-icon"></span>
@@ -243,11 +245,20 @@
           
           
 
+  
 
-  <li class="md-nav__item">
-    <a href="../snakemake/" class="md-nav__link">
+
+  <li class="md-nav__item md-nav__item--active">
+    
+    <input class="md-nav__toggle md-toggle" data-md-toggle="toc" type="checkbox" id="__toc">
+    
+      
+    
+    
+    <a href="./" class="md-nav__link md-nav__link--active">
       HPC extraction with Snakemake
     </a>
+    
   </li>
 
         
@@ -345,12 +356,10 @@
       
       
 
-  
 
-
-  <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+  <li class="md-nav__item md-nav__item--nested">
     
-    <input class="md-nav__toggle md-toggle" data-md-toggle="nav-4" type="checkbox" id="nav-4" checked>
+    <input class="md-nav__toggle md-toggle" data-md-toggle="nav-4" type="checkbox" id="nav-4" >
     <label class="md-nav__link" for="nav-4">
       Reference
       <span class="md-nav__icon md-icon"></span>
@@ -367,20 +376,11 @@
           
           
 
-  
 
-
-  <li class="md-nav__item md-nav__item--active">
-    
-    <input class="md-nav__toggle md-toggle" data-md-toggle="toc" type="checkbox" id="__toc">
-    
-      
-    
-    
-    <a href="./" class="md-nav__link md-nav__link--active">
+  <li class="md-nav__item">
+    <a href="../cli/" class="md-nav__link">
       CLI reference
     </a>
-    
   </li>
 
         
@@ -428,170 +428,16 @@
             <article class="md-content__inner md-typeset">
               
                 
-                  <a href="https://github.com/frankier/skelshop/edit/master/docs/cli.md" title="Edit this page" class="md-content__button md-icon">
+                  <a href="https://github.com/frankier/skelshop/edit/master/docs/snakemake.md" title="Edit this page" class="md-content__button md-icon">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20.71 7.04c.39-.39.39-1.04 0-1.41l-2.34-2.34c-.37-.39-1.02-.39-1.41 0l-1.84 1.83 3.75 3.75M3 17.25V21h3.75L17.81 9.93l-3.75-3.75L3 17.25z"/></svg>
                   </a>
                 
                 
-                <h1 id="cli-reference">CLI Reference</h1>
-<h1 id="skelshop">skelshop</h1>
-<p>Usage:</p>
-<pre><code>skelshop [OPTIONS] COMMAND [ARGS]...
-</code></pre>
-<p>Options:</p>
-<pre><code>  -v, --verbosity LVL  Either CRITICAL, ERROR, WARNING, INFO or DEBUG
-  --ffprobe-bin PATH   If you cannot install ffprobe globally, you can provide
-                       the path to the version you want to use here
-
-</code></pre>
-<h2 id="bench">bench</h2>
-<p>Commands to benchmark SkelShop's I/O speeds.</p>
-<p>Usage:</p>
-<pre><code>skelshop bench [OPTIONS] COMMAND [ARGS]...
-</code></pre>
-<h3 id="read-shot-seg">read-shot-seg</h3>
-<p>Benchmark reading a shot segmented skeleton file.</p>
-<p>Usage:</p>
-<pre><code>skelshop bench read-shot-seg [OPTIONS] SKELS_FN
-</code></pre>
-<h2 id="calibrate">calibrate</h2>
-<p>Keypoint calibration tools.</p>
-<p>Usage:</p>
-<pre><code>skelshop calibrate [OPTIONS] COMMAND [ARGS]...
-</code></pre>
-<h3 id="analyse">analyse</h3>
-<p>Usage:</p>
-<pre><code>skelshop calibrate analyse [OPTIONS] DFIN [CHARTOUT]
-</code></pre>
-<h3 id="process-dlib-dir">process-dlib-dir</h3>
-<p>Give a directory with dlib facepoint XMLs, run OpenPose on all images and
-write out where the keypoints are relative to the chips.</p>
-<p>Usage:</p>
-<pre><code>skelshop calibrate process-dlib-dir [OPTIONS] DIRIN H5IN DFOUT
-</code></pre>
-<h3 id="process-video">process-video</h3>
-<p>Given a video and a skeleton keypoint file, run the dlib keypoint detection
-pipeline for each frame and give points where BODY_25 face keypoints would
-have to map to make the same transformation.</p>
-<p>Usage:</p>
-<pre><code>skelshop calibrate process-video [OPTIONS] VIDEO H5INFN DFOUT
-</code></pre>
-<h2 id="conv">conv</h2>
-<p>Convert a exiting dump from another format into HDF5 format.</p>
-<p>LEGACY_DUMP is the dump in the old format. OUT is a file path when run with
-single-zip, otherwise it is the base of a directory tree which will be
-created during processing.</p>
-<p>Usage:</p>
-<pre><code>skelshop conv [OPTIONS] [monolithic-tar|single-zip|ordered-tar] LEGACY_DUMP [OUT]
-</code></pre>
-<p>Options:</p>
-<pre><code>  --mode [BODY_25_ALL|BODY_25_HANDS|BODY_25|BODY_135|FACE|BODY_25_FACE]
-                                  [required]
-  --cores INTEGER                 Number of cores to use (only for monolithic-
-                                  tar)
-
-  --suppress-end-fail / --no-suppress-end-fail
-  --skip-existing / --overwrite-existing
-</code></pre>
-<h2 id="drawsticks">drawsticks</h2>
-<p>Output a video with stick figures from pose dump superimposed.</p>
-<p>Usage:</p>
-<pre><code>skelshop drawsticks [OPTIONS] H5FN VIDEOIN VIDEOOUT
-</code></pre>
-<p>Options:</p>
-<pre><code>  --posetrack / --no-posetrack  Whether to convert BODY_25 keypoints to
-                                PoseTrack-style keypoints
-
-  --scale INTEGER
-  --overlay / --no-overlay      Whether to draw VIDEOIN below the stick
-                                figures or not
-
-</code></pre>
-<h2 id="dump">dump</h2>
-<p>Create a HDF5 pose dump from a video using OpenPose.</p>
-<p>This command optionally applies steps from the tracking/segmentation
-pipeline.</p>
-<p>Usage:</p>
-<pre><code>skelshop dump [OPTIONS] VIDEO H5FN
-</code></pre>
-<p>Options:</p>
-<pre><code>  --mode [BODY_25_ALL|BODY_25_HANDS|BODY_25|BODY_135|FACE|BODY_25_FACE]
-  --model-folder TEXT             [required]
-  --debug / --no-debug
-  --dry-run / --write
-  --segs-file PATH
-  --pose-matcher-config TEXT
-  --track-conf [lighttrackish|opt_lighttrack|deepsortlike]
-  --track / --no-track
-  --shot-seg [bbskel|psd|ffprobe|none]
-</code></pre>
-<h2 id="dumpimgs">dumpimgs</h2>
-<p>Dump a directory of images to a HDF5 file using OpenPose.</p>
-<p>Usage:</p>
-<pre><code>skelshop dumpimgs [OPTIONS] INPUT_DIR H5OUT
-</code></pre>
-<p>Options:</p>
-<pre><code>  --mode [BODY_25_ALL|BODY_25_HANDS|BODY_25|BODY_135|FACE|BODY_25_FACE]
-  --model-folder TEXT             [required]
-</code></pre>
-<h2 id="face">face</h2>
-<p>Create a HDF5 face dump from a video using dlib.</p>
-<p>Usage:</p>
-<pre><code>skelshop face [OPTIONS] VIDEO H5FN
-</code></pre>
-<p>Options:</p>
-<pre><code>  --from-skels PATH
-  --start-frame INTEGER
-  --skel-thresh-pool [min|max|mean]
-  --skel-thresh-val FLOAT
-  --batch-size INTEGER
-  --write-bbox / --no-write-bbox
-  --write-chip / --no-write-chip
-</code></pre>
-<h2 id="filter">filter</h2>
-<p>Apply tracking to an untracked HDF5 pose dump.</p>
-<p>Usage:</p>
-<pre><code>skelshop filter [OPTIONS] H5INFN H5OUTFN
-</code></pre>
-<p>Options:</p>
-<pre><code>  --segs-file PATH
-  --pose-matcher-config TEXT
-  --track-conf [lighttrackish|opt_lighttrack|deepsortlike]
-  --track / --no-track
-  --shot-seg [bbskel|psd|ffprobe|none]
-  --start-frame INTEGER
-  --end-frame INTEGER
-</code></pre>
-<h2 id="idsegs">idsegs</h2>
-<p>Identifying shots with a particular person from reference headshots and
-optionally get their bbox within the whole shot.</p>
-<p>Usage:</p>
-<pre><code>skelshop idsegs [OPTIONS] REFIN SKELIN FACEIN SEGSOUT
-</code></pre>
-<p>Options:</p>
-<pre><code>  --scene-bboxes / --no-scene-bboxes
-</code></pre>
-<h2 id="playsticks">playsticks</h2>
-<p>Play a video with stick figures from pose dump superimposed.</p>
-<p>Usage:</p>
-<pre><code>skelshop playsticks [OPTIONS] VIDEOIN
-</code></pre>
-<p>Options:</p>
-<pre><code>  --skel PATH
-  --face PATH
-  --posetrack / --no-posetrack  Whether to convert BODY_25 keypoints to
-                                PoseTrack-style keypoints
-
-  --seek-time FLOAT
-  --seek-frame INTEGER
-  --scale INTEGER
-  --paused / --playing
-</code></pre>
-<h2 id="stats">stats</h2>
-<p>Output stats about dumps in INPUT_DIR.</p>
-<p>Usage:</p>
-<pre><code>skelshop stats [OPTIONS] INPUT_DIR
-</code></pre>
+                <h1 id="hpc-extraction-with-snakemake">HPC extraction with Snakemake</h1>
+<p>There are tools for running extraction pipelines orchestrated using Snakemake.
+These would typically be run in a HPC environment, with GPU nodes orchestrated
+by SLURM.</p>
+<p>TODO: Detail</p>
                 
               
               
@@ -610,7 +456,7 @@ optionally get their bbox within the whole shot.</p>
     <div class="md-footer-nav">
       <nav class="md-footer-nav__inner md-grid" aria-label="Footer">
         
-          <a href="../development/" class="md-footer-nav__link md-footer-nav__link--prev" rel="prev">
+          <a href="../usage-examples/" class="md-footer-nav__link md-footer-nav__link--prev" rel="prev">
             <div class="md-footer-nav__button md-icon">
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12z"/></svg>
             </div>
@@ -619,11 +465,25 @@ optionally get their bbox within the whole shot.</p>
                 <span class="md-footer-nav__direction">
                   Previous
                 </span>
-                Contributing
+                Usage examples
               </div>
             </div>
           </a>
         
+        
+          <a href="../pipeline-internals/" class="md-footer-nav__link md-footer-nav__link--next" rel="next">
+            <div class="md-footer-nav__title">
+              <div class="md-ellipsis">
+                <span class="md-footer-nav__direction">
+                  Next
+                </span>
+                Pipeline internals
+              </div>
+            </div>
+            <div class="md-footer-nav__button md-icon">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11H4z"/></svg>
+            </div>
+          </a>
         
       </nav>
     </div>
