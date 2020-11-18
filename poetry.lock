@@ -177,11 +177,18 @@ python-versions = "*"
 
 [[package]]
 name = "dlib"
-version = "19.21.0"
+version = "19.21.99"
 description = "A toolkit for making real world machine learning and data analysis applications"
 category = "main"
-optional = true
+optional = false
 python-versions = "*"
+develop = false
+
+[package.source]
+type = "git"
+url = "https://github.com/frankier/dlib"
+reference = "get_face_chip_details-python"
+resolved_reference = "62b95f57295b1632fade0fba6659a50d4ba22fe4"
 
 [[package]]
 name = "docutils"
@@ -373,11 +380,11 @@ format_nongpl = ["idna", "jsonpointer (>1.13)", "webcolors", "rfc3986-validator 
 
 [[package]]
 name = "jupyter-core"
-version = "4.6.3"
+version = "4.7.0"
 description = "Jupyter core package. A base package on which Jupyter projects rely."
 category = "main"
 optional = true
-python-versions = "!=3.0,!=3.1,!=3.2,!=3.3,!=3.4,>=2.7"
+python-versions = ">=3.6"
 
 [package.dependencies]
 pywin32 = {version = ">=1.0", markers = "sys_platform == \"win32\""}
@@ -440,6 +447,17 @@ importlib-metadata = {version = "*", markers = "python_version < \"3.8\""}
 
 [package.extras]
 testing = ["coverage", "pyyaml"]
+
+[[package]]
+name = "markdown-inline-graphviz-extension-png"
+version = "1.1"
+description = "Render inline graphs with Markdown and Graphviz (python3 version)"
+category = "dev"
+optional = false
+python-versions = "*"
+
+[package.dependencies]
+Markdown = ">=2.3.1"
 
 [[package]]
 name = "markupsafe"
@@ -1188,7 +1206,7 @@ ssmat = ["numba", "matplotlib", "scikit-learn", "scipy"]
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.7"
-content-hash = "b3881a50020bf5a5c0b9abaaaba28ef7f7f6ee78063807c75d8dc2f44eb22d29"
+content-hash = "b159bba0d55867324b238887f8fb4bb0ab38e2187ae968036e40d745a9e749b3"
 
 [metadata.files]
 amply = [
@@ -1283,9 +1301,7 @@ distlib = [
     {file = "distlib-0.3.1-py2.py3-none-any.whl", hash = "sha256:8c09de2c67b3e7deef7184574fc060ab8a793e7adbb183d942c389c8b13c52fb"},
     {file = "distlib-0.3.1.zip", hash = "sha256:edf6116872c863e1aa9d5bb7cb5e05a022c519a4594dc703843343a9ddd9bff1"},
 ]
-dlib = [
-    {file = "dlib-19.21.0.tar.gz", hash = "sha256:e79d8e14171b8446d6b5434d7dc3b44a23ca05c8f99266acaf731cc7b268edb6"},
-]
+dlib = []
 docutils = [
     {file = "docutils-0.16-py2.py3-none-any.whl", hash = "sha256:0c5b78adfbf7762415433f5515cd5c9e762339e23369dbe8000d84a4bf4ab3af"},
     {file = "docutils-0.16.tar.gz", hash = "sha256:c2de3a60e9e7d07be26b7f2b00ca0309c207e06c100f9cc2a94931fc75a478fc"},
@@ -1379,8 +1395,8 @@ jsonschema = [
     {file = "jsonschema-3.2.0.tar.gz", hash = "sha256:c8a85b28d377cc7737e46e2d9f2b4f44ee3c0e1deac6bf46ddefc7187d30797a"},
 ]
 jupyter-core = [
-    {file = "jupyter_core-4.6.3-py2.py3-none-any.whl", hash = "sha256:a4ee613c060fe5697d913416fc9d553599c05e4492d58fac1192c9a6844abb21"},
-    {file = "jupyter_core-4.6.3.tar.gz", hash = "sha256:394fd5dd787e7c8861741880bdf8a00ce39f95de5d18e579c74b882522219e7e"},
+    {file = "jupyter_core-4.7.0-py3-none-any.whl", hash = "sha256:0a451c9b295e4db772bdd8d06f2f1eb31caeec0e81fbb77ba37d4a3024e3b315"},
+    {file = "jupyter_core-4.7.0.tar.gz", hash = "sha256:aa1f9496ab3abe72da4efe0daab0cb2233997914581f9a071e07498c6add8ed3"},
 ]
 kiwisolver = [
     {file = "kiwisolver-1.3.1-cp36-cp36m-macosx_10_9_x86_64.whl", hash = "sha256:fd34fbbfbc40628200730bc1febe30631347103fc8d3d4fa012c21ab9c11eca9"},
@@ -1444,6 +1460,10 @@ lunr = [
 markdown = [
     {file = "Markdown-3.3.3-py3-none-any.whl", hash = "sha256:c109c15b7dc20a9ac454c9e6025927d44460b85bd039da028d85e2b6d0bcc328"},
     {file = "Markdown-3.3.3.tar.gz", hash = "sha256:5d9f2b5ca24bc4c7a390d22323ca4bad200368612b5aaa7796babf971d2b2f18"},
+]
+markdown-inline-graphviz-extension-png = [
+    {file = "markdown_inline_graphviz_extension_png-1.1-py3-none-any.whl", hash = "sha256:298d918418e50920eea566b149080c43ebc3d254fce2281b99e68dda3a4f53d7"},
+    {file = "markdown_inline_graphviz_extension_png-1.1.tar.gz", hash = "sha256:d919fe64c954f32ad60868d3d29de3b80e32c4dc6659c93215750ce157ae54b9"},
 ]
 markupsafe = [
     {file = "MarkupSafe-1.1.1-cp27-cp27m-macosx_10_6_intel.whl", hash = "sha256:09027a7803a62ca78792ad89403b1b7a73a01c8cb65909cd876f7fcebd79b161"},

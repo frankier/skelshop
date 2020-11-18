@@ -30,6 +30,7 @@ face_recognition = { version = "^1.3.0", optional = true }
 pandas = { version = "^1.1.4", optional = true }
 seaborn = { version = "^0.11.0", optional = true }
 pyarrow = { version = "^2.0.0", optional = true }
+dlib = {git = "https://github.com/frankier/dlib", rev = "get_face_chip_details-python"}
 
 [tool.poetry.extras]
 pipeline = ["scenedetect", "snakemake"]
@@ -48,6 +49,7 @@ mkdocs = "^1.1.2"
 mkdocstrings = "^0.13.6"
 mkdocs-material = "^6.1.0"
 mkdocs-click = { version = "^0.1.1" }
+markdown-inline-graphviz-extension-png = "^1.1"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
