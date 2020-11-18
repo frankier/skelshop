@@ -180,7 +180,7 @@ name = "dlib"
 version = "19.21.99"
 description = "A toolkit for making real world machine learning and data analysis applications"
 category = "main"
-optional = false
+optional = true
 python-versions = "*"
 develop = false
 
@@ -1198,7 +1198,7 @@ testing = ["pytest (>=3.5,!=3.7.3)", "pytest-checkdocs (>=1.2.3)", "pytest-flake
 
 [extras]
 calibrate = ["pandas", "seaborn", "pyarrow"]
-face = ["face_recognition"]
+face = ["face_recognition", "dlib"]
 pipeline = ["scenedetect", "snakemake"]
 play = ["pygame"]
 ssmat = ["numba", "matplotlib", "scikit-learn", "scipy"]
@@ -1206,7 +1206,7 @@ ssmat = ["numba", "matplotlib", "scikit-learn", "scipy"]
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.7"
-content-hash = "b159bba0d55867324b238887f8fb4bb0ab38e2187ae968036e40d745a9e749b3"
+content-hash = "310055f607d7e2ebcd8a81d6d7f94ededf629c3bb0ded4004c42c8b0477447da"
 
 [metadata.files]
 amply = [
