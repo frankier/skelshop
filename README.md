@@ -45,8 +45,6 @@ main attributes of this type of material is:
    * Using OpenPose's face detection and keypoint estimation
    * Or using dlib's own face detection/keypoint estimation
 
-## Screenshot
-
 Here's a screenshot of the playsticks command:
 
 ![Screenshot of the playsticks
