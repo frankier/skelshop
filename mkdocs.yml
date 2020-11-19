@@ -1,13 +1,23 @@
 site_name: SkelShop Documentation
-site_description: " Utilities for dealing with pose skeleton data, currently from OpenPose"
+site_description: "Documentation of SkelShop, a toolkit for offline skeleton and face analysis of talking heads videos"
 repo_url: "https://github.com/frankier/skelshop"
 repo_name: "frankier/skelshop"
 
 nav:
-  - Home: index.md
-  - Pipeline internals: pipeline-internals.md
-  - Tracking: tracking.md
-  - CLI: cli.md
+  - Getting started: index.md
+  - 'User guide (for users of the command line tools)':
+    - Pipelines overview: pipelines-overview.md
+    - Usage examples: usage-examples.md
+    - HPC extraction with Snakemake: snakemake.md
+  - 'Developer guide (for users of the library & contributors)': 
+    - Pipeline internals: pipeline-internals.md
+    - Tracking: tracking.md
+    - Formats: formats.md
+    - Reading and writing the formats from your own code: io.md
+    - Contributing: development.md
+  - Reference:
+    - CLI reference: cli.md
+  - 'Issues & Questions': https://github.com/frankier/skelshop/issues
 
 theme:
   name: "material"
@@ -16,6 +26,7 @@ markdown_extensions:
   - admonition
   - mkdocs-click
   - footnotes
+  - markdown_inline_graphviz
 
 plugins:
   - search
