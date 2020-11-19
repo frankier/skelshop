@@ -11,7 +11,7 @@ from tqdm import tqdm
 from skelshop.skelgraphs.openpose import MODE_SKELS
 from skelshop.skelgraphs.posetrack import POSETRACK18_SKEL
 from skelshop.utils.geom import rnd
-import skelshop.config as config
+from skelshop.config import conf as config
 
 logger = logging.getLogger(__name__)
 

@@ -58,12 +58,18 @@ def get_skels_read_and_draws(
 @click.option("--seek-frame", type=int)
 @click.option("--scale", type=int, default=1)
 @click.option("--paused/--playing")
-def playsticks(
-    videoin, skel, face, posetrack, seek_time, seek_frame, scale, paused
+def playsticks(*args, **kwargs):
+    playsticks_fn(*args, **kwargs)
+
+
+
+def playsticks_fn(
+    videoin, skel, face=None, posetrack=False, seek_time=None, seek_frame=None, scale=1, paused=False
 ):
     """
     Play a video with stick figures from pose dump superimposed.
     """
+    face = face or []
     from skelshop.player import PlayerBase, SegPlayer, UnsegPlayer
 
     title = basename(videoin)
@@ -89,3 +95,4 @@ def playsticks(
         elif seek_frame is not None:
             play.seek_to_frame(seek_frame)
         play.start(not paused)
+        print("exited gracefully.")

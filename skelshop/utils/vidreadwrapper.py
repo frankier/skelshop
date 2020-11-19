@@ -47,7 +47,10 @@ class LoadedVidWrapper():
         return self
 
     def __exit__(self, exc_type, exc_value, exc_traceback):
-        self.cvw_vid.__exit__(exc_type, exc_value, exc_traceback)
+        ret_val = self.cvw_vid.__exit__(exc_type, exc_value, exc_traceback)
+        if exc_type == StopIteration:
+            return True
+        return ret_val
 
     def __iter__(self):
         return self.cvw_ref.__iter__()
@@ -62,7 +65,7 @@ class LoadedVidWrapper():
         if ffprobe_fps == '0/0':
             return self.cvw_ref.fps
         if '/' in ffprobe_fps:
-            return int(ffprobe_fps.split('/')[0])/int(ffprobe_fps.split('/')[1])
+            return float(ffprobe_fps.split('/', 1)[0])/float(ffprobe_fps.split('/', 1)[1])
         assert False
 
     @property
