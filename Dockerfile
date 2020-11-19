@@ -1,4 +1,5 @@
 ARG BASE
+ARG VAR
 
 FROM frankierr/openpose_containers:bionic_multi AS bionic_base
 
@@ -10,7 +11,7 @@ RUN export LC_ALL=C.UTF-8 && \
     apt-get remove -y cython3 && \
     apt-get install -y --no-install-recommends python3.7-venv
 
-FROM frankierr/openpose_containers:focal_multi AS focal_base
+FROM frankierr/openpose_containers:focal_${VAR} AS focal_base
 
 RUN ln -sf /usr/bin/python3 /usr/bin/python
 
@@ -29,7 +30,7 @@ WORKDIR /opt/skelshop
 
 COPY pyproject.toml poetry.lock ./
 
-RUN poetry install --no-dev -E pipeline -E play -E ssmat -E face && \
+RUN poetry install --no-dev -E pipeline -E play -E ssmat -E face -E calibrate && \
     rm -rf /root/.cache
 
 COPY . /opt/skelshop
@@ -37,7 +38,7 @@ COPY . /opt/skelshop
 # Install virtualenv because it gets removed for some reason in the previous step
 # Install again to get the skelshop package itself
 RUN pip install virtualenv && \
-    poetry install --no-dev -E pipeline -E play -E ssmat -E face && \
+    poetry install --no-dev -E pipeline -E play -E ssmat -E face -E calibrate && \
     rm -rf /root/.cache
 
 # And reinstall again...(!)
