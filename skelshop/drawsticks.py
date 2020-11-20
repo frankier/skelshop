@@ -1,5 +1,5 @@
 import logging
-from itertools import zip_longest, chain
+from itertools import chain, zip_longest
 from typing import Iterator
 
 import cv2
@@ -8,12 +8,13 @@ import opencv_wrapper as cvw
 from more_itertools.recipes import grouper
 from tqdm import tqdm
 
+from skelshop.config import conf as config
 from skelshop.skelgraphs.openpose import MODE_SKELS
 from skelshop.skelgraphs.posetrack import POSETRACK18_SKEL
 from skelshop.utils.geom import rnd
-from skelshop.config import conf as config
 
 logger = logging.getLogger(__name__)
+
 
 def scale_video(vid_read, dim) -> Iterator[np.ndarray]:
     for frame in vid_read:
@@ -41,11 +42,11 @@ class ScaledVideo:
         else:
             return scale_video(frame_iter, (self.width, self.height))
 
+
 def limb_invisible(confidence, subskel):
     # TODO if I interpolate limbs, have special confidence-values reserved for that
-    return (
-            confidence == 0 or
-            (config.THRESHOLDS[subskel] and confidence < config.THRESHOLDS[subskel])
+    return confidence == 0 or (
+        config.THRESHOLDS[subskel] and confidence < config.THRESHOLDS[subskel]
     )
 
 
@@ -75,11 +76,7 @@ class SkelDraw:
             else:
                 color = (255, rnd(255 * (1 - c)), rnd(255 * (1 - c)))
             cv2.line(
-                frame,
-                (rnd(x1), rnd(y1)),
-                (rnd(x2), rnd(y2)),
-                color,
-                1,
+                frame, (rnd(x1), rnd(y1)), (rnd(x2), rnd(y2)), color, 1,
             )
 
     def draw_ann(self, frame, pers_id, numarr):
@@ -119,29 +116,37 @@ class SkelDraw:
                 numarr.append([point[0] * self.scale, point[1] * self.scale, point[2]])
             if config.INTERPOLATE_LIMBS > 0:
                 numarr = self.interpolate_limbs(numarr, iter, pers_id)
-            numarrs.append(numarr) #TODO why is numarr 138 long and the skeleton 137?
+            numarrs.append(numarr)  # TODO why is numarr 138 long and the skeleton 137?
         for numarr in numarrs:
             self.draw_skel(frame, numarr)
         for (pers_id, person), numarr in zip(bundle, numarrs):
             self.draw_ann(frame, pers_id, numarr)
 
-
     def interpolate_limbs(self, numarr, iter, pers_id):
-        if np.array(numarr)[...,:].max() == 0:
+        if np.array(numarr)[..., :].max() == 0:
             return numarr
-        interpolate_win = [iter[i] for i in
-                           chain(range(-config.INTERPOLATE_LIMBS, 0), range(1, config.INTERPOLATE_LIMBS + 1))]
-        if config.INTERPOLATE_TACTIC == 'highest_conf':
-            for num, elem in enumerate(numarr[:-1]): #numarr is 137 long, skeletons 137
+        interpolate_win = [
+            iter[i]
+            for i in chain(
+                range(-config.INTERPOLATE_LIMBS, 0),
+                range(1, config.INTERPOLATE_LIMBS + 1),
+            )
+        ]
+        if config.INTERPOLATE_TACTIC == "highest_conf":
+            for num, elem in enumerate(
+                numarr[:-1]
+            ):  # numarr is 137 long, skeletons 137
                 if limb_invisible(elem[2], self.skel._get_subskel(num)):
                     # THIS DOES: replace non-existing bodyparts by their counterpart inside the interpolation-window with the highest confidence
-                    other_frames = np.array([i.wrapped.bundle[pers_id][num] for i in interpolate_win])
-                    highest_conf = other_frames[other_frames[:,2].argmax()]
+                    # TODO: part of the reason this is not good is because the user-detection is really not good yet
+                    other_frames = np.array(
+                        [i.wrapped.bundle[pers_id][num] for i in interpolate_win]
+                    )
+                    highest_conf = other_frames[other_frames[:, 2].argmax()]
                     if not limb_invisible(highest_conf[2], self.skel._get_subskel(num)):
                         numarr[num] = list(highest_conf)
                         numarr[num][2] += 1
             return numarr
-
 
     def get_hover(self, mouse_pos, bundle):
         return None
@@ -247,7 +252,9 @@ def drawsticks_shots(vid_read, stick_read, vid_write):
 
 
 def drawsticks_unseg(vid_read, stick_read, vid_write):
-    for frame, bundle in tqdm(zip_longest(vid_read, stick_read), total=stick_read.total_frames):
+    for frame, bundle in tqdm(
+        zip_longest(vid_read, stick_read), total=stick_read.total_frames
+    ):
         vid_write.draw(frame, bundle)
 
 

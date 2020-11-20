@@ -11,7 +11,7 @@ from skelshop.pipeline import pipeline_options
 @click.command()
 @click.argument("h5infn", type=click.Path(exists=True))
 @click.argument("h5outfn", type=click.Path())
-@pipeline_options(allow_empty=False)
+@pipeline_options(allow_empty=False)  # additional click-arguments
 @click.option("--start-frame", type=int, default=0)
 @click.option("--end-frame", type=int, default=None)
 def filter(h5infn, h5outfn, pipeline, start_frame, end_frame):

@@ -46,7 +46,9 @@ class DumpReaderPoseBundle:
 
     def __iter__(self) -> Iterator[Tuple[int, "PoseBase"]]:
         for idx, pose in self.bundle.items():
-            yield idx, self.cls.from_keypoints(pose)
+            yield idx, self.cls.from_keypoints(
+                pose
+            )  # TODO somewhere here some kind of  "if there is no scene cut, assume that the skeleton closest to skel1 from the frame before is also skel1 this time"?
 
 
 class UnorderedDumpReaderPoseBundle(DumpReaderPoseBundle):

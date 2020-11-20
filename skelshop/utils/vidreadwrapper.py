@@ -1,19 +1,23 @@
 import logging
-import opencv_wrapper as cvw
 import subprocess
+from collections.abc import Sequence
 from shutil import which
+from typing import Any, Iterator, Text
+
+import opencv_wrapper as cvw
 
 logger = logging.getLogger(__name__)
 
 
 _ffprobe_bin = "ffprobe"
 
+
 def set_ffprobe_bin(ffprobe_bin):
     global _ffprobe_bin
     _ffprobe_bin = ffprobe_bin
 
 
-class VidReadWrapper():
+class VidReadWrapper:
     @staticmethod
     def load_video(vid_file):
         if which(_ffprobe_bin) is None:
@@ -24,8 +28,16 @@ class VidReadWrapper():
         return LoadedVidWrapper(vid_file, _ffprobe_bin)
 
 
-def execute(cmd, **kwargs):
-    popen = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True, **kwargs)
+def execute(cmd, **kwargs):  # type: (Sequence[Text], Any) -> Iterator[Text]
+    popen = subprocess.Popen(
+        cmd,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        universal_newlines=True,
+        **kwargs,
+    )
+    # https://stackoverflow.com/questions/57350490/mypy-complaining-that-popen-stdout-does-not-have-a-readline
+    assert popen.stdout is not None
     for stdout_line in iter(popen.stdout.readline, ""):
         yield stdout_line
     popen.stdout.close()
@@ -34,12 +46,26 @@ def execute(cmd, **kwargs):
         raise subprocess.CalledProcessError(return_code, cmd)
 
 
-class LoadedVidWrapper():
+class LoadedVidWrapper:
     def __init__(self, vid_file=None, ffprobe_string=None):
         self.vid_file = vid_file
-        ffprobe_res = [line for line in execute([ffprobe_string]+f"-select_streams v -show_streams".split(' ')+[self.vid_file])]
-        self.ffprobe_attrs = {key: val for key, val in [line.strip().split('=') for line in ffprobe_res if "=" in line and not line.startswith("DISPOSITION:")]}
-        #see https://superuser.com/a/768420/489445
+        ffprobe_res = [
+            line
+            for line in execute(
+                [ffprobe_string]
+                + "-select_streams v -show_streams".split(" ")
+                + [self.vid_file]
+            )
+        ]
+        self.ffprobe_attrs = {
+            key: val
+            for key, val in [
+                line.strip().split("=")
+                for line in ffprobe_res
+                if "=" in line and not line.startswith("DISPOSITION:")
+            ]
+        }
+        # see https://superuser.com/a/768420/489445
 
     def __enter__(self):
         self.cvw_vid = cvw.load_video(self.vid_file)
@@ -57,15 +83,17 @@ class LoadedVidWrapper():
 
     @property
     def total_frames(self):
-        return int(self.ffprobe_attrs['nb_frames'])
+        return int(self.ffprobe_attrs["nb_frames"])
 
     @property
     def fps(self):
-        ffprobe_fps = self.ffprobe_attrs['r_frame_rate']
-        if ffprobe_fps == '0/0':
+        ffprobe_fps = self.ffprobe_attrs["r_frame_rate"]
+        if ffprobe_fps == "0/0":
             return self.cvw_ref.fps
-        if '/' in ffprobe_fps:
-            return float(ffprobe_fps.split('/', 1)[0])/float(ffprobe_fps.split('/', 1)[1])
+        if "/" in ffprobe_fps:
+            return float(ffprobe_fps.split("/", 1)[0]) / float(
+                ffprobe_fps.split("/", 1)[1]
+            )
         assert False
 
     @property
@@ -76,6 +104,6 @@ class LoadedVidWrapper():
     def width(self):
         return self.cvw_ref.width
 
-    def __getattr__(self,attr):
-        #pass everything that isn't implemented here to the original cvw
+    def __getattr__(self, attr):
+        # pass everything that isn't implemented here to the original cvw
         return self.cvw_ref.__getattribute__(attr)

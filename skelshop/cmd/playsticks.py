@@ -11,6 +11,7 @@ from skelshop.io import AsIfOrdered, ShotSegmentedReader, UnsegmentedReader
 from skelshop.utils.h5py import log_open
 from skelshop.utils.vidreadwrapper import VidReadWrapper as cvw
 
+
 @contextmanager
 def get_skels_read_and_draws(
     skels, faces, get_skel_draw, get_face_draw
@@ -33,7 +34,9 @@ def get_skels_read_and_draws(
                 is_seg = True
                 read = ShotSegmentedReader(skel_h5f)
             else:
-                read = AsIfOrdered(UnsegmentedReader(skel_h5f))
+                read = AsIfOrdered(
+                    UnsegmentedReader(skel_h5f)
+                )  # TODO maybe rename the 'ordered' parts here
             result.append((read, get_skel_draw(skel_h5f)))
         for h5fn in faces:
             face_h5f = stack.enter_context(h5py.File(h5fn, "r"))
@@ -62,9 +65,15 @@ def playsticks(*args, **kwargs):
     playsticks_fn(*args, **kwargs)
 
 
-
 def playsticks_fn(
-    videoin, skel, face=None, posetrack=False, seek_time=None, seek_frame=None, scale=1, paused=False
+    videoin,
+    skel,
+    face=None,
+    posetrack=False,
+    seek_time=None,
+    seek_frame=None,
+    scale=1,
+    paused=False,
 ):
     """
     Play a video with stick figures from pose dump superimposed.
