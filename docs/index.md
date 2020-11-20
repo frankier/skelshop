@@ -34,7 +34,7 @@ For the CPU version:
     $ docker run frankierr/skelshop:focal_cpu python -m skelshop --help
 
 For more information about the Docker containers see [their page on Docker
-Hub](https://hub.docker.com/repository/frankierr/skelshop) and [the
+Hub](https://hub.docker.com/r/frankierr/skelshop) and [the
 openpose_containers repository where the bases are
 built](https://github.com/frankier/openpose_containers).
 
