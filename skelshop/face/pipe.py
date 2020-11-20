@@ -6,8 +6,8 @@ from face_recognition.api import (
     face_encoder,
     pose_predictor_68_point,
 )
-from ufunclab import minmax
 from tqdm import tqdm
+from ufunclab import minmax
 
 from skelshop.skelgraphs.openpose import FACE_IN_BODY_25_ALL_REDUCER
 from skelshop.utils.geom import rnd
@@ -74,8 +74,6 @@ def face_detection_batched(vid_read, batch_size=DEFAULT_FRAME_BATCH_SIZE):
             face_locations = [
                 [mmod_rect.rect for mmod_rect in mmod_rects]
                 for mmod_rects in cnn_face_detector(frames, batch_size=cur_batch_size)
-                # TODO this is always empty - which is interesting, because
-                # face_recognition.face_locations(frames[0]) works just fine
             ]
             batch_fods = []
             used_frames = []
@@ -89,7 +87,9 @@ def face_detection_batched(vid_read, batch_size=DEFAULT_FRAME_BATCH_SIZE):
                 if frame_shape_predictions:
                     mask.append(True)
                     used_frames.append(frame)
-                    batch_fods.append(to_full_object_detections(frame_shape_predictions))
+                    batch_fods.append(
+                        to_full_object_detections(frame_shape_predictions)
+                    )
                 else:
                     mask.append(False)
             yield used_frames, batch_fods, mask

@@ -1,5 +1,5 @@
 import logging
-from itertools import chain, zip_longest
+from itertools import zip_longest
 from typing import Iterator
 
 import cv2
@@ -44,7 +44,7 @@ class ScaledVideo:
 
 
 def limb_invisible(confidence, subskel):
-    # TODO if I interpolate limbs, have special confidence-values reserved for that
+    # TODO when interpolating limbs, have special confidence-values reserved for that
     return confidence == 0 or (
         config.THRESHOLDS[subskel] and confidence < config.THRESHOLDS[subskel]
     )
@@ -114,39 +114,11 @@ class SkelDraw:
             numarr = []
             for point in grouper(flat, 3):
                 numarr.append([point[0] * self.scale, point[1] * self.scale, point[2]])
-            if config.INTERPOLATE_LIMBS > 0:
-                numarr = self.interpolate_limbs(numarr, iter, pers_id)
             numarrs.append(numarr)  # TODO why is numarr 138 long and the skeleton 137?
         for numarr in numarrs:
             self.draw_skel(frame, numarr)
         for (pers_id, person), numarr in zip(bundle, numarrs):
             self.draw_ann(frame, pers_id, numarr)
-
-    def interpolate_limbs(self, numarr, iter, pers_id):
-        if np.array(numarr)[..., :].max() == 0:
-            return numarr
-        interpolate_win = [
-            iter[i]
-            for i in chain(
-                range(-config.INTERPOLATE_LIMBS, 0),
-                range(1, config.INTERPOLATE_LIMBS + 1),
-            )
-        ]
-        if config.INTERPOLATE_TACTIC == "highest_conf":
-            for num, elem in enumerate(
-                numarr[:-1]
-            ):  # numarr is 137 long, skeletons 137
-                if limb_invisible(elem[2], self.skel._get_subskel(num)):
-                    # THIS DOES: replace non-existing bodyparts by their counterpart inside the interpolation-window with the highest confidence
-                    # TODO: part of the reason this is not good is because the user-detection is really not good yet
-                    other_frames = np.array(
-                        [i.wrapped.bundle[pers_id][num] for i in interpolate_win]
-                    )
-                    highest_conf = other_frames[other_frames[:, 2].argmax()]
-                    if not limb_invisible(highest_conf[2], self.skel._get_subskel(num)):
-                        numarr[num] = list(highest_conf)
-                        numarr[num][2] += 1
-            return numarr
 
     def get_hover(self, mouse_pos, bundle):
         return None

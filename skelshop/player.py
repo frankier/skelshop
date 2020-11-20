@@ -276,14 +276,16 @@ class UnsegPlayer(PlayerBase):
 
     def draw_cur(self, img):
         bundles = self.cur_skels()
-        for skel_draw, bundle, skel_iter in zip(self.skel_draws, bundles, self.skel_iters): #TODO why could there be more than one skel_draw?
+        for skel_draw, bundle, skel_iter in zip(
+            self.skel_draws, bundles, self.skel_iters
+        ):  # TODO why could there be more than one skel_draw?
             skel_draw.draw_bundle(img, bundle, skel_iter)
 
     def cur_skels(self):
         return (skel_iter.peek() for skel_iter in self.skel_iters)
 
     def next_skel(self):
-        for skel_iter in self.skel_iters: #TODO why could there be more than one? It doesn't seem to correspond to the number of persons in a frame
+        for skel_iter in self.skel_iters:
             next(skel_iter)
 
     def seek_to_frame(self, frame):

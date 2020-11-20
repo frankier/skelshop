@@ -13,7 +13,9 @@ from skelshop.utils.vidreadwrapper import VidReadWrapper as cvw
 @click.command()
 @click.argument("video", type=click.Path())
 @click.argument("h5fn", type=click.Path())
-@click.option("--from-skels", type=click.Path()) #TODO #PRECOMMIT Docu - if this is given, it still uses face_detection but doesn't need to _find_ the faces using face_detection?
+@click.option(
+    "--from-skels", type=click.Path()
+)  # Docu - if this is given, it still uses face_detection but doesn't need to _find_ the faces using face_detection
 @click.option("--start-frame", type=int, default=0)
 @click.option(
     "--skel-thresh-pool",
@@ -33,7 +35,7 @@ def face(
     skel_thresh_val,
     batch_size,
     write_bbox,
-    write_chip
+    write_chip,
 ):
     """
     Create a HDF5 face dump from a video using dlib.
