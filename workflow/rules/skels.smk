@@ -12,6 +12,15 @@ rule scenedetect:
     script:
         "scripts/scenedetect.py"
 
+# TODO: User can choose which segmentor to use
+rule ffprobe:
+    input:
+        video = pjoin(VIDEO_BASE, "{base}.mp4")
+    output:
+        scenes = pjoin(DUMP_BASE, "{base}.ffprobe.scene.txt")
+    script:
+        "scripts/ffprobe.py"
+
 rule skel_unsorted:
     input:
         video = pjoin(VIDEO_BASE, "{base}.mp4")
