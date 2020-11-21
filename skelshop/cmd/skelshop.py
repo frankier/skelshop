@@ -10,6 +10,7 @@ from .calibrate import calibrate
 from .conv import conv
 from .drawsticks import drawsticks
 from .dump import dump
+from .dumpimgs import dumpimgs
 from .filter import filter
 from .idsegs import idsegs
 from .playsticks import playsticks
@@ -44,3 +45,4 @@ skelshop.add_command(stats)
 skelshop.add_command(bench)
 skelshop.add_command(idsegs)
 skelshop.add_command(calibrate)
+skelshop.add_command(dumpimgs)

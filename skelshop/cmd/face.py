@@ -1,6 +1,5 @@
 import click
 import h5py
-import opencv_wrapper as cvw
 from imutils.video.count_frames import count_frames
 
 from skelshop.dump import add_basic_metadata
@@ -8,6 +7,7 @@ from skelshop.face.consts import DEFAULT_THRESH_POOL, DEFAULT_THRESH_VAL
 from skelshop.face.io import FaceWriter, write_faces
 from skelshop.io import AsIfSingleShot, ShotSegmentedReader
 from skelshop.utils.h5py import h5out
+from skelshop.utils.video import load_video_rgb
 
 
 @click.command()
@@ -22,7 +22,12 @@ from skelshop.utils.h5py import h5out
 )
 @click.option("--skel-thresh-val", type=float, default=DEFAULT_THRESH_VAL)
 @click.option("--batch-size", type=int)
-@click.option("--write-bbox/--no-write-bbox")
+@click.option(
+    "--face-extractor",
+    type=click.Choice(["dlib", "openpose-face68", "openpose-face3", "auto"]),
+    default="auto",
+)
+@click.option("--write-bboxes/--no-write-bboxes")
 @click.option("--write-chip/--no-write-chip")
 def face(
     video,
@@ -32,7 +37,8 @@ def face(
     skel_thresh_pool,
     skel_thresh_val,
     batch_size,
-    write_bbox,
+    face_extractor,
+    write_bboxes,
     write_chip,
 ):
     """
@@ -40,14 +46,23 @@ def face(
     """
     from skelshop.face.pipe import iter_faces, iter_faces_from_skel
 
+    if face_extractor == "auto":
+        if from_skels:
+            face_extractor = "openpose-face68"
+        else:
+            face_extractor = "dlib"
+    elif face_extractor in ["openpose-face68", "openpose-face3"]:
+        assert from_skels is not None, "Must pass --from-skels"
     num_frames = count_frames(video) - start_frame
-    with h5out(h5fn) as h5f, cvw.load_video(video) as vid_read:
+    with h5out(h5fn) as h5f, load_video_rgb(video) as vid_read:
         add_basic_metadata(h5f, video, num_frames)
-        writer = FaceWriter(h5f, write_fod_bbox=write_bbox, write_chip=write_chip,)
+        writer = FaceWriter(h5f, write_bboxes=write_bboxes, write_chip=write_chip,)
         kwargs = {}
         if batch_size is not None:
             kwargs["batch_size"] = batch_size
-        if from_skels:
+        if face_extractor == "dlib":
+            face_iter = iter_faces(vid_read, include_chip=write_chip, **kwargs)
+        else:
             skels_h5 = h5py.File(from_skels, "r")
             skel_read = AsIfSingleShot(ShotSegmentedReader(skels_h5))
             face_iter = iter_faces_from_skel(
@@ -58,6 +73,4 @@ def face(
                 thresh_val=skel_thresh_val,
                 **kwargs,
             )
-        else:
-            face_iter = iter_faces(vid_read, include_chip=write_chip, **kwargs)
         write_faces(face_iter, writer)

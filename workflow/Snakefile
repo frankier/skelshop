@@ -35,6 +35,7 @@ device: [0]
 ## Rules
 
 include: "rules/skels.smk"
+include: "rules/calibrate.smk"
 
 rule setup:
     input:
