@@ -59,7 +59,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#hpc-extraction-with-snakemake" class="md-skip">
+        <a href="#workflow-orchestration-and-extraction-in-a-hpc-environment-using-snakemake" class="md-skip">
           Skip to content
         </a>
       
@@ -255,9 +255,59 @@
       
     
     
+      <label class="md-nav__link md-nav__link--active" for="__toc">
+        HPC extraction with Snakemake
+        <span class="md-nav__icon md-icon"></span>
+      </label>
+    
     <a href="./" class="md-nav__link md-nav__link--active">
       HPC extraction with Snakemake
     </a>
+    
+      
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#running-snakemake-on-a-single-node" class="md-nav__link">
+    Running Snakemake on a single node
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#running-snakemake-on-a-slurm-cluster" class="md-nav__link">
+    Running Snakemake on a SLURM cluster
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#integrating-skelshop-into-your-own-pipelines" class="md-nav__link">
+    Integrating SkelShop into your own pipelines
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#other-hpc-utilities" class="md-nav__link">
+    Other HPC utilities
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
     
   </li>
 
@@ -418,6 +468,42 @@
     
   
   
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#running-snakemake-on-a-single-node" class="md-nav__link">
+    Running Snakemake on a single node
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#running-snakemake-on-a-slurm-cluster" class="md-nav__link">
+    Running Snakemake on a SLURM cluster
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#integrating-skelshop-into-your-own-pipelines" class="md-nav__link">
+    Integrating SkelShop into your own pipelines
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#other-hpc-utilities" class="md-nav__link">
+    Other HPC utilities
+  </a>
+  
+</li>
+      
+    </ul>
+  
 </nav>
                   </div>
                 </div>
@@ -433,11 +519,75 @@
                   </a>
                 
                 
-                <h1 id="hpc-extraction-with-snakemake">HPC extraction with Snakemake</h1>
-<p>There are tools for running extraction pipelines orchestrated using Snakemake.
-These would typically be run in a HPC environment, with GPU nodes orchestrated
-by SLURM.</p>
-<p>TODO: Detail</p>
+                <h1 id="workflow-orchestration-and-extraction-in-a-hpc-environment-using-snakemake">Workflow orchestration and extraction in a HPC environment using Snakemake</h1>
+<p>SkelShop include tools for running extraction pipelines orchestrated using
+Snakemake. These workflows can be run on a single node, however more typically
+these would be run in a HPC environment, with a heterogeneous mix of GPU and
+CPU nodes being orchestrated by SLURM so as to enable skeleton/face extraction
+from a large video corpus in a reasonable amount of time.</p>
+<p>The intended environment for SkelShop to be run is in a SLURM-based HPC
+environment in a Singularity container. You can run Snakemake on one node
+(typically a login node, since no heavy computation is performed by this node)
+and the actual steps will run on different nodes chosen according to a JSON
+configuration file, all from a single Singularity container. This workflow is
+enabled by <a href="https://github.com/frankier/singslurm">singslurm</a> project, which is
+based on the <a href="https://github.com/Snakemake-Profiles/slurm">Snakemake SLURM
+profile</a>.</p>
+<h2 id="running-snakemake-on-a-single-node">Running Snakemake on a single node</h2>
+<p>Snakemake can be run on a single node, which might be appropriate if you have
+a very small video corpus or a lot of time(!)</p>
+<p>For example assuming you have followed the manual installation instruction and
+that you want to use 8 cores:</p>
+<pre><code>$ cd /path/to/skelshop
+$ poetry run snakemake sorted_all \
+  --cores 8 \
+  --config \
+  VIDEO_BASE=/path/to/my/video/corpus/ \
+  DUMP_BASE=/path/to/my/dump/directory
+</code></pre>
+<h2 id="running-snakemake-on-a-slurm-cluster">Running Snakemake on a SLURM cluster</h2>
+<p>The coordinator script bootstraps everything needed for containerised Snakemake
+execution:</p>
+<pre><code>$ wget https://raw.githubusercontent.com/frankier/singslurm/master/run_coord.sh
+$ chmod +x run_coord.sh
+</code></pre>
+<p>Now you can download the Singularity image:</p>
+<pre><code>$ singularity pull shub://frankier/skelshop:latest skelshop.sif
+</code></pre>
+<p>Next, you need to create a JSON file specifying which type of nodes you would
+like to assign to different rules (steps in the workflow). <a href="https://github.com/frankier/skelshop/blob/master/contrib/slurm/track.clusc.json">There is an example
+for Case Western Reserve University SLURM
+cluster</a>.
+See also the <a href="https://slurm.schedmd.com/documentation.html">SLURM
+documentation</a> and the <a href="https://github.com/Snakemake-Profiles/slurm">SLURM
+Snakemake profile documentation</a>
+for information on how to write this file.</p>
+<p>You can see the names of the steps in the workflow at any time by running:</p>
+<pre><code>$ poetry run snakemake --list
+</code></pre>
+<p>Then an example of how you would run the pipeline is given below:</p>
+<pre><code>$ SIF_PATH=`pwd`/skelshop.sif \
+  SNAKEFILE=/opt/skelshop/workflow/Snakefile \
+  CLUSC_CONF=/opt/skelshop/contrib/slurm/skels.tracked.clusc.json \
+  NUM_JOBS=42 \
+  SING_EXTRA_ARGS="--bind /path/to/my/extra/bind" \
+  ./run_coord.sh \
+  sorted_all \
+  --config \
+  VIDEO_BASE=/path/to/my/video/corpus/ \
+  DUMP_BASE=/path/to/my/dump/directory
+</code></pre>
+<h2 id="integrating-skelshop-into-your-own-pipelines">Integrating SkelShop into your own pipelines</h2>
+<p>In case you are using SkelShop as part of a larger pipeline or want to further
+customise your workflow, you should write your own Snakefile. See the
+<a href="https://snakemake.readthedocs.io">Snakemake documentation</a>. You may like to
+use the rules and scripts from SkelShop. In this case the current best approach
+is to copy or symlink everything under <code>workflow/rules</code> and <code>workflow/scripts</code>
+into your own <code>workflow</code> directory.</p>
+<h2 id="other-hpc-utilities">Other HPC utilities</h2>
+<p>There are some examples of how to run which are specific to the Case Western
+Reserve University SLURM cluster <a href="https://github.com/frankier/skelshop/tree/master/contrib/slurm">in the contrib/slurm
+directory</a>.</p>
                 
               
               

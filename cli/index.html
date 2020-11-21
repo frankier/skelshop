@@ -461,13 +461,21 @@
 </code></pre>
 <h3 id="analyse">analyse</h3>
 <p>Usage:</p>
-<pre><code>skelshop calibrate analyse [OPTIONS] DFIN [CHARTOUT]
+<pre><code>skelshop calibrate analyse [OPTIONS] DFIN
+</code></pre>
+<p>Options:</p>
+<pre><code>  --chartout PATH
+  --kps TEXT
 </code></pre>
 <h3 id="process-dlib-dir">process-dlib-dir</h3>
 <p>Give a directory with dlib facepoint XMLs, run OpenPose on all images and
 write out where the keypoints are relative to the chips.</p>
 <p>Usage:</p>
 <pre><code>skelshop calibrate process-dlib-dir [OPTIONS] DIRIN H5IN DFOUT
+</code></pre>
+<p>Options:</p>
+<pre><code>  --add-symmetries / --no-add-symmetries
+  --add-synthetic / --no-add-synthetic
 </code></pre>
 <h3 id="process-video">process-video</h3>
 <p>Given a video and a skeleton keypoint file, run the dlib keypoint detection
@@ -537,7 +545,8 @@ pipeline.</p>
 <h2 id="face">face</h2>
 <p>Create a HDF5 face dump from a video using dlib.</p>
 <p>Usage:</p>
-<pre><code>skelshop face [OPTIONS] VIDEO H5FN
+<pre><code>skelshop face [OPTIONS] [dlib-hog-face5|dlib-hog-face68|dlib-cnn-face5|dlib-cnn-
+ face68|openpose-face68|openpose-face3] VIDEO H5FN
 </code></pre>
 <p>Options:</p>
 <pre><code>  --from-skels PATH
@@ -545,7 +554,7 @@ pipeline.</p>
   --skel-thresh-pool [min|max|mean]
   --skel-thresh-val FLOAT
   --batch-size INTEGER
-  --write-bbox / --no-write-bbox
+  --write-bboxes / --no-write-bboxes
   --write-chip / --no-write-chip
 </code></pre>
 <h2 id="filter">filter</h2>
