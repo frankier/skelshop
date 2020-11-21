@@ -1,12 +1,14 @@
 from abc import ABC, abstractmethod
 from enum import Enum
-from typing import Iterable, Iterator, List, Optional, cast
+from typing import Iterable, Iterator, List, Optional, Tuple, cast
 
 import dlib
 import numpy as np
 from face_recognition.api import (
     cnn_face_detector,
+    face_detector,
     face_encoder,
+    pose_predictor_5_point,
     pose_predictor_68_point,
 )
 from numpy.linalg import norm
@@ -73,7 +75,7 @@ class DlibFodsBatch(FullObjectDetectionsBatch):
     def compute_face_descriptor(self, batch_frames: List[np.ndarray]) -> np.ndarray:
         return face_encoder.compute_face_descriptor(batch_frames, self.batch_fods)
 
-    def get_fod_bboxes(self) -> Optional[Iterator[List[dlib.full_object_detection]]]:
+    def get_fod_bboxes(self) -> Iterator[List[dlib.full_object_detection]]:
         return iter(self.batch_fods)
 
     def get_chip_details(self) -> Iterator[List[dlib.chip_details]]:
@@ -162,9 +164,15 @@ def fods_to_embeddings(
         yield res
 
 
-def face_detection_batched(vid_read, batch_size=DEFAULT_FRAME_BATCH_SIZE):
+def dlib_face_detection_batched(
+    vid_read, detector="cnn", keypoints="face68", batch_size=DEFAULT_FRAME_BATCH_SIZE
+) -> Iterator[Tuple[List[np.ndarray], DlibFodsBatch, List[bool]]]:
     vid_it = iter(vid_read)
     last = False
+    if keypoints == "face68":
+        pose_predictor = pose_predictor_68_point
+    else:
+        pose_predictor = pose_predictor_5_point
     while 1:
         frames = []
         cur_batch_size = 0
@@ -177,23 +185,26 @@ def face_detection_batched(vid_read, batch_size=DEFAULT_FRAME_BATCH_SIZE):
             cur_batch_size += 1
         if cur_batch_size < batch_size:
             last = True
-        face_locations = [
-            [mmod_rect.rect for mmod_rect in mmod_rects]
-            for mmod_rects in cnn_face_detector(frames, batch_size=cur_batch_size)
-        ]
-        batch_fods = []
+        if detector == "cnn":
+            face_locations = [
+                [mmod_rect.rect for mmod_rect in mmod_rects]
+                for mmod_rects in cnn_face_detector(frames, batch_size=cur_batch_size)
+            ]
+        else:
+            face_locations = [face_detector(frame) for frame in frames]
+        batch_fods = DlibFodsBatch()
         used_frames = []
         mask = []
         for frame, image_face_locations in zip(frames, face_locations):
             frame_shape_predictions = []
             for image_face_location in image_face_locations:
                 frame_shape_predictions.append(
-                    pose_predictor_68_point(frame, image_face_location)
+                    pose_predictor(frame, image_face_location)
                 )
             if frame_shape_predictions:
                 mask.append(True)
                 used_frames.append(frame)
-                batch_fods.append(to_full_object_detections(frame_shape_predictions))
+                batch_fods.append_fods(frame_shape_predictions)
             else:
                 mask.append(False)
         yield used_frames, batch_fods, mask
@@ -201,13 +212,18 @@ def face_detection_batched(vid_read, batch_size=DEFAULT_FRAME_BATCH_SIZE):
             break
 
 
-def iter_faces(
+def iter_faces_from_dlib(
     vid_read,
+    detector="cnn",
+    keypoints="face68",
     batch_size=DEFAULT_FRAME_BATCH_SIZE,
     include_chip=False,
     include_bboxes=False,
 ):
-    for used_frames, batch_fods, mask in face_detection_batched(vid_read, batch_size):
+    detections = dlib_face_detection_batched(
+        vid_read, detector=detector, keypoints=keypoints, batch_size=batch_size
+    )
+    for used_frames, batch_fods, mask in detections:
         yield from fods_to_embeddings(
             used_frames,
             batch_fods,

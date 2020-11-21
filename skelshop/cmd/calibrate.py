@@ -19,7 +19,10 @@ from dlib import (
 from matplotlib import pyplot as plt
 from matplotlib.patches import Rectangle
 
-from skelshop.face.pipe import face_detection_batched, make_synthetic_keypoints_body_25
+from skelshop.face.pipe import (
+    dlib_face_detection_batched,
+    make_synthetic_keypoints_body_25,
+)
 from skelshop.io import UnsegmentedReader
 from skelshop.skelgraphs.openpose import BODY_25_JOINTS
 from skelshop.skelgraphs.utils import flip_joint_name
@@ -204,12 +207,12 @@ def process_video(video, h5infn, dfout):
     with cvw.load_video(video) as vid_read, h5py.File(h5infn, "r") as h5in:
         skel_bundle_iter = iter(UnsegmentedReader(h5in))
         data = []
-        for used_frames, batch_fods, mask in face_detection_batched(
+        for used_frames, batch_fods, mask in dlib_face_detection_batched(
             vid_read, batch_size=1
         ):
             if not batch_fods:
                 continue
-            fods_iter = iter(batch_fods)
+            fods_iter = batch_fods.get_fod_bboxes()
             for included in mask:
                 if not included:
                     continue
