@@ -56,7 +56,7 @@ def flip_kps_inplace(lines, kps):
 def flip_joint_name(joint_name):
     is_left_joint = is_left(joint_name)
     is_right_joint = is_right(joint_name)
-    basename = joint_name.split(" ", 1)[1]
+    basename = joint_name.rsplit(" ", 1)[-1]
     if is_left_joint:
         return "right " + basename
     elif is_right_joint:
