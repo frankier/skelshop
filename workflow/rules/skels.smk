@@ -3,6 +3,7 @@ from os.path import join as pjoin
 
 
 rule scenedetect:
+    "Runs PySceneDetect"
     input:
         video = pjoin(VIDEO_BASE, "{base}.mp4")
     params:
@@ -14,6 +15,7 @@ rule scenedetect:
 
 # TODO: User can choose which segmentor to use
 rule ffprobe:
+    "Runs ffprobe scene segmentor"
     input:
         video = pjoin(VIDEO_BASE, "{base}.mp4")
     output:
@@ -22,6 +24,7 @@ rule ffprobe:
         "scripts/ffprobe.py"
 
 rule skel_unsorted:
+    "Runs BODY_25_ALL untracked OpenPose dumping"
     input:
         video = pjoin(VIDEO_BASE, "{base}.mp4")
     output:
@@ -33,6 +36,7 @@ rule skel_unsorted:
         "{output}"
 
 rule skel_filter_csvshotseg_opt_lighttrack:
+    "Runs opt_lighttrack OpenPose tracking"
     input:
         gcn_config = GCN_CONFIG,
         unsorted = pjoin(DUMP_BASE, "{base}.unsorted.h5"),

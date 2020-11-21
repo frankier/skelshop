@@ -7,6 +7,13 @@
     "scenedetect": {
         "nodes" : 64
     },
+    "skel_unsorted": {
+        "time" : "2-00:00:00",
+        "partition": "gpu",
+        "gres": "gpu:1",
+        "cpus-per-task": 4,
+        "nodes" : 1
+    },
     "skel_filter_csvshotseg_opt_lighttrack": {
         "nodes" : 64
     }

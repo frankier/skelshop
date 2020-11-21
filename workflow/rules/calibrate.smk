@@ -8,8 +8,9 @@ FACES_DIR = pjoin(DLIB_DIR, "examples", "faces")
 
 
 rule calibrate_dlib_examples_all:
+    "Calibrate the BODY_25 model using the example face detection photos from dlib"
     input:
-        chartout = pjoin(CALIB_WORK, "chart.png"),
+        chartout = pjoin(CALIB_WORK, "chart.pdf"),
         means = pjoin(CALIB_WORK, "means.txt")
 
 

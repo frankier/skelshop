@@ -38,6 +38,7 @@ include: "rules/skels.smk"
 include: "rules/calibrate.smk"
 
 rule setup:
+    "Perform setup actions"
     input:
         GCN_CONFIG
 
@@ -46,6 +47,7 @@ def all(ext):
     return [fn + ext for fn in base]
 
 rule sorted_all:
+    "Produce tracked dumps of all videos in VIDEO_BASE"
     input:
         [pjoin(DUMP_BASE, fn) for fn in all(".opt_lighttrack.h5")]
     output:
@@ -73,6 +75,7 @@ rule tmpl_gcn_config:
         )
 
 rule drawsticks:
+    "Produces stick videos"
     input:
         skels = pjoin(DUMP_BASE, "{base}.{var}.h5"),
         video = pjoin(VIDEO_BASE, "{base}.mp4")

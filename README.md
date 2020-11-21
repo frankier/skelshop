@@ -44,6 +44,7 @@ main attributes of this type of material is:
  * Embed faces using dlib
    * Using OpenPose's face detection and keypoint estimation
    * Or using dlib's own face detection/keypoint estimation
+ * Dump across heterogeneous HPC environments including GPU and CPU nodes.
 
 Here's a screenshot of the playsticks command:
 
