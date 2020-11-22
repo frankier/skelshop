@@ -3,16 +3,6 @@
 Here are some usage examples. There is more help available through the `--help'
 flag.
 
-### Modes
-
-| Mode name  | Keypoints | Body | Hands | Face |
-| ------------- | ------------- | ------------- | ------------- | ------------- |
-| BODY_25  | 25  | Yes | No | No |
-| BODY_25_ALL  | 135  | Yes | Yes | Yes |
-| BODY_25_HANDS  | 65  | Yes | Yes | No |
-| FACE  | 70  | No | No | Yes |
-| BODY_25_FACE  | 95  | Yes | No | Yes |
-
 ### Dumping/tracking
 
 A working OpenPose install is required for dumping (and only for dumping). We

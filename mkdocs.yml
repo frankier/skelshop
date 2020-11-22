@@ -7,6 +7,12 @@ nav:
   - Getting started: index.md
   - 'User guide (for users of the command line tools)':
     - Pipelines overview: pipelines-overview.md
+    - 'Meet the...':
+      - Pose estimators: pose-estimators.md
+      - Shot segmentors: shot-segmentors.md
+      - Within-shot pose trackers: pose-trackers.md
+      - 'Face chip detectors/croppers': face-extractors.md
+      - Face embedders: face-embedders.md
     - Usage examples: usage-examples.md
     - HPC extraction with Snakemake: snakemake.md
   - 'Developer guide (for users of the library & contributors)': 
