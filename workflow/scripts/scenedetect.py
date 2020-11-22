@@ -1,3 +1,5 @@
+from os.path import splitext
+
 from snakemake.shell import shell
 
 video = snakemake.input.video
