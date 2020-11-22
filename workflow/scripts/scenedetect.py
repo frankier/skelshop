@@ -5,7 +5,7 @@ from snakemake.shell import shell
 video = snakemake.input.video
 out_orig = splitext(video)[0] + "-Scenes.csv"
 min_scene_len = snakemake.params.get("min_scene_len", "2s")
-out_dir = snakemake.param.out_dir
+out_dir = snakemake.params.out_dir
 
 shell(
     "scenedetect"
