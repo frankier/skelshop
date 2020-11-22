@@ -233,6 +233,91 @@
           
           
 
+
+  <li class="md-nav__item md-nav__item--nested">
+    
+    <input class="md-nav__toggle md-toggle" data-md-toggle="nav-2-2" type="checkbox" id="nav-2-2" >
+    <label class="md-nav__link" for="nav-2-2">
+      Meet the...
+      <span class="md-nav__icon md-icon"></span>
+    </label>
+    <nav class="md-nav" aria-label="Meet the..." data-md-level="2">
+      <label class="md-nav__title" for="nav-2-2">
+        <span class="md-nav__icon md-icon"></span>
+        Meet the...
+      </label>
+      <ul class="md-nav__list" data-md-scrollfix>
+        
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../pose-estimators/" class="md-nav__link">
+      Pose estimators
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../shot-segmentors/" class="md-nav__link">
+      Shot segmentors
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../pose-trackers/" class="md-nav__link">
+      Within-shot pose trackers
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../face-extractors/" class="md-nav__link">
+      Face chip detectors/croppers
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../face-embedders/" class="md-nav__link">
+      Face embedders
+    </a>
+  </li>
+
+        
+      </ul>
+    </nav>
+  </li>
+
+        
+          
+          
+          
+
   
 
 
@@ -268,13 +353,6 @@
   
     <nav class="md-nav" aria-label="Usage examples">
       <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#modes" class="md-nav__link">
-    Modes
-  </a>
-  
-</li>
         
           <li class="md-nav__item">
   <a href="#dumpingtracking" class="md-nav__link">
@@ -490,13 +568,6 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#modes" class="md-nav__link">
-    Modes
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
   <a href="#dumpingtracking" class="md-nav__link">
     Dumping/tracking
   </a>
@@ -544,55 +615,6 @@
                 <h2 id="usage-examples">Usage examples</h2>
 <p>Here are some usage examples. There is more help available through the `--help'
 flag.</p>
-<h3 id="modes">Modes</h3>
-<table>
-<thead>
-<tr>
-<th>Mode name</th>
-<th>Keypoints</th>
-<th>Body</th>
-<th>Hands</th>
-<th>Face</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>BODY_25</td>
-<td>25</td>
-<td>Yes</td>
-<td>No</td>
-<td>No</td>
-</tr>
-<tr>
-<td>BODY_25_ALL</td>
-<td>135</td>
-<td>Yes</td>
-<td>Yes</td>
-<td>Yes</td>
-</tr>
-<tr>
-<td>BODY_25_HANDS</td>
-<td>65</td>
-<td>Yes</td>
-<td>Yes</td>
-<td>No</td>
-</tr>
-<tr>
-<td>FACE</td>
-<td>70</td>
-<td>No</td>
-<td>No</td>
-<td>Yes</td>
-</tr>
-<tr>
-<td>BODY_25_FACE</td>
-<td>95</td>
-<td>Yes</td>
-<td>No</td>
-<td>Yes</td>
-</tr>
-</tbody>
-</table>
 <h3 id="dumpingtracking">Dumping/tracking</h3>
 <p>A working OpenPose install is required for dumping (and only for dumping). We
 could dump some untracked skeletons with a version of OpenPose we have compiled
@@ -650,7 +672,7 @@ the <code>Snakefile</code>, and the help provided with <code>python skelshop --h
     <div class="md-footer-nav">
       <nav class="md-footer-nav__inner md-grid" aria-label="Footer">
         
-          <a href="../pipelines-overview/" class="md-footer-nav__link md-footer-nav__link--prev" rel="prev">
+          <a href="../face-embedders/" class="md-footer-nav__link md-footer-nav__link--prev" rel="prev">
             <div class="md-footer-nav__button md-icon">
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12z"/></svg>
             </div>
@@ -659,7 +681,7 @@ the <code>Snakefile</code>, and the help provided with <code>python skelshop --h
                 <span class="md-footer-nav__direction">
                   Previous
                 </span>
-                Pipelines overview
+                Face embedders
               </div>
             </div>
           </a>

@@ -16,7 +16,7 @@
     
     
       
-        <title>HPC extraction with Snakemake - SkelShop Documentation</title>
+        <title>Face chip detectors/croppers - SkelShop Documentation</title>
       
     
     
@@ -59,7 +59,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#workflow-orchestration-and-extraction-in-a-hpc-environment-using-snakemake" class="md-skip">
+        <a href="#dlib" class="md-skip">
           Skip to content
         </a>
       
@@ -89,7 +89,7 @@
           </span>
           <span class="md-header-nav__topic md-ellipsis">
             
-              HPC extraction with Snakemake
+              Face chip detectors/croppers
             
           </span>
         </div>
@@ -233,10 +233,12 @@
           
           
 
+  
 
-  <li class="md-nav__item md-nav__item--nested">
+
+  <li class="md-nav__item md-nav__item--active md-nav__item--nested">
     
-    <input class="md-nav__toggle md-toggle" data-md-toggle="nav-2-2" type="checkbox" id="nav-2-2" >
+    <input class="md-nav__toggle md-toggle" data-md-toggle="nav-2-2" type="checkbox" id="nav-2-2" checked>
     <label class="md-nav__link" for="nav-2-2">
       Meet the...
       <span class="md-nav__icon md-icon"></span>
@@ -289,11 +291,52 @@
           
           
 
+  
 
-  <li class="md-nav__item">
-    <a href="../face-extractors/" class="md-nav__link">
+
+  <li class="md-nav__item md-nav__item--active">
+    
+    <input class="md-nav__toggle md-toggle" data-md-toggle="toc" type="checkbox" id="__toc">
+    
+    
+      <label class="md-nav__link md-nav__link--active" for="__toc">
+        Face chip detectors/croppers
+        <span class="md-nav__icon md-icon"></span>
+      </label>
+    
+    <a href="./" class="md-nav__link md-nav__link--active">
       Face chip detectors/croppers
     </a>
+    
+      
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#dlib" class="md-nav__link">
+    dlib
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#openpose" class="md-nav__link">
+    OpenPose
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+    
   </li>
 
         
@@ -330,70 +373,11 @@
           
           
 
-  
 
-
-  <li class="md-nav__item md-nav__item--active">
-    
-    <input class="md-nav__toggle md-toggle" data-md-toggle="toc" type="checkbox" id="__toc">
-    
-      
-    
-    
-      <label class="md-nav__link md-nav__link--active" for="__toc">
-        HPC extraction with Snakemake
-        <span class="md-nav__icon md-icon"></span>
-      </label>
-    
-    <a href="./" class="md-nav__link md-nav__link--active">
+  <li class="md-nav__item">
+    <a href="../snakemake/" class="md-nav__link">
       HPC extraction with Snakemake
     </a>
-    
-      
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#running-snakemake-on-a-single-node" class="md-nav__link">
-    Running Snakemake on a single node
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#running-snakemake-on-a-slurm-cluster" class="md-nav__link">
-    Running Snakemake on a SLURM cluster
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#integrating-skelshop-into-your-own-pipelines" class="md-nav__link">
-    Integrating SkelShop into your own pipelines
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#other-hpc-utilities" class="md-nav__link">
-    Other HPC utilities
-  </a>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-    
   </li>
 
         
@@ -550,8 +534,6 @@
 <nav class="md-nav md-nav--secondary" aria-label="Table of contents">
   
   
-    
-  
   
     <label class="md-nav__title" for="__toc">
       <span class="md-nav__icon md-icon"></span>
@@ -560,29 +542,15 @@
     <ul class="md-nav__list" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#running-snakemake-on-a-single-node" class="md-nav__link">
-    Running Snakemake on a single node
+  <a href="#dlib" class="md-nav__link">
+    dlib
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#running-snakemake-on-a-slurm-cluster" class="md-nav__link">
-    Running Snakemake on a SLURM cluster
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#integrating-skelshop-into-your-own-pipelines" class="md-nav__link">
-    Integrating SkelShop into your own pipelines
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#other-hpc-utilities" class="md-nav__link">
-    Other HPC utilities
+  <a href="#openpose" class="md-nav__link">
+    OpenPose
   </a>
   
 </li>
@@ -599,80 +567,58 @@
             <article class="md-content__inner md-typeset">
               
                 
-                  <a href="https://github.com/frankier/skelshop/edit/master/docs/snakemake.md" title="Edit this page" class="md-content__button md-icon">
+                  <a href="https://github.com/frankier/skelshop/edit/master/docs/face-extractors.md" title="Edit this page" class="md-content__button md-icon">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20.71 7.04c.39-.39.39-1.04 0-1.41l-2.34-2.34c-.37-.39-1.02-.39-1.41 0l-1.84 1.83 3.75 3.75M3 17.25V21h3.75L17.81 9.93l-3.75-3.75L3 17.25z"/></svg>
                   </a>
                 
                 
-                <h1 id="workflow-orchestration-and-extraction-in-a-hpc-environment-using-snakemake">Workflow orchestration and extraction in a HPC environment using Snakemake</h1>
-<p>SkelShop include tools for running extraction pipelines orchestrated using
-Snakemake. These workflows can be run on a single node, however more typically
-these would be run in a HPC environment, with a heterogeneous mix of GPU and
-CPU nodes being orchestrated by SLURM so as to enable skeleton/face extraction
-from a large video corpus in a reasonable amount of time.</p>
-<p>The intended environment for SkelShop to be run is in a SLURM-based HPC
-environment in a Singularity container. You can run Snakemake on one node
-(typically a login node, since no heavy computation is performed by this node)
-and the actual steps will run on different nodes chosen according to a JSON
-configuration file, all from a single Singularity container. This workflow is
-enabled by <a href="https://github.com/frankier/singslurm">singslurm</a> project, which is
-based on the <a href="https://github.com/Snakemake-Profiles/slurm">Snakemake SLURM
-profile</a>.</p>
-<h2 id="running-snakemake-on-a-single-node">Running Snakemake on a single node</h2>
-<p>Snakemake can be run on a single node, which might be appropriate if you have
-a very small video corpus or a lot of time(!)</p>
-<p>For example assuming you have followed the manual installation instruction and
-that you want to use 8 cores:</p>
-<pre><code>$ cd /path/to/skelshop
-$ poetry run snakemake sorted_all \
-  --cores 8 \
-  --config \
-  VIDEO_BASE=/path/to/my/video/corpus/ \
-  DUMP_BASE=/path/to/my/dump/directory
-</code></pre>
-<h2 id="running-snakemake-on-a-slurm-cluster">Running Snakemake on a SLURM cluster</h2>
-<p>The coordinator script bootstraps everything needed for containerised Snakemake
-execution:</p>
-<pre><code>$ wget https://raw.githubusercontent.com/frankier/singslurm/master/run_coord.sh
-$ chmod +x run_coord.sh
-</code></pre>
-<p>Now you can download the Singularity image:</p>
-<pre><code>$ singularity pull shub://frankier/skelshop:latest skelshop.sif
-</code></pre>
-<p>Next, you need to create a JSON file specifying which type of nodes you would
-like to assign to different rules (steps in the workflow). <a href="https://github.com/frankier/skelshop/blob/master/contrib/slurm/track.clusc.json">There is an example
-for Case Western Reserve University SLURM
-cluster</a>.
-See also the <a href="https://slurm.schedmd.com/documentation.html">SLURM
-documentation</a> and the <a href="https://github.com/Snakemake-Profiles/slurm">SLURM
-Snakemake profile documentation</a>
-for information on how to write this file.</p>
-<p>You can see the names of the steps in the workflow at any time by running:</p>
-<pre><code>$ poetry run snakemake --list
-</code></pre>
-<p>Then an example of how you would run the pipeline is given below:</p>
-<pre><code>$ SIF_PATH=`pwd`/skelshop.sif \
-  SNAKEFILE=/opt/skelshop/workflow/Snakefile \
-  CLUSC_CONF=/opt/skelshop/contrib/slurm/skels.tracked.clusc.json \
-  NUM_JOBS=42 \
-  SING_EXTRA_ARGS="--bind /path/to/my/extra/bind" \
-  ./run_coord.sh \
-  sorted_all \
-  --config \
-  VIDEO_BASE=/path/to/my/video/corpus/ \
-  DUMP_BASE=/path/to/my/dump/directory
-</code></pre>
-<h2 id="integrating-skelshop-into-your-own-pipelines">Integrating SkelShop into your own pipelines</h2>
-<p>In case you are using SkelShop as part of a larger pipeline or want to further
-customise your workflow, you should write your own Snakefile. See the
-<a href="https://snakemake.readthedocs.io">Snakemake documentation</a>. You may like to
-use the rules and scripts from SkelShop. In this case the current best approach
-is to copy or symlink everything under <code>workflow/rules</code> and <code>workflow/scripts</code>
-into your own <code>workflow</code> directory.</p>
-<h2 id="other-hpc-utilities">Other HPC utilities</h2>
-<p>There are some examples of how to run which are specific to the Case Western
-Reserve University SLURM cluster <a href="https://github.com/frankier/skelshop/tree/master/contrib/slurm">in the contrib/slurm
-directory</a>.</p>
+                  <h1>Face chip detectors/croppers</h1>
+                
+                <p>Before performing the face embedding step required for facial recognition, we
+need to extract rotated, non-aspect ratio preserving scaled images of an exact
+square size, since this is the type of data the embedders are trained on.</p>
+<p>There are currently two major approaches to extracting face <em>chips</em>: those
+based on dlib's pipeline and those based on OpenPose skeletons. Typically the
+latter is recommended if you are planning on extracting these skeleton
+keypoints at any point, since it is faster and allows the faces to be
+associated with tracked skeletons.</p>
+<h2 id="dlib">dlib</h2>
+<p>The dlib based face chip extractor first runs a face detector and then as show
+in <a href="../pipelines-overview/">the pipelines overview</a></p>
+<p>The following modes are available:</p>
+<p>| Mode name  | Face detector | Face keypoint model |
+| ------------- | ------------- | ------------- | ------------- | ------------- |
+| dlib-hog-face5 | HOG | 5-point |
+| dlib-hog-face68 | HOG | 68-point |
+| dlib-cnn-face5 | CNN | 5-point |
+| dlib-cnn-face68 | CNN | 68-point |</p>
+<p>The CNN detector is slower than the HOG detector, but can be GPU accelerated.
+The 5 point face keypoint model is slightly faster than the 68 keypoint model.
+Both keypoint models run on the CPU only.</p>
+<h2 id="openpose">OpenPose</h2>
+<p>The OpenPose based face chip extractor uses keypoints detected by OpenPose. If
+your keypoint model (see <a href="../pose-estimators/">meet the pose estimators for a list of keypoint
+models</a> includes the face, you can use the 68 keypoint
+model, otherwise you can use the 3 keypoint model which uses only the face
+keypoints from BODY_25.</p>
+<table>
+<thead>
+<tr>
+<th>Mode name</th>
+<th>Face keypoint model</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>openpose-face3</td>
+<td>3-point</td>
+</tr>
+<tr>
+<td>openpose-face68</td>
+<td>68-point</td>
+</tr>
+</tbody>
+</table>
                 
               
               
@@ -691,7 +637,7 @@ directory</a>.</p>
     <div class="md-footer-nav">
       <nav class="md-footer-nav__inner md-grid" aria-label="Footer">
         
-          <a href="../usage-examples/" class="md-footer-nav__link md-footer-nav__link--prev" rel="prev">
+          <a href="../pose-trackers/" class="md-footer-nav__link md-footer-nav__link--prev" rel="prev">
             <div class="md-footer-nav__button md-icon">
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12z"/></svg>
             </div>
@@ -700,19 +646,19 @@ directory</a>.</p>
                 <span class="md-footer-nav__direction">
                   Previous
                 </span>
-                Usage examples
+                Within-shot pose trackers
               </div>
             </div>
           </a>
         
         
-          <a href="../pipeline-internals/" class="md-footer-nav__link md-footer-nav__link--next" rel="next">
+          <a href="../face-embedders/" class="md-footer-nav__link md-footer-nav__link--next" rel="next">
             <div class="md-footer-nav__title">
               <div class="md-ellipsis">
                 <span class="md-footer-nav__direction">
                   Next
                 </span>
-                Pipeline internals
+                Face embedders
               </div>
             </div>
             <div class="md-footer-nav__button md-icon">
