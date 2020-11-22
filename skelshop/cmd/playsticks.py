@@ -8,7 +8,7 @@ import opencv_wrapper as cvw
 
 from skelshop.drawsticks import FaceDraw, ScaledVideo, SkelDraw, get_skel
 from skelshop.face.io import FaceReader
-from skelshop.io import AsIfOrdered, ShotSegmentedReader, UnsegmentedReader
+from skelshop.io import AsIfTracked, ShotSegmentedReader, UnsegmentedReader
 from skelshop.utils.h5py import log_open
 
 
@@ -34,7 +34,7 @@ def get_skels_read_and_draws(
                 is_seg = True
                 read = ShotSegmentedReader(skel_h5f)
             else:
-                read = AsIfOrdered(UnsegmentedReader(skel_h5f))
+                read = AsIfTracked(UnsegmentedReader(skel_h5f))
             result.append((read, get_skel_draw(skel_h5f)))
         for h5fn in faces:
             face_h5f = stack.enter_context(h5py.File(h5fn, "r"))

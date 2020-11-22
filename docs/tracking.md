@@ -1,4 +1,4 @@
-The tracker is a stage that each frame takes an unordered bundle of poses and
+The tracker is a stage that each frame takes an untracked bundle of poses and
 gives them IDs. 
 
 ::: skelshop.bbtrack.TrackStage

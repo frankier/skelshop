@@ -24,7 +24,7 @@ For example assuming you have followed the manual installation instruction and
 that you want to use 8 cores:
 
     $ cd /path/to/skelshop
-    $ poetry run snakemake sorted_all \
+    $ poetry run snakemake tracked_all \
       --cores 8 \
       --config \
       VIDEO_BASE=/path/to/my/video/corpus/ \
@@ -63,7 +63,7 @@ Then an example of how you would run the pipeline is given below:
       NUM_JOBS=42 \
       SING_EXTRA_ARGS="--bind /path/to/my/extra/bind" \
       ./run_coord.sh \
-      sorted_all \
+      tracked_all \
       --config \
       VIDEO_BASE=/path/to/my/video/corpus/ \
       DUMP_BASE=/path/to/my/dump/directory

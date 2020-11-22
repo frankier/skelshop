@@ -5,7 +5,7 @@ import click
 from imutils.video.count_frames import count_frames
 
 from skelshop.dump import add_fmt_metadata, add_metadata, write_shots
-from skelshop.io import AsIfOrdered, NullWriter, ShotSegmentedWriter, UnsegmentedWriter
+from skelshop.io import AsIfTracked, NullWriter, ShotSegmentedWriter, UnsegmentedWriter
 from skelshop.openpose import LIMBS, MODES, OpenPoseStage
 from skelshop.pipeline import pipeline_options
 
@@ -48,7 +48,7 @@ def dump(video, h5fn, mode, model_folder, pipeline, debug, dry_run):
             writer_cls = ShotSegmentedWriter
             fmt_type = "trackshots"
         else:
-            frame_iter = AsIfOrdered(stage)
+            frame_iter = AsIfTracked(stage)
             writer_cls = UnsegmentedWriter
             fmt_type = "unseg"
         if h5f:

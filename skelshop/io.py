@@ -5,7 +5,7 @@ from typing import Any, Iterator, List, Tuple
 from numpy import ndarray
 
 from .openpose import POSE_CLASSES
-from .pose import DumpReaderPoseBundle, UnorderedDumpReaderPoseBundle
+from .pose import DumpReaderPoseBundle, UntrackedDumpReaderPoseBundle
 from .sparsepose import SparsePose, create_csr, create_growable_csr
 
 
@@ -251,7 +251,7 @@ class ShotSegmentedReader:
 
 
 class UnsegmentedReader:
-    def __init__(self, h5f, bundle_cls=UnorderedDumpReaderPoseBundle):
+    def __init__(self, h5f, bundle_cls=UntrackedDumpReaderPoseBundle):
         self.h5f = h5f
         assert self.h5f.attrs["fmt_type"] == "unseg"
         mk_bundle = partial(bundle_cls, cls=POSE_CLASSES[self.h5f.attrs["mode"]])
@@ -309,6 +309,11 @@ class ShotReader:
 
 
 class EnumerateIterable:
+    """
+    Like enumerate(...) but produces an iterable (can consume mulitple times)
+    rather than an iterator (can only consume once).
+    """
+
     def __init__(self, wrapped):
         self.wrapped = wrapped
 
@@ -316,7 +321,13 @@ class EnumerateIterable:
         return enumerate(self.wrapped)
 
 
-class AsIfOrdered:
+class AsIfTracked:
+    """
+    Adapter wrapper for readers producing UntrackedDumpReaderPoseBundle such as
+    UnsegmentedReader by default that makes them appear to produce bundles like
+    TrackedDumpReaderPoseBundle.
+    """
+
     def __init__(self, wrapped):
         self.wrapped = wrapped
 
@@ -330,6 +341,11 @@ class AsIfOrdered:
 
 
 class AsIfSingleShot:
+    """
+    Adapter wrapper for ShotSegmentedReader to make it act more like an
+    UnsegmentedReader.
+    """
+
     def __init__(self, wrapped):
         self.wrapped = wrapped
 

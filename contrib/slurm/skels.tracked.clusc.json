@@ -7,7 +7,7 @@
     "scenedetect": {
         "nodes" : 64
     },
-    "skel_unsorted": {
+    "skel_untracked": {
         "time" : "2-00:00:00",
         "partition": "gpu",
         "gres": "gpu:1",

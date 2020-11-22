@@ -23,7 +23,7 @@ if we like e.g. first run
         rankdir=LR
         video [label="Video"]
         estimator [label="Pose estimator"]
-        writer [label="Unsorted pose writer"]
+        writer [label="Untracked pose writer"]
         video -> estimator -> writer;
     }
 ```
@@ -34,7 +34,7 @@ And then later run
     digraph G {
         rankdir=LR
         video [label="Video"]
-        reader [label="Unsorted pose reader"]
+        reader [label="Untracked pose reader"]
         tracker [label="Pose tracker"]
         segmenter [label="Shot segmenter"]
         writer [label="Tracked + shot segmented pose writer"]
@@ -78,7 +78,7 @@ Skeleton-based pipeline:
     digraph G {
         rankdir=LR
         video [label="Video"]
-        reader [label="Tracked or unsorted pose reader"]
+        reader [label="Tracked or untracked pose reader"]
         chipcropper [label="Dlib chip cropper"]
         writer [label="Embedding writer"]
         reader -> tracker -> segmenter -> writer;

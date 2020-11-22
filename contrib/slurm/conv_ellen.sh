@@ -14,5 +14,5 @@ do
     srun --exclusive singularity exec ~/gsoc2020_skelshop.sif python \
         /opt/skelshop/skelshop \
         conv --mode BODY_25_ALL \
-        single-zip $zip home/frr7/ellen_dataset_openpose/$(basename $zip .zip).unsorted.h5
+        single-zip $zip home/frr7/ellen_dataset_openpose/$(basename $zip .zip).untracked.h5
 done

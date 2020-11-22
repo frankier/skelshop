@@ -15,7 +15,7 @@ from skelshop.drawsticks import (
     drawsticks_unseg,
     get_skel,
 )
-from skelshop.io import AsIfOrdered, ShotSegmentedReader, UnsegmentedReader
+from skelshop.io import AsIfTracked, ShotSegmentedReader, UnsegmentedReader
 
 logger = logging.getLogger(__name__)
 
@@ -62,4 +62,4 @@ def drawsticks(h5fn, videoin, videoout, posetrack, scale, overlay):
         if h5f.attrs["fmt_type"] == "trackshots":
             drawsticks_shots(frames, ShotSegmentedReader(h5f), vid_write)
         else:
-            drawsticks_unseg(frames, AsIfOrdered(UnsegmentedReader(h5f)), vid_write)
+            drawsticks_unseg(frames, AsIfTracked(UnsegmentedReader(h5f)), vid_write)

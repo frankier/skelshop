@@ -11,14 +11,14 @@ from skelshop.dump import add_fmt_metadata, add_metadata, write_shots
 from skelshop.infmt.ordered_tar import ordered_tar_source
 from skelshop.infmt.tar import ShardedJsonDumpSource, iter_tarinfos
 from skelshop.infmt.zip import zip_json_source
-from skelshop.io import AsIfOrdered, UnsegmentedWriter
+from skelshop.io import AsIfTracked, UnsegmentedWriter
 from skelshop.openpose import LIMBS, MODES
 from skelshop.utils.h5py import h5out
 
 
 def write_conv(h5f, mode, basename, json_source, input_fmt):
     limbs = LIMBS[mode]
-    frame_iter = AsIfOrdered(json_source)
+    frame_iter = AsIfTracked(json_source)
     write_shots(h5f, limbs, frame_iter, writer_cls=UnsegmentedWriter)
     if basename is None:
         basename = json_source.basename
@@ -77,7 +77,7 @@ class TarInfosProcessor:
         json_source = ShardedJsonDumpSource(
             self.mode, self.tar_path, tarinfos, self.suppress_end_fail
         )
-        path = pjoin(self.out, basename + ".unsorted.h5")
+        path = pjoin(self.out, basename + ".untracked.h5")
         stats: Counter = Counter()
         if self.skip_existing and os.path.exists(path):
             return stats

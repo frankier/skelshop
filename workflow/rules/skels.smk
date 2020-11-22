@@ -23,12 +23,12 @@ rule ffprobe:
     script:
         "../scripts/ffprobe.py"
 
-rule skel_unsorted:
+rule skel_untracked:
     "Runs BODY_25_ALL untracked OpenPose dumping"
     input:
         video = pjoin(VIDEO_BASE, "{base}.mp4")
     output:
-        pjoin(DUMP_BASE, "{base}.unsorted.h5")
+        pjoin(DUMP_BASE, "{base}.untracked.h5")
     shell:
         "python -m skelshop dump " +
         "--mode BODY_25_ALL " + 
@@ -39,7 +39,7 @@ rule skel_filter_csvshotseg_opt_lighttrack:
     "Runs opt_lighttrack OpenPose tracking"
     input:
         gcn_config = GCN_CONFIG,
-        unsorted = pjoin(DUMP_BASE, "{base}.unsorted.h5"),
+        untracked = pjoin(DUMP_BASE, "{base}.untracked.h5"),
         scenes_csv = pjoin(DUMP_BASE, "{base}-Scenes.csv")
     output:
         pjoin(DUMP_BASE, "{base}.opt_lighttrack.h5")
@@ -50,4 +50,4 @@ rule skel_filter_csvshotseg_opt_lighttrack:
         "--pose-matcher-config {input.gcn_config} " +
         "--shot-seg=psd " +
         "--segs-file {input.scenes_csv} " +
-        "{input.unsorted} {output}"
+        "{input.untracked} {output}"

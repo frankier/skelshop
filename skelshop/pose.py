@@ -49,7 +49,7 @@ class DumpReaderPoseBundle:
             yield idx, self.cls.from_keypoints(pose)
 
 
-class UnorderedDumpReaderPoseBundle(DumpReaderPoseBundle):
+class UntrackedDumpReaderPoseBundle(DumpReaderPoseBundle):
     def __iter__(self):
         return (val for _, val in super().__iter__())
 

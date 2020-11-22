@@ -46,12 +46,12 @@ def all(ext):
     base, = glob_wildcards(pjoin(VIDEO_BASE, "{base}.mp4"))
     return [fn + ext for fn in base]
 
-rule sorted_all:
+rule tracked_all:
     "Produce tracked dumps of all videos in VIDEO_BASE"
     input:
         [pjoin(DUMP_BASE, fn) for fn in all(".opt_lighttrack.h5")]
     output:
-        touch(".sorted_all")
+        touch(".tracked_all")
 
 rule get_gcn_weights:
     output:
