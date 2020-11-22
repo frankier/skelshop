@@ -11,7 +11,7 @@ rule scenedetect:
     output:
         pjoin(DUMP_BASE, "{base}-Scenes.csv")
     script:
-        "scripts/scenedetect.py"
+        "../scripts/scenedetect.py"
 
 # TODO: User can choose which segmentor to use
 rule ffprobe:
@@ -21,7 +21,7 @@ rule ffprobe:
     output:
         scenes = pjoin(DUMP_BASE, "{base}.ffprobe.scene.txt")
     script:
-        "scripts/ffprobe.py"
+        "../scripts/ffprobe.py"
 
 rule skel_unsorted:
     "Runs BODY_25_ALL untracked OpenPose dumping"
