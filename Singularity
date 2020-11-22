@@ -8,4 +8,4 @@ From: frankierr/skelshop:focal_nvcaffe
     cd /opt/skelshop && snakemake "$@"
 
 %environment
-    source /.skelshop_env
+    . /.skelshop_env
