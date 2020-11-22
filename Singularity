@@ -1,7 +1,7 @@
 Bootstrap: docker
 From: frankierr/skelshop:focal_nvcaffe
 
-%script
+%post
     echo "Nothing to do"
 
 %runscript
