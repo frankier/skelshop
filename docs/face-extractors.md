@@ -16,7 +16,7 @@ in [the pipelines overview](pipelines-overview.md)
 The following modes are available:
 
 | Mode name  | Face detector | Face keypoint model |
-| ------------- | ------------- | ------------- | ------------- | ------------- |
+| ------------- | ------------- | ------------- |
 | dlib-hog-face5 | HOG | 5-point |
 | dlib-hog-face68 | HOG | 68-point |
 | dlib-cnn-face5 | CNN | 5-point |
