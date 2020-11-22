@@ -586,12 +586,37 @@ associated with tracked skeletons.</p>
 <p>The dlib based face chip extractor first runs a face detector and then as show
 in <a href="../pipelines-overview/">the pipelines overview</a></p>
 <p>The following modes are available:</p>
-<p>| Mode name  | Face detector | Face keypoint model |
-| ------------- | ------------- | ------------- | ------------- | ------------- |
-| dlib-hog-face5 | HOG | 5-point |
-| dlib-hog-face68 | HOG | 68-point |
-| dlib-cnn-face5 | CNN | 5-point |
-| dlib-cnn-face68 | CNN | 68-point |</p>
+<table>
+<thead>
+<tr>
+<th>Mode name</th>
+<th>Face detector</th>
+<th>Face keypoint model</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>dlib-hog-face5</td>
+<td>HOG</td>
+<td>5-point</td>
+</tr>
+<tr>
+<td>dlib-hog-face68</td>
+<td>HOG</td>
+<td>68-point</td>
+</tr>
+<tr>
+<td>dlib-cnn-face5</td>
+<td>CNN</td>
+<td>5-point</td>
+</tr>
+<tr>
+<td>dlib-cnn-face68</td>
+<td>CNN</td>
+<td>68-point</td>
+</tr>
+</tbody>
+</table>
 <p>The CNN detector is slower than the HOG detector, but can be GPU accelerated.
 The 5 point face keypoint model is slightly faster than the 68 keypoint model.
 Both keypoint models run on the CPU only.</p>
