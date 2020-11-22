@@ -1,7 +1,8 @@
 from functools import partial
 from itertools import repeat
-from typing import Any, Iterator, List, Tuple
+from typing import Any, Dict, Iterator, List, Tuple
 
+import h5py
 from numpy import ndarray
 
 from .openpose import POSE_CLASSES
@@ -43,13 +44,21 @@ class NullWriter:
 
 
 class UnsegmentedWriter:
-    def __init__(self, h5f):
+    """
+    Write a skeleton dump without any shot segmentation. This typically implies
+    that poses are not tracked.
+    """
+
+    def __init__(self, h5f: h5py.File):
+        """
+        Constructs an unsegmented pose writer
+        """
         self.h5f = h5f
         self.timeline_grp = self.h5f.create_group("/timeline", track_order=True)
-        self.pose_grps = {}
+        self.pose_grps: Dict[int, List[Any]] = {}
         self.start_frame = 0
 
-    def pose_grp(self, pose_id, frame_num):
+    def _pose_grp(self, pose_id: int, frame_num: int):
         if pose_id in self.pose_grps:
             return self.pose_grps[pose_id]
         path = f"/timeline/pose{pose_id}"
@@ -65,8 +74,11 @@ class UnsegmentedWriter:
         ]
         return self.pose_grps[pose_id]
 
-    def add_pose(self, frame_num, pose_id, pose):
-        pose_grp, data, indices, indptr, last_frame_num = self.pose_grp(
+    def add_pose(self, frame_num: int, pose_id: int, pose: ndarray):
+        """
+        Add a pose
+        """
+        pose_grp, data, indices, indptr, last_frame_num = self._pose_grp(
             pose_id, frame_num
         )
         new_rows = frame_num - last_frame_num
@@ -83,13 +95,19 @@ class UnsegmentedWriter:
             indices[-len(new_indices) :] = new_indices
         self.pose_grps[pose_id][-1] = frame_num
 
-    def start_shot(self, start_frame=None):
+    def start_shot(self, start_frame: int = 0):
+        """
+        Start a shot. This should only be called once at the beginning of writing.
+        """
         self.start_frame = start_frame
 
     def register_frame(self, frame_num):
         pass
 
     def end_shot(self):
+        """
+        Ends a shot. This should only be called once at the end of writing.
+        """
         self.timeline_grp.attrs["start_frame"] = self.start_frame
         timeline_last_frame_num = 0
         for pose_grp, data, indices, indptr, last_frame_num in self.pose_grps.values():
@@ -100,27 +118,47 @@ class UnsegmentedWriter:
 
 
 class ShotSegmentedWriter:
-    def __init__(self, h5f):
+    """
+    Write a skeleton dump with any shot segmentation. This typically implies
+    that poses are are tracked.
+    """
+
+    def __init__(self, h5f: h5py.File):
+        """
+        Constructs a shot segmented writer
+        """
         self.h5f = h5f
         self.h5f.create_group("/timeline", track_order=True)
 
-        self.pose_data = {}
+        self.pose_data: Dict[int, Dict[int, ndarray]] = {}
         self.shot_idx = 0
         self.shot_start = 0
         self.last_frame = 0
 
     def start_shot(self, start_frame=None):
+        """
+        Start a new shot
+        """
         if start_frame is not None:
             self.shot_start = start_frame
 
-    def add_pose(self, frame_num, pose_id, pose):
+    def add_pose(self, frame_num: int, pose_id: int, pose: ndarray):
+        """
+        Add a pose
+        """
         self.pose_data.setdefault(pose_id, {})[frame_num] = pose
         self.last_frame = frame_num
 
-    def register_frame(self, frame_num):
+    def register_frame(self, frame_num: int):
+        """
+        Register frame_num as existing within the current shot
+        """
         self.last_frame = frame_num
 
     def end_shot(self):
+        """
+        End the current shot
+        """
         shot_grp = self.h5f.create_group(
             f"/timeline/shot{self.shot_idx}", track_order=True
         )
@@ -181,7 +219,16 @@ def read_grp(grp) -> Tuple[int, int, Iterator[Any]]:
 
 
 class ShotSegmentedReader:
-    def __init__(self, h5f, bundle_cls=DumpReaderPoseBundle, infinite=True):
+    """
+    Reads a shot segmented skeleton dump.
+    """
+
+    def __init__(self, h5f: h5py.File, bundle_cls=DumpReaderPoseBundle, infinite=True):
+        """
+        Constructs the reader from a HDF5 file and. If `infinite` is True, all
+        shot iterators will terminate with a final empty shot which infintely
+        yields empty pose bundles.
+        """
         self.h5f = h5f
         self.limbs = self.h5f.attrs["limbs"]
         assert self.h5f.attrs["fmt_type"] == "trackshots"
@@ -224,15 +271,24 @@ class ShotSegmentedReader:
             )
 
     def __iter__(self):
+        """
+        Returns a shot iterator of all shots
+        """
         for shot_idx, shot_name, start_frame, end_frame, mk_shot in self._iter():
             yield mk_shot()
 
-    def iter_from_shot(self, start_shot):
+    def iter_from_shot(self, start_shot: int):
+        """
+        Returns a shot iterator starting from shot 0-index `start_shot`.
+        """
         for shot_idx, shot_name, start_frame, end_frame, mk_shot in self._iter():
             if shot_idx >= start_shot:
                 yield mk_shot()
 
-    def iter_from_frame(self, start_frame):
+    def iter_from_frame(self, start_frame: int):
+        """
+        Returns a shot iterator starting from frame 0-index `start_frame`.
+        """
         started = False
         for (
             shot_idx,
@@ -251,6 +307,10 @@ class ShotSegmentedReader:
 
 
 class UnsegmentedReader:
+    """
+    Reads a non-shot segmented skeleton dump.
+    """
+
     def __init__(self, h5f, bundle_cls=UntrackedDumpReaderPoseBundle):
         self.h5f = h5f
         assert self.h5f.attrs["fmt_type"] == "unseg"
@@ -260,9 +320,15 @@ class UnsegmentedReader:
         )
 
     def __iter__(self):
+        """
+        Returns a pose bundle iterator of all frames.
+        """
         return iter(self.shot_reader)
 
-    def iter_from(self, start_frame):
+    def iter_from(self, start_frame: int):
+        """
+        Returns a pose bundle iterator starting at frame `start_frame`.
+        """
         return self.shot_reader.iter_from(start_frame)
 
 
@@ -283,6 +349,10 @@ class EmptyShot:
 
 
 class ShotReader:
+    """
+    A reader for a single shot. Typically this is returned from ShotSegmentedReader.
+    """
+
     def __init__(self, start_frame, end_frame, bundles, num_limbs, mk_bundle):
         self.num_limbs = num_limbs
         self.mk_bundle = mk_bundle
@@ -296,9 +366,15 @@ class ShotReader:
             self.poses.append((pose_num, start_frame, end_frame, sparse_pose))
 
     def __iter__(self):
+        """
+        Returns a pose bundle iterator of all frames.
+        """
         return self.iter_from(self.start_frame)
 
     def iter_from(self, start_frame):
+        """
+        Returns a pose bundle iterator starting at frame `start_frame`.
+        """
         for frame in range(start_frame, self.end_frame):
             bundle = {}
             for pose_num, start_frame, end_frame, sparse_pose in self.poses:
