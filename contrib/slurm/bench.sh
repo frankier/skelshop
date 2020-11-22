@@ -9,38 +9,42 @@
 #SBATCH --time=1-00:00:00
 #SBATCH --constraint=gpu2080
 
-cd /mnt/rds/redhen/gallina
 module load singularity
+module load cuda/10.1
 
-wget https://youtube-dl.org/downloads/latest/youtube-dl
-chmod +x ./youtube-dl
-./youtube-dl -o breakingnews.mp4 -f 'bestvideo' 'https://www.youtube.com/watch?v=9U4Ha9HQvMo'
+if [ ! -f "breakingnews.mp4" ]; then
+    wget https://youtube-dl.org/downloads/latest/youtube-dl
+    chmod +x ./youtube-dl
+    ./youtube-dl -o breakingnews.mp4 -f 'bestvideo' 'https://www.youtube.com/watch?v=9U4Ha9HQvMo'
+fi
 
-echo "pyscenedetect\n" > results.txt
+echo "pyscenedetect" > results.txt
 
 { time \
 singularity exec ~/sifs/skelshop.sif snakemake \
-    -CVIDEO_BASE=`pwd` -CDUMP_BASE=`pwd` breakingnews-Scenes.csv \
-    breakingnews.mp4 \
+    breakingnews-Scenes.csv -j1 \
+    --snakefile /opt/skelshop/workflow/Snakefile \
+    -CVIDEO_BASE='' -CDUMP_BASE='' \
 > /dev/null 2>&1 ; } 2>> results.txt
 
-echo "ffprobe\n" >> results.txt
+echo "ffprobe" >> results.txt
 
 { time \
 singularity exec ~/sifs/skelshop.sif snakemake \
-    -CVIDEO_BASE=`pwd` -CDUMP_BASE=`pwd` breakingnews.ffprobe.scene.csv \
-    breakingnews.mp4 \
+    breakingnews.ffprobe.scene.csv -j1 \
+    --snakefile /opt/skelshop/workflow/Snakefile \
+    -CVIDEO_BASE='' -CDUMP_BASE='' \
 > /dev/null 2>&1 ; } 2>> results.txt
 
 echo >> results.txt
-echo "BODY_25 dump\n" >> results.txt
+echo "BODY_25 dump" >> results.txt
 
 { time \
 singularity exec ~/sifs/skelshop.sif python -m skelshop dump \
     --mode BODY_25 breakingnews.mp4 body25.dump.h5 \
 > /dev/null 2>&1 ; } 2>> results.txt
 
-echo "BODY_25_ALL dump\n" >> results.txt
+echo "BODY_25_ALL dump" >> results.txt
 
 { time \
 singularity exec ~/sifs/skelshop.sif python -m skelshop dump \
@@ -48,7 +52,7 @@ singularity exec ~/sifs/skelshop.sif python -m skelshop dump \
 > /dev/null 2>&1 ; } 2>> results.txt
 
 echo >> results.txt
-echo "lighttrackish track\n" >> results.txt
+echo "lighttrackish track" >> results.txt
 
 { time \
 singularity exec ~/sifs/skelshop.sif python -m skelshop filter \
@@ -60,7 +64,7 @@ singularity exec ~/sifs/skelshop.sif python -m skelshop filter \
     body25.dump.h5 body25.tracked.lighttrackish.dump.h5 \
 > /dev/null 2>&1 ; } 2>> results.txt
 
-echo "opt_lighttrack track\n" >> results.txt
+echo "opt_lighttrack track" >> results.txt
 
 { time \
 singularity exec ~/sifs/skelshop.sif python -m skelshop filter \
@@ -72,7 +76,7 @@ singularity exec ~/sifs/skelshop.sif python -m skelshop filter \
     body25.dump.h5 body25.tracked.opt_lighttrack.dump.h5 \
 > /dev/null 2>&1 ; } 2>> results.txt
 
-echo "deepsortlike track\n" >> results.txt
+echo "deepsortlike track" >> results.txt
 
 { time \
 singularity exec ~/sifs/skelshop.sif python -m skelshop filter \
@@ -84,7 +88,7 @@ singularity exec ~/sifs/skelshop.sif python -m skelshop filter \
 > /dev/null 2>&1 ; } 2>> results.txt
 
 echo >> results.txt
-echo "opt_lighttrack track body25_all (not strictly part of the benchmark)\n" >> results.txt
+echo "opt_lighttrack track body25_all (not strictly part of the benchmark)" >> results.txt
 
 { time \
 singularity exec ~/sifs/skelshop.sif python -m skelshop filter \
@@ -97,38 +101,38 @@ singularity exec ~/sifs/skelshop.sif python -m skelshop filter \
 > /dev/null 2>&1 ; } 2>> results.txt
 
 echo >> results.txt
-echo "dlib-hog-face5 face\n" >> results.txt
+echo "dlib-hog-face5 face" >> results.txt
 { time \
 singularity exec ~/sifs/skelshop.sif python -m skelshop face \
     dlib-hog-face5 breakingnews.mp4 breakingnews.dlibhogface5.h5 \
 > /dev/null 2>&1 ; } 2>> results.txt
 
-echo "dlib-cnn-face5 face\n" >> results.txt
+echo "dlib-cnn-face5 face" >> results.txt
 { time \
 singularity exec ~/sifs/skelshop.sif python -m skelshop face \
     dlib-cnn-face5 breakingnews.mp4 breakingnews.dlibcnnface5.h5 \
 > /dev/null 2>&1 ; } 2>> results.txt
 
-echo "dlib-hog-face68 face\n" >> results.txt
+echo "dlib-hog-face68 face" >> results.txt
 { time \
 singularity exec ~/sifs/skelshop.sif python -m skelshop face \
     dlib-hog-face68 breakingnews.mp4 breakingnews.dlibhogface68.h5 \
 > /dev/null 2>&1 ; } 2>> results.txt
 
-echo "dlib-cnn-face68 face\n" >> results.txt
+echo "dlib-cnn-face68 face" >> results.txt
 { time \
 singularity exec ~/sifs/skelshop.sif python -m skelshop face \
     dlib-cnn-face68 breakingnews.mp4 breakingnews.dlibcnnface5.h5 \
 > /dev/null 2>&1 ; } 2>> results.txt
 
-echo "openpose-face3 face\n" >> results.txt
+echo "openpose-face3 face" >> results.txt
 { time \
 singularity exec ~/sifs/skelshop.sif python -m skelshop face \
     --from-skels body25.tracked.opt_lighttrack.dump.h5 \
     openpose-face3 breakingnews.mp4 breakingnews.openposeface3.h5 \
 > /dev/null 2>&1 ; } 2>> results.txt
 
-echo "openpose-face68 face\n" >> results.txt
+echo "openpose-face68 face" >> results.txt
 { time \
 singularity exec ~/sifs/skelshop.sif python -m skelshop face \
     --from-skels body25all.tracked.opt_lighttrack.dump.h5 \
@@ -137,35 +141,35 @@ singularity exec ~/sifs/skelshop.sif python -m skelshop face \
 
 echo >> results.txt
 echo "(again but with bboxes/chips [slower])" >> results.txt
-echo "dlib-hog-face5 face\n" >> results.txt
+echo "dlib-hog-face5 face" >> results.txt
 { time \
 singularity exec ~/sifs/skelshop.sif python -m skelshop face \
     --write-bboxes --write-chip \
     dlib-hog-face5 breakingnews.mp4 breakingnews.dlibhogface5.chips.h5 \
 > /dev/null 2>&1 ; } 2>> results.txt
 
-echo "dlib-cnn-face5 face\n" >> results.txt
+echo "dlib-cnn-face5 face" >> results.txt
 { time \
 singularity exec ~/sifs/skelshop.sif python -m skelshop face \
     --write-bboxes --write-chip \
     dlib-cnn-face5 breakingnews.mp4 breakingnews.dlibcnnface5.chips.h5 \
 > /dev/null 2>&1 ; } 2>> results.txt
 
-echo "dlib-hog-face68 face\n" >> results.txt
+echo "dlib-hog-face68 face" >> results.txt
 { time \
 singularity exec ~/sifs/skelshop.sif python -m skelshop face \
     --write-bboxes --write-chip \
     dlib-hog-face68 breakingnews.mp4 breakingnews.dlibhogface68.chips.h5 \
 > /dev/null 2>&1 ; } 2>> results.txt
 
-echo "dlib-cnn-face68 face\n" >> results.txt
+echo "dlib-cnn-face68 face" >> results.txt
 { time \
 singularity exec ~/sifs/skelshop.sif python -m skelshop face \
     --write-bboxes --write-chip \
     dlib-cnn-face68 breakingnews.mp4 breakingnews.dlibcnnface5.chips.h5 \
 > /dev/null 2>&1 ; } 2>> results.txt
 
-echo "openpose-face3 face\n" >> results.txt
+echo "openpose-face3 face" >> results.txt
 { time \
 singularity exec ~/sifs/skelshop.sif python -m skelshop face \
     --write-bboxes --write-chip \
@@ -173,7 +177,7 @@ singularity exec ~/sifs/skelshop.sif python -m skelshop face \
     openpose-face3 breakingnews.mp4 breakingnews.openposeface3.chips.h5 \
 > /dev/null 2>&1 ; } 2>> results.txt
 
-echo "openpose-face68 face\n" >> results.txt
+echo "openpose-face68 face" >> results.txt
 { time \
 singularity exec ~/sifs/skelshop.sif python -m skelshop face \
     --write-bboxes --write-chip \
