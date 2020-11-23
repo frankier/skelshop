@@ -19,6 +19,8 @@ RUN apt-get install -y --no-install-recommends unzip
 
 FROM ${BASE}_base
 
+RUN apt-get install -y --no-install-recommends ffprobe
+
 RUN python3 -m pip install --upgrade \
     pip==20.2.4 \
     setuptools==50.3.2 \
