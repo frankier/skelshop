@@ -9,6 +9,6 @@ shell(
     " -show_entries frame=pkt_pts"
     " -of compact=p=0:nk=1"
     " -f lavfi"
-    " movie={video},setpts=N,select=gt(scene\,{threshold})"
+    " movie={video},setpts=N,select='gt(scene\,{threshold})'"
     " > {scenes}"
 )
