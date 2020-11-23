@@ -32,7 +32,7 @@ echo "ffprobe" >> results.txt
 
 { time \
 singularity exec --nv ~/sifs/skelshop.sif snakemake \
-    "$(pwd)/breakingnews.ffprobe.scene.csv" -j1 \
+    "$(pwd)/breakingnews.ffprobe.scene.txt" -j1 \
     --snakefile /opt/skelshop/workflow/Snakefile \
     -CVIDEO_BASE="$(pwd)" -CDUMP_BASE="$(pwd)" \
 > ffprobe.log 2>&1 ; } 2>> results.txt
