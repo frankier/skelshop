@@ -59,7 +59,7 @@ def face(
     )
 
     extractor_info = EXTRACTORS[face_extractor]
-    if extractor_info["type"] == "openpose":
+    if extractor_info["type"] == "openpose" and from_skels is None:
         raise click.BadOptionUsage(
             "--from-skels",
             f"--from-skels required when FACE EXTRACTOR uses OpenPose (got: {face_extractor})",
