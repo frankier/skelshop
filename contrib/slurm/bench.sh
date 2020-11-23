@@ -5,6 +5,7 @@
 #SBATCH --ntasks=1
 #SBATCH --gres=gpu:1
 #SBATCH --cpus-per-task=10
+#SBATCH --mem=64g
 #SBATCH --partition=gpu
 #SBATCH --time=1-00:00:00
 #SBATCH --constraint=gpu2080
@@ -122,7 +123,7 @@ singularity exec --nv ~/sifs/skelshop.sif python -m skelshop face \
 echo "dlib-cnn-face68 face" >> results.txt
 { time \
 singularity exec --nv ~/sifs/skelshop.sif python -m skelshop face \
-    dlib-cnn-face68 breakingnews.mp4 breakingnews.dlibcnnface5.h5 \
+    dlib-cnn-face68 breakingnews.mp4 breakingnews.dlibcnnface68.h5 \
 > /dev/null 2>&1 ; } 2>> results.txt
 
 echo "openpose-face3 face" >> results.txt
@@ -166,7 +167,7 @@ echo "dlib-cnn-face68 face" >> results.txt
 { time \
 singularity exec --nv ~/sifs/skelshop.sif python -m skelshop face \
     --write-bboxes --write-chip \
-    dlib-cnn-face68 breakingnews.mp4 breakingnews.dlibcnnface5.chips.h5 \
+    dlib-cnn-face68 breakingnews.mp4 breakingnews.dlibcnnface68.chips.h5 \
 > /dev/null 2>&1 ; } 2>> results.txt
 
 echo "openpose-face3 face" >> results.txt
