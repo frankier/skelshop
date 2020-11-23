@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
 from enum import Enum
+from functools import partial
 from typing import Iterable, Iterator, List, Optional, Tuple, cast
 
 import dlib
@@ -29,6 +30,7 @@ from .consts import (
 class FaceExtractionMode(Enum):
     FROM_FACE68_IN_BODY_25_ALL = 0
     FROM_FACE3_IN_BODY_25 = 1
+    FROM_FACE5_IN_BODY_25 = 2
 
 
 LEFT_EAR_KP = BODY_25_JOINTS.index("left ear")
@@ -40,6 +42,15 @@ RIGHT_EAR_KP = BODY_25_JOINTS.index("right ear")
 
 BODY_25_FACE3_TARGETS = np.array(
     [[0.781901, 0.182221], [0.5, 0.455327], [0.218099, 0.182221],]
+)
+
+BODY_25_FACE5_TARGETS = np.vstack(
+    [
+        BODY_25_FACE3_TARGETS,
+        # These are not very stable usually. These values are found by thresholding
+        # c > 0.9, which would thus also be recommended at runtime.
+        np.array([[1.403953, 0.358962], [-0.403953, 0.358962]]),
+    ]
 )
 
 
@@ -269,18 +280,28 @@ def fod_from_body_25_all_face68(skel, conf_thresh):
     )
 
 
-def chip_details_from_body_25_face3(
-    body25, conf_thresh, size=150, padding=0.25
+def chip_details_from_body_25(
+    body25, conf_thresh, kps, targets, size=150, padding=0.25
 ) -> dlib.chip_details:
-    if not conf_thresh(body25[[LEFT_EYE_KP, NOSE_KP, RIGHT_EYE_KP], 2]):
+    if not conf_thresh(body25[kps, 2]):
         return None
-    from_points = [
-        body25[LEFT_EYE_KP, :2],
-        body25[NOSE_KP, :2],
-        body25[RIGHT_EYE_KP, :2],
-    ]
-    to_points = (padding + BODY_25_FACE3_TARGETS) / (2 * padding + 1)
+    from_points = [body25[kp, :2] for kp in kps]
+    to_points = (padding + targets) / (2 * padding + 1)
     return dlib.chip_details(from_points, to_points, dlib.chip_dims(size, size))
+
+
+chip_details_from_body_25_face3 = partial(
+    chip_details_from_body_25,
+    kps=[LEFT_EYE_KP, NOSE_KP, RIGHT_EYE_KP],
+    targets=BODY_25_FACE3_TARGETS,
+)
+
+
+chip_details_from_body_25_face5 = partial(
+    chip_details_from_body_25,
+    kps=[LEFT_EYE_KP, NOSE_KP, RIGHT_EYE_KP, LEFT_EAR_KP, RIGHT_EAR_KP],
+    targets=BODY_25_FACE5_TARGETS,
+)
 
 
 def project_across(p1, p2, p3):
@@ -325,11 +346,13 @@ def skel_bundle_to_fods(skel_bundle, conf_thresh):
     return len(fods), to_full_object_detections(fods)
 
 
-def skel_bundle_to_chip_details(skel_bundle, conf_thresh) -> List[dlib.chip_details]:
+def skel_bundle_to_chip_details(
+    skel_bundle, conf_thresh, chip_details_extractor
+) -> List[dlib.chip_details]:
     skel_ids = []
     frame_chip_details: List[dlib.chip_details] = []
     for skel_id, skel in skel_bundle:
-        chip_details = chip_details_from_body_25_face3(skel, conf_thresh)
+        chip_details = chip_details_extractor(skel, conf_thresh)
         if chip_details is None:
             continue
         skel_ids.append(skel_id)
@@ -372,7 +395,13 @@ def iter_faces_from_skel(
                     continue
                 cast(DlibFodsBatch, batch_fods).append_fods(fods)
             else:
-                child_details = skel_bundle_to_chip_details(skel_bundle, conf_thresh)
+                if mode == FaceExtractionMode.FROM_FACE3_IN_BODY_25:
+                    chip_details_extractor = chip_details_from_body_25_face3
+                else:
+                    chip_details_extractor = chip_details_from_body_25_face5
+                child_details = skel_bundle_to_chip_details(
+                    skel_bundle, conf_thresh, chip_details_extractor
+                )
                 if not child_details:
                     mask.append(False)
                     continue
