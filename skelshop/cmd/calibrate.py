@@ -289,11 +289,14 @@ def multipage(filename, figs=None):
 @click.argument("dfin", type=click.Path(exists=True))
 @click.option("--chartout", type=click.Path())
 @click.option("--kps")
-def analyse(dfin, chartout, kps):
+@click.option("--thresh", type=float)
+def analyse(dfin, chartout, kps, thresh):
     df = pd.read_parquet(dfin)
     if kps is not None:
         kps_list = proc_kps_arg(kps)
         df = df[df["kp"].isin(kps_list)]
+    if thresh is not None:
+        df = df[df["c"] > thresh]
     for ax_idx in range(3):
         if ax_idx == 0:
             sns.scatterplot(
