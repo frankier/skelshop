@@ -1,5 +1,6 @@
 import os.path
-from os.path import basename
+from os.path import basename, exists
+from os.path import join as pjoin
 from pathlib import Path
 from subprocess import CalledProcessError, check_output
 
@@ -27,10 +28,17 @@ def add_metadata(h5f, video, num_frames, mode, limbs):
 
 
 def git_describe_safe(cwd):
-    try:
-        return check_output(["git", "describe", "--always"], cwd=cwd).decode().strip()
-    except CalledProcessError:
-        return "unknown"
+    git_describe = pjoin(cwd, ".git-describe")
+    if exists(git_describe):
+        with open(git_describe) as describe_f:
+            return describe_f.read()
+    else:
+        try:
+            return (
+                check_output(["git", "describe", "--always"], cwd=cwd).decode().strip()
+            )
+        except CalledProcessError:
+            return "unknown"
 
 
 def extract_cmake_flags(cwd, flags):
