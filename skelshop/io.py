@@ -131,6 +131,8 @@ class ShotSegmentedWriter:
         self.h5f.create_group("/timeline", track_order=True)
 
         self.pose_data: Dict[int, Dict[int, ndarray]] = {}
+        self.pose_starts: Dict[int, int] = {}
+        self.pose_ends: Dict[int, int] = {}
         self.shot_idx = 0
         self.shot_start = 0
         self.last_frame = 0
@@ -146,7 +148,11 @@ class ShotSegmentedWriter:
         """
         Add a pose
         """
-        self.pose_data.setdefault(pose_id, {})[frame_num] = pose
+        if pose_id not in self.pose_data:
+            self.pose_starts[pose_id] = frame_num
+            self.pose_data[pose_id] = {}
+        self.pose_data[pose_id][frame_num] = pose
+        self.pose_ends[pose_id] = frame_num
         self.last_frame = frame_num
 
     def register_frame(self, frame_num: int):
@@ -168,12 +174,8 @@ class ShotSegmentedWriter:
             data: List[ndarray] = []
             indices: List[int] = []
             indptr: List[int] = []
-            try:
-                frames = poses.keys()
-                pose_first_frame = next(iter(frames))
-                pose_last_frame = next(iter(reversed(frames))) + 1
-            except StopIteration:
-                continue
+            pose_first_frame = self.pose_starts[pose_id]
+            pose_last_frame = self.pose_ends[pose_id] + 1
             last_frame_num = pose_first_frame - 1
 
             def add_empty_rows(num_rows):
