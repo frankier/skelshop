@@ -9,7 +9,7 @@ from ufunclab import minmax
 
 from skelshop import lazyimp
 from skelshop.skelgraphs.openpose import BODY_25_JOINTS, FACE_IN_BODY_25_ALL_REDUCER
-from skelshop.utils.dlib import rect_to_x1y1x2y2, to_full_object_detections
+from skelshop.utils.dlib import rect_to_x1y1x2y2, to_dpoints, to_full_object_detections
 from skelshop.utils.geom import rnd
 
 from .consts import (
@@ -287,12 +287,15 @@ def fod_from_body_25_all_face68(skel, conf_thresh):
 def chip_details_from_body_25(
     body25, conf_thresh, kps, targets, size=150, padding=0.25
 ) -> "dlib.chip_details":
-    if not conf_thresh(body25[kps, 2]):
+    body25_arr = body25.all()
+    if not conf_thresh(body25_arr[kps, 2]):
         return None
-    from_points = [body25[kp, :2] for kp in kps]
+    from_points = [body25_arr[kp, :2] for kp in kps]
     to_points = (padding + targets) / (2 * padding + 1)
     return lazyimp.dlib.chip_details(
-        from_points, to_points, lazyimp.dlib.chip_dims(size, size)
+        to_dpoints(from_points),
+        to_dpoints(to_points),
+        lazyimp.dlib.chip_dims(size, size),
     )
 
 
