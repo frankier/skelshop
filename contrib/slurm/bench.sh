@@ -3,15 +3,10 @@
 #SBATCH --job-name=skelshop_dump_bench
 #
 #SBATCH --ntasks=1
-#SBATCH --gres=gpu:1
-#SBATCH --cpus-per-task=10
-#SBATCH --mem=64g
-#SBATCH --partition=gpu
+#SBATCH --gres=gpu:p100:1
+#SBATCH --cpus-per-task=7
+#SBATCH --mem=32g
 #SBATCH --time=1-00:00:00
-#SBATCH --constraint=gpu2080
-
-module load singularity
-module load cuda/10.1
 
 if [ ! -f "breakingnews.mp4" ]; then
     wget https://youtube-dl.org/downloads/latest/youtube-dl
@@ -83,6 +78,7 @@ echo "deepsortlike track" >> results.txt
 singularity exec --nv ~/sifs/skelshop.sif python -m skelshop filter \
     --track \
     --track-conf deepsortlike \
+    --pose-matcher-config /opt/skelshop/work/gcn_config.yaml \
     --shot-seg=psd \
     --segs-file breakingnews-Scenes.csv \
     body25.dump.h5 body25.tracked.deepsortlike.dump.h5 \
