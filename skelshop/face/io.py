@@ -25,13 +25,15 @@ class FaceWriter:
             grow_ds(self.face_grp["embed"], num_new_faces)
             self.face_grp["embed"][-num_new_faces:] = faces
             if self.write_bboxes:
-                grow_ds(self.face_grp["fod_bbox"], num_new_faces)
-                self.face_grp["fod_bbox"][-num_new_faces:] = fod_bboxes
-                grow_ds(self.face_grp["chip_bbox"], num_new_faces)
-                self.face_grp["chip_bbox"][-num_new_faces:] = [
-                    *chip_bboxes[0],
-                    chip_bboxes[1],
-                ]
+                if fod_bboxes is not None:
+                    grow_ds(self.face_grp["fod_bbox"], num_new_faces)
+                    self.face_grp["fod_bbox"][-num_new_faces:] = fod_bboxes
+                if chip_bboxes is not None:
+                    grow_ds(self.face_grp["chip_bbox"], num_new_faces)
+                    self.face_grp["chip_bbox"][-num_new_faces:] = [
+                        *chip_bboxes[0],
+                        chip_bboxes[1],
+                    ]
             if self.write_chip and face_chips is not None:
                 grow_ds(self.face_grp["chip"], num_new_faces)
                 self.face_grp["chip"][-num_new_faces:] = face_chips
