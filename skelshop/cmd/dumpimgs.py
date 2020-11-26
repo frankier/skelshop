@@ -4,6 +4,7 @@ import click
 import imagesize
 import numpy as np
 
+from skelshop import lazyimp
 from skelshop.openpose import LIMBS, MODES, OpenPoseStage
 from skelshop.utils.h5py import h5out as mk_h5out
 
@@ -17,10 +18,9 @@ def dumpimgs(input_dir, h5out, mode, model_folder):
     """
     Dump a directory of images to a HDF5 file using OpenPose.
     """
-    from openpose import pyopenpose as op
 
     stage = OpenPoseStage(model_folder, mode, image_dir=input_dir)
-    paths = op.get_images_on_directory(input_dir)
+    paths = lazyimp.pyopenpose.get_images_on_directory(input_dir)
     limbs = LIMBS[mode]
     with mk_h5out(h5out) as h5f:
         h5f.attrs["mode"] = mode

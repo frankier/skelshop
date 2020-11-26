@@ -1,24 +1,14 @@
 from glob import glob
 from os.path import join as pjoin
-from typing import Dict, List, Tuple
+from typing import TYPE_CHECKING, Dict, List, Tuple
 from xml.etree import ElementTree
 
 import click
 import h5py
 import numpy as np
 import opencv_wrapper as cvw
-import pandas as pd
-import seaborn as sns
-from dlib import (
-    chip_details,
-    full_object_detection,
-    get_face_chip_details,
-    point,
-    rectangle,
-)
-from matplotlib import pyplot as plt
-from matplotlib.patches import Rectangle
 
+from skelshop import lazyimp
 from skelshop.face.pipe import (
     dlib_face_detection_batched,
     make_synthetic_keypoints_body_25,
@@ -28,6 +18,9 @@ from skelshop.skelgraphs.openpose import BODY_25_JOINTS
 from skelshop.skelgraphs.utils import flip_joint_name
 from skelshop.utils.dlib import rect_to_x1y1x2y2, to_full_object_detections
 from skelshop.utils.geom import rnd
+
+if TYPE_CHECKING:
+    import dlib
 
 
 @click.group()
@@ -51,7 +44,7 @@ BODY_25_SYNTH_JOINTS = [
 ]
 
 
-ImageChips = Dict[str, List[Tuple[full_object_detection, chip_details]]]
+ImageChips = Dict[str, List[Tuple["dlib.full_object_detection", "dlib.chip_details"]]]
 
 
 def get_chips_from_xml(dirin: str) -> ImageChips:
@@ -62,18 +55,18 @@ def get_chips_from_xml(dirin: str) -> ImageChips:
         for image in images:
             fod_list = []
             for box in image.getchildren():
-                rect = rectangle(
+                rect = lazyimp.dlib.rectangle(
                     int(box.attrib["left"]),
                     int(box.attrib["top"]),
                     int(box.attrib["left"] + box.attrib["width"]),
                     int(box.attrib["top"] + box.attrib["height"]),
                 )
                 points = [
-                    point(int(part.attrib["x"]), int(part.attrib["y"]))
+                    lazyimp.dlib.point(int(part.attrib["x"]), int(part.attrib["y"]))
                     for part in box.getchildren()
                 ]
-                fod_list.append(full_object_detection(rect, points))
-            batch_chip_details = get_face_chip_details(
+                fod_list.append(lazyimp.dlib.full_object_detection(rect, points))
+            batch_chip_details = lazyimp.dlib.get_face_chip_details(
                 to_full_object_detections(fod_list), size=150, padding=0
             )
             result[image.attrib["file"]] = list(zip(fod_list, batch_chip_details))
@@ -185,7 +178,7 @@ def process_dlib_dir(dirin, h5in, dfout, add_symmetries, add_synthetic):
                         print(row)
                         data.append(row)
 
-    df = pd.DataFrame.from_records(
+    df = lazyimp.pandas.DataFrame.from_records(
         data, columns=["filename", "chip_idx", "skel_idx", "kp", "x", "y", "c"]
     )
     df.to_parquet(dfout)
@@ -201,8 +194,6 @@ def process_video(video, h5infn, dfout):
     pipeline for each frame and give points where BODY_25 face keypoints would
     have to map to make the same transformation.
     """
-    from dlib import get_face_chip_details
-
     frame_idx = 0
     with cvw.load_video(video) as vid_read, h5py.File(h5infn, "r") as h5in:
         skel_bundle_iter = iter(UnsegmentedReader(h5in))
@@ -218,7 +209,7 @@ def process_video(video, h5infn, dfout):
                     continue
                 fods = next(fods_iter)
                 skel_bundle = next(skel_bundle_iter)
-                batch_chip_details = get_face_chip_details(fods)
+                batch_chip_details = lazyimp.dlib.get_face_chip_details(fods)
                 for chip_idx, (chip, fod) in enumerate(zip(batch_chip_details, fods)):
                     for skel_idx, skel in enumerate(skel_bundle):
                         skel_all = skel.all()
@@ -230,7 +221,7 @@ def process_video(video, h5infn, dfout):
                             data.append(row)
                 frame_idx += 1
 
-        df = pd.DataFrame.from_records(
+        df = lazyimp.pandas.DataFrame.from_records(
             data, columns=["frame_idx", "chip_idx", "skel_idx", "kp", "x", "y", "c"]
         )
         df.to_parquet(dfout)
@@ -260,7 +251,7 @@ def weighted_average_std(grp, weight_col, select_cols=None):
     average = np.ma.average(values, weights=weights, axis=0)
     variance = np.dot(weights, (values - average) ** 2) / weights.sum()
     std = np.sqrt(variance)
-    return pd.DataFrame({"mean": average, "std": std}, index=values.columns)
+    return lazyimp.pandas.DataFrame({"mean": average, "std": std}, index=values.columns)
 
 
 def weighted_median(grp, weight_col, select_cols):
@@ -271,7 +262,7 @@ def weighted_median(grp, weight_col, select_cols):
         cumsum = col_grp[weight_col].cumsum()
         cutoff = col_grp[weight_col].sum() / 2.0
         medians.append(col_grp[cumsum >= cutoff].iloc[0][select_col])
-    return pd.DataFrame({"median": medians}, index=select_cols)
+    return lazyimp.pandas.DataFrame({"median": medians}, index=select_cols)
 
 
 def multipage(filename, figs=None):
@@ -279,7 +270,7 @@ def multipage(filename, figs=None):
 
     pp = PdfPages(filename)
     if figs is None:
-        figs = [plt.figure(n) for n in plt.get_fignums()]
+        figs = [lazyimp.pyplot.figure(n) for n in lazyimp.pyplot.get_fignums()]
     for fig in figs:
         fig.savefig(pp, format="pdf")
     pp.close()
@@ -291,7 +282,9 @@ def multipage(filename, figs=None):
 @click.option("--kps")
 @click.option("--thresh", type=float)
 def analyse(dfin, chartout, kps, thresh):
-    df = pd.read_parquet(dfin)
+    from matplotlib.patches import Rectangle
+
+    df = lazyimp.pandas.read_parquet(dfin)
     if kps is not None:
         kps_list = proc_kps_arg(kps)
         df = df[df["kp"].isin(kps_list)]
@@ -299,11 +292,11 @@ def analyse(dfin, chartout, kps, thresh):
         df = df[df["c"] > thresh]
     for ax_idx in range(3):
         if ax_idx == 0:
-            sns.scatterplot(
+            lazyimp.seaborn.scatterplot(
                 data=df, x="x", y="y", hue="kp", size="c", sizes=(0.5, 5), alpha=0.8
             )
         elif ax_idx == 1:
-            sns.displot(
+            lazyimp.seaborn.displot(
                 data=df,
                 x="x",
                 y="y",
@@ -313,7 +306,7 @@ def analyse(dfin, chartout, kps, thresh):
                 bins=[np.linspace(-1, 2, 90), np.linspace(-1, 2, 90),],
             )
         elif ax_idx == 2:
-            sns.displot(
+            lazyimp.seaborn.displot(
                 data=df,
                 x="x",
                 y="y",
@@ -323,7 +316,7 @@ def analyse(dfin, chartout, kps, thresh):
                 fill=True,
                 alpha=0.5,
             )
-        ax = plt.gca()
+        ax = lazyimp.pyplot.gca()
         ax.set_xlim(-1, 2)
         ax.set_ylim(-1, 2)
         ax.legend(bbox_to_anchor=(1.04, 1), loc="upper left")
@@ -334,7 +327,7 @@ def analyse(dfin, chartout, kps, thresh):
         )
         ax.set_aspect(1)
         ax.invert_yaxis()
-        plt.gcf().tight_layout()
+        lazyimp.pyplot.gcf().tight_layout()
     print("Weighted mean/std. dev")
     print(
         df.groupby("kp").apply(
@@ -348,4 +341,4 @@ def analyse(dfin, chartout, kps, thresh):
     if chartout is not None:
         multipage(chartout)
     else:
-        plt.show()
+        lazyimp.pyplot.show()

@@ -1,6 +1,8 @@
 import logging
 import os
 
+from skelshop import lazyimp
+
 from .pipebase import PipelineStageBase
 from .pose import (
     PoseBody25,
@@ -69,11 +71,11 @@ def mode_conf(mode):
 
 class OpenPoseStage(PipelineStageBase):
     def __init__(self, model_folder, mode, video=None, image_dir=None, debug=False):
-        from openpose import pyopenpose as op
-
         assert (video is not None) + (image_dir is not None) == 1
 
-        self.op_wrap = op.WrapperPython(op.ThreadManagerMode.AsynchronousOut)
+        self.op_wrap = lazyimp.pyopenpose.WrapperPython(
+            lazyimp.pyopenpose.ThreadManagerMode.AsynchronousOut
+        )
         # 2 => synchronous input => OpenPose handles reads internally
         # & asynchrnous output => We can handle the output here
         conf = {
@@ -96,11 +98,9 @@ class OpenPoseStage(PipelineStageBase):
         self.pose_cls = POSE_CLASSES[mode]
 
     def __next__(self):
-        from openpose import pyopenpose as op
-
         if logger.isEnabledFor(logging.DEBUG):
             print(f"i: {self.i}")
-        vec_datum = op.VectorDatum()
+        vec_datum = lazyimp.pyopenpose.VectorDatum()
         res = self.op_wrap.waitAndPop(vec_datum)
         if not res:
             raise StopIteration()

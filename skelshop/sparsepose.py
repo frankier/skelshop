@@ -1,5 +1,4 @@
 import numpy as np
-import scipy.sparse as ss
 
 
 def create_growable_csr(h5f, path):
@@ -37,6 +36,8 @@ class SparsePose:
 
 
 def as_scipy_csrs(grp, num_limbs):
+    import scipy.sparse as ss
+
     data = grp["data"]
     indices = grp["indices"]
     indptr = grp["indptr"]

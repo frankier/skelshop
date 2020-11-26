@@ -1,20 +1,13 @@
 from abc import ABC, abstractmethod
 from enum import Enum
 from functools import partial
-from typing import Iterable, Iterator, List, Optional, Tuple, cast
+from typing import TYPE_CHECKING, Iterable, Iterator, List, Optional, Tuple, cast
 
-import dlib
 import numpy as np
-from face_recognition.api import (
-    cnn_face_detector,
-    face_detector,
-    face_encoder,
-    pose_predictor_5_point,
-    pose_predictor_68_point,
-)
 from numpy.linalg import norm
 from ufunclab import minmax
 
+from skelshop import lazyimp
 from skelshop.skelgraphs.openpose import BODY_25_JOINTS, FACE_IN_BODY_25_ALL_REDUCER
 from skelshop.utils.dlib import rect_to_x1y1x2y2, to_full_object_detections
 from skelshop.utils.geom import rnd
@@ -25,6 +18,9 @@ from .consts import (
     DEFAULT_THRESH_POOL,
     DEFAULT_THRESH_VAL,
 )
+
+if TYPE_CHECKING:
+    import dlib
 
 
 class FaceExtractionMode(Enum):
@@ -63,55 +59,59 @@ class FullObjectDetectionsBatch(ABC):
     def compute_face_descriptor(self, batch_frames: List[np.ndarray]) -> np.ndarray:
         ...
 
-    def get_fod_bboxes(self) -> Optional[Iterator[List[dlib.full_object_detection]]]:
+    def get_fod_bboxes(self) -> Optional[Iterator[List["dlib.full_object_detection"]]]:
         ...
 
-    def get_chip_details(self) -> Iterator[List[dlib.chip_details]]:
+    def get_chip_details(self) -> Iterator[List["dlib.chip_details"]]:
         ...
 
 
 class DlibFodsBatch(FullObjectDetectionsBatch):
     def __init__(self):
-        self.batch_fods: List[List[dlib.full_object_detection]] = []
+        self.batch_fods: List[List["dlib.full_object_detection"]] = []
 
-    def append_fods(self, fods: List[dlib.full_object_detection]):
+    def append_fods(self, fods: List["dlib.full_object_detection"]):
         self.batch_fods.append(to_full_object_detections(fods))
 
     def get_face_chips(
         self, batch_frames: Iterable[np.ndarray]
     ) -> Iterator[List[np.ndarray]]:
         for frame, fods in zip(batch_frames, self.batch_fods):
-            yield dlib.get_face_chips(frame, fods, size=150, padding=0.25)
+            yield lazyimp.dlib.get_face_chips(frame, fods, size=150, padding=0.25)
 
     def compute_face_descriptor(self, batch_frames: List[np.ndarray]) -> np.ndarray:
-        return face_encoder.compute_face_descriptor(batch_frames, self.batch_fods)
+        return lazyimp.dlib_models.face_encoder.compute_face_descriptor(
+            batch_frames, self.batch_fods
+        )
 
-    def get_fod_bboxes(self) -> Iterator[List[dlib.full_object_detection]]:
+    def get_fod_bboxes(self) -> Iterator[List[lazyimp.dlib.full_object_detection]]:
         return iter(self.batch_fods)
 
-    def get_chip_details(self) -> Iterator[List[dlib.chip_details]]:
+    def get_chip_details(self) -> Iterator[List[lazyimp.dlib.chip_details]]:
         for fods in self.batch_fods:
-            yield dlib.get_face_chip_details(fods, size=150, padding=0.25)
+            yield lazyimp.dlib.get_face_chip_details(fods, size=150, padding=0.25)
 
 
 class SkelShopFodsBatch(FullObjectDetectionsBatch):
     def __init__(self):
-        self.chip_details: List[List[dlib.chip_details]] = []
+        self.chip_details: List[List["dlib.chip_details"]] = []
 
-    def append_chip_details(self, chip_details: List[dlib.chip_details]):
+    def append_chip_details(self, chip_details: List["dlib.chip_details"]):
         self.chip_details.append(chip_details)
 
     def get_face_chips(
         self, batch_frames: Iterator[np.ndarray]
     ) -> Iterator[List[np.ndarray]]:
         for frame, chip_details in zip(batch_frames, self.chip_details):
-            yield dlib.extract_image_chips(frame, chip_details)
+            yield lazyimp.dlib.extract_image_chips(frame, chip_details)
 
     def compute_face_descriptor(self, batch_frames: List[np.ndarray]) -> np.ndarray:
         batch_imgs = []
         for frame, chip_details in zip(batch_frames, self.chip_details):
-            batch_imgs.extend(dlib.extract_image_chips(frame, chip_details))
-        embeddings_joined = face_encoder.compute_face_descriptor(batch_imgs)
+            batch_imgs.extend(lazyimp.dlib.extract_image_chips(frame, chip_details))
+        embeddings_joined = lazyimp.dlib_models.face_encoder.compute_face_descriptor(
+            batch_imgs
+        )
         idx = 0
         result = []
         for chip_details in self.chip_details:
@@ -120,10 +120,10 @@ class SkelShopFodsBatch(FullObjectDetectionsBatch):
             idx += num_chip_details
         return result
 
-    def get_fod_bboxes(self) -> Optional[Iterator[List[dlib.full_object_detection]]]:
+    def get_fod_bboxes(self) -> Optional[Iterator[List["dlib.full_object_detection"]]]:
         return None
 
-    def get_chip_details(self) -> Iterator[List[dlib.chip_details]]:
+    def get_chip_details(self) -> Iterator[List["dlib.chip_details"]]:
         return iter(self.chip_details)
 
 
@@ -181,9 +181,9 @@ def dlib_face_detection_batched(
     vid_it = iter(vid_read)
     last = False
     if keypoints == "face68":
-        pose_predictor = pose_predictor_68_point
+        pose_predictor = lazyimp.dlib_models.pose_predictor_68_point
     else:
-        pose_predictor = pose_predictor_5_point
+        pose_predictor = lazyimp.dlib_models.pose_predictor_5_point
     while 1:
         frames = []
         cur_batch_size = 0
@@ -199,10 +199,14 @@ def dlib_face_detection_batched(
         if detector == "cnn":
             face_locations = [
                 [mmod_rect.rect for mmod_rect in mmod_rects]
-                for mmod_rects in cnn_face_detector(frames, batch_size=cur_batch_size)
+                for mmod_rects in lazyimp.dlib_models.cnn_face_detector(
+                    frames, batch_size=cur_batch_size
+                )
             ]
         else:
-            face_locations = [face_detector(frame) for frame in frames]
+            face_locations = [
+                lazyimp.dlib_models.face_detector(frame) for frame in frames
+            ]
         batch_fods = DlibFodsBatch()
         used_frames = []
         mask = []
@@ -272,22 +276,24 @@ def fod_from_body_25_all_face68(skel, conf_thresh):
     if not len(kps_existing):
         return None
     bbox = minmax(kps_existing, axes=[(0,), (1,)])
-    rect = dlib.rectangle(
+    rect = lazyimp.dlib.rectangle(
         rnd(bbox[0, 0]), rnd(bbox[1, 0]), rnd(bbox[0, 1]), rnd(bbox[1, 1])
     )
-    return dlib.full_object_detection(
-        rect, [dlib.point(rnd(x), rnd(y)) for x, y in face_kps[:, :2]]
+    return lazyimp.dlib.full_object_detection(
+        rect, [lazyimp.dlib.point(rnd(x), rnd(y)) for x, y in face_kps[:, :2]]
     )
 
 
 def chip_details_from_body_25(
     body25, conf_thresh, kps, targets, size=150, padding=0.25
-) -> dlib.chip_details:
+) -> "dlib.chip_details":
     if not conf_thresh(body25[kps, 2]):
         return None
     from_points = [body25[kp, :2] for kp in kps]
     to_points = (padding + targets) / (2 * padding + 1)
-    return dlib.chip_details(from_points, to_points, dlib.chip_dims(size, size))
+    return lazyimp.dlib.chip_details(
+        from_points, to_points, lazyimp.dlib.chip_dims(size, size)
+    )
 
 
 chip_details_from_body_25_face3 = partial(
@@ -348,9 +354,9 @@ def skel_bundle_to_fods(skel_bundle, conf_thresh):
 
 def skel_bundle_to_chip_details(
     skel_bundle, conf_thresh, chip_details_extractor
-) -> List[dlib.chip_details]:
+) -> List["dlib.chip_details"]:
     skel_ids = []
-    frame_chip_details: List[dlib.chip_details] = []
+    frame_chip_details: List[lazyimp.dlib.chip_details] = []
     for skel_id, skel in skel_bundle:
         chip_details = chip_details_extractor(skel, conf_thresh)
         if chip_details is None:

@@ -4,9 +4,9 @@ from statistics import median
 from typing import List, Optional
 
 import click
-import face_recognition
 import h5py
 
+from skelshop import lazyimp
 from skelshop.face.io import FaceReader
 from skelshop.io import ShotSegmentedReader
 from skelshop.utils.bbox import bbox_hull, keypoints_bbox_x1y1x2y2
@@ -26,8 +26,8 @@ def ref_embeddings(ref_dir):
             if not lower_name.endswith(".jpg") and not lower_name.endswith(".jpeg"):
                 continue
             image_path = pjoin(root, name)
-            face_image = face_recognition.load_image_file(image_path)
-            face_encodings = face_recognition.face_encodings(face_image)
+            face_image = lazyimp.face_recognition.load_image_file(image_path)
+            face_encodings = lazyimp.face_recognition.face_encodings(face_image)
             assert len(face_encodings) == 1
             encodings.append(face_encodings[0])
     return encodings
@@ -35,7 +35,7 @@ def ref_embeddings(ref_dir):
 
 def min_dist(ref, embed):
     min_distance = float("inf")
-    face_distances = face_recognition.face_distance(ref, embed)
+    face_distances = lazyimp.face_recognition.face_distance(ref, embed)
     for distance in face_distances:
         if distance < min_distance:
             min_distance = distance

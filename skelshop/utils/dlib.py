@@ -3,8 +3,8 @@ def rect_to_x1y1x2y2(rect):
 
 
 def to_full_object_detections(shape_preds):
-    from dlib import full_object_detections
+    from skelshop import lazyimp
 
-    fods = full_object_detections()
+    fods = lazyimp.dlib.full_object_detections()
     fods.extend(shape_preds)
     return fods

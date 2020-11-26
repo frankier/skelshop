@@ -1,7 +1,6 @@
 import time
 
 import click
-import h5py
 
 from skelshop.io import AsIfSingleShot, ShotSegmentedReader
 
@@ -20,6 +19,8 @@ def read_shot_seg(skels_fn):
     """
     Benchmark reading a shot segmented skeleton file.
     """
+    import h5py
+
     with h5py.File(skels_fn, "r") as skels_h5:
         begin_time = time.time()
         prev_time = begin_time

@@ -2,22 +2,29 @@ from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Any, Optional
 
 import numpy as np
-from scipy.spatial.distance import euclidean
 
 from ...pose import PoseBody25
+from . import posetrack_gcn_match
 from .base import Metric
-from .posetrack_gcn_match import PoseMatcher
 
 if TYPE_CHECKING:
     from ..models import TrackedPose
+
+
+def lazy_euclidean(x, y):
+    from scipy.spatial.distance import euclidean
+
+    return euclidean(x, y)
 
 
 @dataclass
 class LightTrackPoseMatchMetric(Metric):
     # Should have type: Callable[[np.ndarray, np.ndarray], float]
     # https://github.com/python/mypy/issues/5485
-    dist: Any = euclidean
-    pose_matcher: Optional[PoseMatcher] = field(init=False, default=None)
+    dist: Any = lazy_euclidean
+    pose_matcher: Optional["posetrack_gcn_match.PoseMatcher"] = field(
+        init=False, default=None
+    )
 
     @classmethod
     def setup(cls, new_pose_matcher):

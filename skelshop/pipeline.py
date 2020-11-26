@@ -9,8 +9,8 @@ from skelshop.shotseg.base import FileBasedSegStage
 from skelshop.shotseg.blackbox import BlackBoxShotSegStage
 from skelshop.shotseg.ffprobe import FFProbeShotSegStage
 from skelshop.shotseg.psdcsv import PsdCsvShotSegStage
-from skelshop.track import PoseMatcher
 from skelshop.track.confs import CONFS as TRACK_CONFS
+from skelshop.track.metrics import posetrack_gcn_match
 from skelshop.track.metrics.lighttrack_pose_match import LightTrackPoseMatchMetric
 
 
@@ -78,7 +78,9 @@ def process_options(options, allow_empty, kwargs):
         pipeline.add_stage(RewindStage, 20)
     if kwargs.get("track"):
         # XXX: A bit ugly just patching this on like so...
-        LightTrackPoseMatchMetric.setup(PoseMatcher(kwargs.get("pose_matcher_config")))
+        LightTrackPoseMatchMetric.setup(
+            posetrack_gcn_match.PoseMatcher(kwargs.get("pose_matcher_config"))
+        )
         pipeline.add_stage(
             TrackStage, spec=TRACK_CONFS[kwargs.get("track_conf")],
         )
