@@ -36,6 +36,9 @@ NECK_KP = BODY_25_JOINTS.index("neck")
 RIGHT_EYE_KP = BODY_25_JOINTS.index("right eye")
 RIGHT_EAR_KP = BODY_25_JOINTS.index("right ear")
 
+FACE3_KPS = [LEFT_EYE_KP, NOSE_KP, RIGHT_EYE_KP]
+FACE5_KPS = [LEFT_EYE_KP, NOSE_KP, RIGHT_EYE_KP, LEFT_EAR_KP, RIGHT_EAR_KP]
+
 BODY_25_FACE3_TARGETS = np.array(
     [[0.781901, 0.182221], [0.5, 0.455327], [0.218099, 0.182221],]
 )
@@ -300,16 +303,12 @@ def chip_details_from_body_25(
 
 
 chip_details_from_body_25_face3 = partial(
-    chip_details_from_body_25,
-    kps=[LEFT_EYE_KP, NOSE_KP, RIGHT_EYE_KP],
-    targets=BODY_25_FACE3_TARGETS,
+    chip_details_from_body_25, kps=FACE3_KPS, targets=BODY_25_FACE3_TARGETS,
 )
 
 
 chip_details_from_body_25_face5 = partial(
-    chip_details_from_body_25,
-    kps=[LEFT_EYE_KP, NOSE_KP, RIGHT_EYE_KP, LEFT_EAR_KP, RIGHT_EAR_KP],
-    targets=BODY_25_FACE5_TARGETS,
+    chip_details_from_body_25, kps=FACE5_KPS, targets=BODY_25_FACE5_TARGETS,
 )
 
 

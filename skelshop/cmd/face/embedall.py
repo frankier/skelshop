@@ -37,7 +37,7 @@ EXTRACTORS = {
 @click.option("--batch-size", type=int)
 @click.option("--write-bboxes/--no-write-bboxes")
 @click.option("--write-chip/--no-write-chip")
-def face(
+def embedall(
     face_extractor,
     video,
     h5fn,
