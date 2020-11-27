@@ -51,3 +51,7 @@ def rnd(x):
 def rot(theta):
     c, s = np.cos(theta), np.sin(theta)
     return np.array(((c, -s), (s, c)))
+
+
+def clamp(n, smallest, largest):
+    return max(smallest, min(n, largest))

@@ -3,7 +3,7 @@ import h5py
 from more_itertools import take
 
 from skelshop.dump import add_fmt_metadata, write_shots
-from skelshop.io import UnsegmentedReader
+from skelshop.io import COMPRESSIONS, UnsegmentedReader
 from skelshop.pipebase import IterStage
 from skelshop.pipeline import pipeline_options
 
@@ -12,9 +12,10 @@ from skelshop.pipeline import pipeline_options
 @click.argument("h5infn", type=click.Path(exists=True))
 @click.argument("h5outfn", type=click.Path())
 @pipeline_options(allow_empty=False)
+@click.option("--compression", type=click.Choice(COMPRESSIONS.keys()), default="none")
 @click.option("--start-frame", type=int, default=0)
 @click.option("--end-frame", type=int, default=None)
-def filter(h5infn, h5outfn, pipeline, start_frame, end_frame):
+def filter(h5infn, h5outfn, pipeline, compression, start_frame, end_frame):
     """
     Apply tracking to an untracked HDF5 pose dump.
     """
@@ -29,4 +30,12 @@ def filter(h5infn, h5outfn, pipeline, start_frame, end_frame):
             frame_iter = take(end_frame - start_frame, frame_iter)
         stage = IterStage(frame_iter)
         frame_iter = pipeline(stage)
-        write_shots(h5out, limbs, frame_iter, start_frame=start_frame)
+        lossless_kwargs, lossy_kwargs = COMPRESSIONS[compression]
+        write_shots(
+            h5out,
+            limbs,
+            frame_iter,
+            start_frame=start_frame,
+            lossless_kwargs=lossless_kwargs,
+            lossy_kwargs=lossy_kwargs,
+        )
