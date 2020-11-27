@@ -67,8 +67,17 @@ def embedall(
     num_frames = count_frames(video) - start_frame
     with h5out(h5fn) as h5f, load_video_rgb(video) as vid_read:
         add_basic_metadata(h5f, video, num_frames)
-        writer = FaceWriter(h5f, write_bboxes=write_bboxes, write_chip=write_chip,)
-        kwargs = {}
+        has_fod = extractor_info["type"] == "dlib"
+        writer = FaceWriter(
+            h5f,
+            write_fod_bbox=write_bboxes and has_fod,
+            write_chip_bbox=write_bboxes,
+            write_chip=write_chip,
+        )
+        kwargs = {
+            "include_chip": write_chip,
+            "include_bboxes": write_bboxes,
+        }
         if batch_size is not None:
             kwargs["batch_size"] = batch_size
         if extractor_info["type"] == "dlib":
@@ -76,7 +85,6 @@ def embedall(
                 vid_read,
                 detector=extractor_info["detector"],
                 keypoints=extractor_info["keypoints"],
-                include_chip=write_chip,
                 **kwargs,
             )
         else:
@@ -89,7 +97,6 @@ def embedall(
             face_iter = iter_faces_from_skel(
                 vid_read,
                 skel_read,
-                include_chip=write_chip,
                 thresh_pool=skel_thresh_pool,
                 thresh_val=skel_thresh_val,
                 mode=mode,

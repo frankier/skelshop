@@ -293,8 +293,8 @@ def chip_details_from_body_25(
     body25_arr = body25.all()
     if not conf_thresh(body25_arr[kps, 2]):
         return None
-    from_points = [body25_arr[kp, :2] for kp in kps]
-    to_points = (padding + targets) / (2 * padding + 1)
+    from_points = ((padding + targets) / (2 * padding + 1)) * size
+    to_points = [body25_arr[kp, :2] for kp in kps]
     return lazyimp.dlib.chip_details(
         to_dpoints(from_points),
         to_dpoints(to_points),
@@ -373,6 +373,7 @@ def iter_faces_from_skel(
     skel_read,
     batch_size=DEFAULT_FACES_BATCH_SIZE,
     include_chip=False,
+    include_bboxes=False,
     thresh_pool=DEFAULT_THRESH_POOL,
     thresh_val=DEFAULT_THRESH_VAL,
     mode=FaceExtractionMode.FROM_FACE68_IN_BODY_25_ALL,
@@ -418,7 +419,11 @@ def iter_faces_from_skel(
             mask.append(True)
             cur_batch_size += 1
         yield from fods_to_embeddings(
-            used_frames, batch_fods, mask, include_chip=include_chip
+            used_frames,
+            batch_fods,
+            mask,
+            include_chip=include_chip,
+            include_bboxes=include_bboxes,
         )
         if len(mask) < batch_size:
             return
