@@ -551,6 +551,7 @@
 <p>Options:</p>
 <pre><code>  --chartout PATH
   --kps TEXT
+  --thresh FLOAT
 </code></pre>
 <h3 id="process-dlib-dir">process-dlib-dir</h3>
 <p>Give a directory with dlib facepoint XMLs, run OpenPose on all images and
@@ -608,7 +609,8 @@ pipeline.</p>
 <pre><code>skelshop dump [OPTIONS] VIDEO H5FN
 </code></pre>
 <p>Options:</p>
-<pre><code>  --mode [BODY_25_ALL|BODY_25_HANDS|BODY_25|BODY_135|FACE|BODY_25_FACE]
+<pre><code>  --compression [BODY_25_ALL|BODY_25_HANDS|BODY_25|BODY_135|FACE|BODY_25_FACE]
+  --mode [BODY_25_ALL|BODY_25_HANDS|BODY_25|BODY_135|FACE|BODY_25_FACE]
   --model-folder TEXT             [required]
   --debug / --no-debug
   --dry-run / --write
@@ -628,10 +630,18 @@ pipeline.</p>
   --model-folder TEXT             [required]
 </code></pre>
 <h2 id="face">face</h2>
+<p>Usage:</p>
+<pre><code>skelshop face [OPTIONS] COMMAND [ARGS]...
+</code></pre>
+<h3 id="bestcands">bestcands</h3>
+<p>Usage:</p>
+<pre><code>skelshop face bestcands [OPTIONS] [simple-face3|simple-face5|simple-face68] SKELIN SEGSOUT
+</code></pre>
+<h3 id="embedall">embedall</h3>
 <p>Create a HDF5 face dump from a video using dlib.</p>
 <p>Usage:</p>
-<pre><code>skelshop face [OPTIONS] [dlib-hog-face5|dlib-hog-face68|dlib-cnn-face5|dlib-cnn-
- face68|openpose-face68|openpose-face3] VIDEO H5FN
+<pre><code>skelshop face embedall [OPTIONS] [dlib-hog-face5|dlib-hog-face68|dlib-cnn-face5|dlib-cnn-
+ face68|openpose-face68|openpose-face3|openpose-face5] VIDEO H5FN
 </code></pre>
 <p>Options:</p>
 <pre><code>  --from-skels PATH
@@ -641,6 +651,16 @@ pipeline.</p>
   --batch-size INTEGER
   --write-bboxes / --no-write-bboxes
   --write-chip / --no-write-chip
+</code></pre>
+<h3 id="idsegs">idsegs</h3>
+<p>Identifying shots with a particular person from reference headshots and
+optionally get their bbox within the whole shot.</p>
+<p>Usage:</p>
+<pre><code>skelshop face idsegs [OPTIONS] REFIN SKELIN SEGSOUT
+</code></pre>
+<p>Options:</p>
+<pre><code>  --faces PATH
+  --ref-label TEXT
 </code></pre>
 <h2 id="filter">filter</h2>
 <p>Apply tracking to an untracked HDF5 pose dump.</p>
@@ -655,15 +675,6 @@ pipeline.</p>
   --shot-seg [bbskel|psd|ffprobe|none]
   --start-frame INTEGER
   --end-frame INTEGER
-</code></pre>
-<h2 id="idsegs">idsegs</h2>
-<p>Identifying shots with a particular person from reference headshots and
-optionally get their bbox within the whole shot.</p>
-<p>Usage:</p>
-<pre><code>skelshop idsegs [OPTIONS] REFIN SKELIN FACEIN SEGSOUT
-</code></pre>
-<p>Options:</p>
-<pre><code>  --scene-bboxes / --no-scene-bboxes
 </code></pre>
 <h2 id="playsticks">playsticks</h2>
 <p>Play a video with stick figures from pose dump superimposed.</p>

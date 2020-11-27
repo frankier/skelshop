@@ -736,6 +736,8 @@ __init__<span class="p">(</span><span class="bp">self</span><span class="p">,</s
     <span class="bp">self</span><span class="o">.</span><span class="n">h5f</span><span class="o">.</span><span class="n">create_group</span><span class="p">(</span><span class="s2">"/timeline"</span><span class="p">,</span> <span class="n">track_order</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
     <span class="bp">self</span><span class="o">.</span><span class="n">pose_data</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">ndarray</span><span class="p">]]</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">pose_starts</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">pose_ends</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">shot_idx</span> <span class="o">=</span> <span class="mi">0</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">shot_start</span> <span class="o">=</span> <span class="mi">0</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">last_frame</span> <span class="o">=</span> <span class="mi">0</span>
@@ -758,7 +760,11 @@ add_pose<span class="p">(</span><span class="bp">self</span><span class="p">,</s
     <span class="sd">"""</span>
 <span class="sd">    Add a pose</span>
 <span class="sd">    """</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">pose_data</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="n">pose_id</span><span class="p">,</span> <span class="p">{})[</span><span class="n">frame_num</span><span class="p">]</span> <span class="o">=</span> <span class="n">pose</span>
+    <span class="k">if</span> <span class="n">pose_id</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">pose_data</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pose_starts</span><span class="p">[</span><span class="n">pose_id</span><span class="p">]</span> <span class="o">=</span> <span class="n">frame_num</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pose_data</span><span class="p">[</span><span class="n">pose_id</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">pose_data</span><span class="p">[</span><span class="n">pose_id</span><span class="p">][</span><span class="n">frame_num</span><span class="p">]</span> <span class="o">=</span> <span class="n">pose</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">pose_ends</span><span class="p">[</span><span class="n">pose_id</span><span class="p">]</span> <span class="o">=</span> <span class="n">frame_num</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">last_frame</span> <span class="o">=</span> <span class="n">frame_num</span>
 </code></pre>
 </div>
@@ -788,12 +794,8 @@ end_shot<span class="p">(</span><span class="bp">self</span><span class="p">)</s
         <span class="n">data</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">ndarray</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="n">indices</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="n">indptr</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="k">try</span><span class="p">:</span>
-            <span class="n">frames</span> <span class="o">=</span> <span class="n">poses</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
-            <span class="n">pose_first_frame</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="nb">iter</span><span class="p">(</span><span class="n">frames</span><span class="p">))</span>
-            <span class="n">pose_last_frame</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="nb">iter</span><span class="p">(</span><span class="nb">reversed</span><span class="p">(</span><span class="n">frames</span><span class="p">)))</span> <span class="o">+</span> <span class="mi">1</span>
-        <span class="k">except</span> <span class="ne">StopIteration</span><span class="p">:</span>
-            <span class="k">continue</span>
+        <span class="n">pose_first_frame</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pose_starts</span><span class="p">[</span><span class="n">pose_id</span><span class="p">]</span>
+        <span class="n">pose_last_frame</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pose_ends</span><span class="p">[</span><span class="n">pose_id</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span>
         <span class="n">last_frame_num</span> <span class="o">=</span> <span class="n">pose_first_frame</span> <span class="o">-</span> <span class="mi">1</span>
 
         <span class="k">def</span> <span class="nf">add_empty_rows</span><span class="p">(</span><span class="n">num_rows</span><span class="p">):</span>
@@ -880,7 +882,7 @@ start_shot<span class="p">(</span><span class="bp">self</span><span class="p">,<
 <div class="doc doc-object doc-method">
 <h3 class="doc doc-heading" id="skelshop.io.ShotSegmentedReader.__init__">
 <code class="highlight language-python">
-__init__<span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">h5f</span><span class="p">,</span> <span class="n">bundle_cls</span><span class="o">=&lt;</span><span class="k">class</span> <span class="err">'</span><span class="nc">skelshop</span><span class="o">.</span><span class="n">pose</span><span class="o">.</span><span class="n">DumpReaderPoseBundle</span><span class="s1">'&gt;, infinite=True)</span> </code>
+__init__<span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">h5f</span><span class="p">,</span> <span class="n">bundle_cls</span><span class="o">=&lt;</span><span class="k">class</span> <span class="err">'</span><span class="nc">skelshop</span><span class="o">.</span><span class="n">pose</span><span class="o">.</span><span class="n">DumpReaderPoseBundle</span><span class="s1">'&gt;, infinite=False)</span> </code>
 <span class="doc doc-properties">
 <small class="doc doc-property doc-property-special"><code>special</code></small>
 </span>
@@ -892,7 +894,7 @@ yields empty pose bundles.</p>
 <details class="quote">
 <summary>Source code in <code>skelshop/io.py</code></summary>
 <div class="highlight">
-<pre><span></span><code><span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">h5f</span><span class="p">:</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">,</span> <span class="n">bundle_cls</span><span class="o">=</span><span class="n">DumpReaderPoseBundle</span><span class="p">,</span> <span class="n">infinite</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+<pre><span></span><code><span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">h5f</span><span class="p">:</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">,</span> <span class="n">bundle_cls</span><span class="o">=</span><span class="n">DumpReaderPoseBundle</span><span class="p">,</span> <span class="n">infinite</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
     <span class="sd">"""</span>
 <span class="sd">    Constructs the reader from a HDF5 file and. If `infinite` is True, all</span>
 <span class="sd">    shot iterators will terminate with a final empty shot which infintely</span>

@@ -309,6 +309,13 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#the-black-box-segmentor" class="md-nav__link">
+    The black box segmentor
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -555,6 +562,13 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#the-black-box-segmentor" class="md-nav__link">
+    The black box segmentor
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -602,6 +616,12 @@ tracking</a> is performed.</p>
 </code></pre>
 <p>If you want to run this from your own Snakefile, you can use the wrapper script. Please refer to
 <a href="https://github.com/frankier/skelshop/blob/master/workflow/rules/skels.smk">workflow/rules/skels.smk</a>.</p>
+<h2 id="the-black-box-segmentor">The black box segmentor</h2>
+<p>The black box segmentor runs after tracking, and does not use the video at all.
+It works by cutting a scene whenever the set of people in the frame change, as
+according to the output of the tracker. For this reason, in most cases, it will
+perform significantly worse than the other trackers. Its use is not recommended
+unless you don't have access to the original video anymore.</p>
                 
               
               
