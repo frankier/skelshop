@@ -17,7 +17,7 @@ from skelshop.io import UnsegmentedReader
 from skelshop.skelgraphs.openpose import BODY_25_JOINTS
 from skelshop.skelgraphs.utils import flip_joint_name
 from skelshop.utils.dlib import rect_to_x1y1x2y2, to_full_object_detections
-from skelshop.utils.geom import rnd
+from skelshop.utils.geom import rnd, rot
 
 if TYPE_CHECKING:
     import dlib
@@ -28,11 +28,6 @@ def calibrate():
     """
     Keypoint calibration tools.
     """
-
-
-def rot(theta):
-    c, s = np.cos(theta), np.sin(theta)
-    return np.array(((c, -s), (s, c)))
 
 
 THRESH = 0.05

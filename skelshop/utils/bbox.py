@@ -13,12 +13,16 @@ def keypoints_bbox_x1y1x2y2(
         thresh_kps = keypoints[:, :2][np.nonzero(keypoints[:, 2])]
     else:
         thresh_kps = keypoints[:, :2][keypoints[:, 2] > thresh]
-    bbox = minmax(thresh_kps, axes=[(0,), (1,)])
-    bbox = np.transpose(bbox).reshape(-1)
+    bbox = points_bbox_x1y1x2y2(thresh_kps)
     if enlarge_scale is not None:
         return enlarge_bbox(bbox, enlarge_scale)
     else:
         return cast(List[float], list(bbox))
+
+
+def points_bbox_x1y1x2y2(points: np.ndarray):
+    bbox = minmax(points, axes=[(0,), (1,)])
+    return np.transpose(bbox).reshape(-1)
 
 
 def bbox_hull(bbox1: List[float], bbox2: List[float]) -> List[float]:

@@ -1,5 +1,7 @@
 from typing import List
 
+import numpy as np
+
 
 def x1y1x2y2_to_xywh(rect: List[float]) -> List[float]:
     x1, y1, x2, y2 = rect
@@ -44,3 +46,8 @@ def clip_mat_x1y1x2y2(mat, rect):
 
 def rnd(x):
     return int(x + 0.5)
+
+
+def rot(theta):
+    c, s = np.cos(theta), np.sin(theta)
+    return np.array(((c, -s), (s, c)))

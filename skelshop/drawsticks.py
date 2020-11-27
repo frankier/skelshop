@@ -11,7 +11,8 @@ from more_itertools.recipes import grouper
 
 from skelshop.skelgraphs.openpose import MODE_SKELS
 from skelshop.skelgraphs.posetrack import POSETRACK18_SKEL
-from skelshop.utils.geom import rnd
+from skelshop.utils.bbox import points_bbox_x1y1x2y2
+from skelshop.utils.geom import rnd, rot
 
 logger = logging.getLogger(__name__)
 
@@ -144,14 +145,41 @@ class SkelDraw:
         return None
 
 
+def rot_bbox(bbox, angle):
+    bbox_2pts = bbox.reshape((2, 2))
+    center = bbox_2pts.sum(axis=0) / 2
+    bbox_4pts = np.array(
+        [
+            bbox_2pts[0],
+            [bbox_2pts[0, 0], bbox_2pts[1, 1]],
+            bbox_2pts[1],
+            [bbox_2pts[1, 0], bbox_2pts[0, 1]],
+        ]
+    )
+    return (rot(angle) @ (bbox_4pts - center).T).T + center
+
+
 class FaceDraw:
-    def draw_bbox(self, frame, bbox, color=(0, 0, 255)):
-        cv2.rectangle(
-            frame,
-            pt1=(bbox[0], bbox[1]),
-            pt2=(bbox[2], bbox[3]),
-            color=color,
-            thickness=1,
+    def draw_bbox(self, frame, bbox, angle=0, color=(0, 0, 255)):
+        if angle != 0:
+            points = rot_bbox(bbox, angle)
+            points += np.array([0.5, 0.5])
+            points = points.astype("int32")
+            cv2.polylines(
+                frame, [points], isClosed=True, color=color, thickness=1,
+            )
+        else:
+            cv2.rectangle(
+                frame,
+                pt1=(bbox[0], bbox[1]),
+                pt2=(bbox[2], bbox[3]),
+                color=color,
+                thickness=1,
+            )
+
+    def is_point_in_chip_bbox(self, point, chip_bbox):
+        return self.is_point_in_bbox(
+            point, points_bbox_x1y1x2y2(rot_bbox(chip_bbox[:4], chip_bbox[4]))
         )
 
     def is_point_in_bbox(self, point, bbox):
@@ -161,12 +189,25 @@ class FaceDraw:
         return rect.collidepoint(point)
 
     def draw_bundle(self, frame, bundle):
-        for bbox in bundle.get("fod_bbox", ()):
-            self.draw_bbox(frame, bbox, color=(0, 255, 0))
+        for fod_bbox in bundle.get("fod_bbox", ()):
+            self.draw_bbox(frame, fod_bbox, color=(0, 255, 0))
+        for chip_bbox in bundle.get("chip_bbox", ()):
+            self.draw_bbox(
+                frame, chip_bbox[:4], angle=chip_bbox[4], color=(255, 255, 0)
+            )
 
     def get_hover(self, mouse_pos, bundle):
-        for bbox, chip in zip(bundle.get("fod_bbox", ()), bundle.get("chip", ())):
-            if self.is_point_in_bbox(mouse_pos, bbox):
+        for fod_bbox, chip_bbox, chip in zip_longest(
+            bundle.get("fod_bbox", ()),
+            bundle.get("chip_bbox", ()),
+            bundle.get("chip", ()),
+        ):
+            if (
+                fod_bbox is not None and self.is_point_in_bbox(mouse_pos, fod_bbox)
+            ) or (
+                chip_bbox is not None
+                and self.is_point_in_chip_bbox(mouse_pos, chip_bbox)
+            ):
                 return cv2.cvtColor(chip, cv2.COLOR_RGB2BGR)
         return None
 
