@@ -34,3 +34,11 @@ It is recommended to use ffprobe via Snakemake. e.g. if you have a video /path/t
 
 If you want to run this from your own Snakefile, you can use the wrapper script. Please refer to
 [workflow/rules/skels.smk](https://github.com/frankier/skelshop/blob/master/workflow/rules/skels.smk).
+
+## The black box segmentor
+
+The black box segmentor runs after tracking, and does not use the video at all.
+It works by cutting a scene whenever the set of people in the frame change, as
+according to the output of the tracker. For this reason, in most cases, it will
+perform significantly worse than the other trackers. Its use is not recommended
+unless you don't have access to the original video anymore.
