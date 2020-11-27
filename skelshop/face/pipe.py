@@ -420,3 +420,5 @@ def iter_faces_from_skel(
         yield from fods_to_embeddings(
             used_frames, batch_fods, mask, include_chip=include_chip
         )
+        if len(mask) < batch_size:
+            return
