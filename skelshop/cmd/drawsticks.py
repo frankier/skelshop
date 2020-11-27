@@ -60,6 +60,6 @@ def drawsticks(h5fn, videoin, videoout, posetrack, scale, overlay):
         else:
             frames = repeat(None, h5f.attrs["num_frames"])
         if h5f.attrs["fmt_type"] == "trackshots":
-            drawsticks_shots(frames, ShotSegmentedReader(h5f), vid_write)
+            drawsticks_shots(frames, ShotSegmentedReader(h5f, infinite=True), vid_write)
         else:
             drawsticks_unseg(frames, AsIfTracked(UnsegmentedReader(h5f)), vid_write)

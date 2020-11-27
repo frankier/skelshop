@@ -81,7 +81,7 @@ def embedall(
             )
         else:
             skels_h5 = h5py.File(from_skels, "r")
-            skel_read = AsIfSingleShot(ShotSegmentedReader(skels_h5))
+            skel_read = AsIfSingleShot(ShotSegmentedReader(skels_h5, infinite=False))
             if extractor_info["keypoints"] == "face68":
                 mode = FaceExtractionMode.FROM_FACE68_IN_BODY_25_ALL
             else:

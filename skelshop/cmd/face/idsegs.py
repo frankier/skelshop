@@ -97,7 +97,7 @@ def idsegs(refin, skelin, segsout, scene_bboxes, faces, ref_label):
         log_open(skelin, skel_h5f)
         outf.write("seg,pers_id\n")
         assert skel_h5f.attrs["fmt_type"] == "trackshots"
-        skel_read = ShotSegmentedReader(skel_h5f)
+        skel_read = ShotSegmentedReader(skel_h5f, infinite=False)
         shot_iter = iter(skel_read)
         if faces:
             face_iter = iter(FaceReader(face_h5f))

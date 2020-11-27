@@ -42,7 +42,7 @@ def read_shot_seg(skels_fn):
                 prev_skels = skels_cnt
                 prev_bundles = bundles_cnt
 
-        for bundle in AsIfSingleShot(ShotSegmentedReader(skels_h5)):
+        for bundle in AsIfSingleShot(ShotSegmentedReader(skels_h5, infinite=False)):
             for skel in bundle:
                 skels_cnt += 1
             bundles_cnt += 1

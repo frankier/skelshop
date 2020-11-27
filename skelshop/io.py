@@ -225,7 +225,7 @@ class ShotSegmentedReader:
     Reads a shot segmented skeleton dump.
     """
 
-    def __init__(self, h5f: h5py.File, bundle_cls=DumpReaderPoseBundle, infinite=True):
+    def __init__(self, h5f: h5py.File, bundle_cls=DumpReaderPoseBundle, infinite=False):
         """
         Constructs the reader from a HDF5 file and. If `infinite` is True, all
         shot iterators will terminate with a final empty shot which infintely

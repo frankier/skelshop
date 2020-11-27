@@ -32,7 +32,7 @@ def get_skels_read_and_draws(
             read: Any
             if skel_h5f.attrs["fmt_type"] != "unseg":
                 is_seg = True
-                read = ShotSegmentedReader(skel_h5f)
+                read = ShotSegmentedReader(skel_h5f, infinite=True)
             else:
                 read = AsIfTracked(UnsegmentedReader(skel_h5f))
             result.append((read, get_skel_draw(skel_h5f)))
