@@ -45,7 +45,7 @@ Now you can download the Singularity image:
 Next, you need to create a JSON file specifying which type of nodes you would
 like to assign to different rules (steps in the workflow). [There is an example
 for Case Western Reserve University SLURM
-cluster](https://github.com/frankier/skelshop/blob/master/contrib/slurm/track.clusc.json).
+cluster](https://github.com/frankier/skelshop/blob/master/contrib/slurm/skels.tracked.clusc.json).
 See also the [SLURM
 documentation](https://slurm.schedmd.com/documentation.html) and the [SLURM
 Snakemake profile documentation](https://github.com/Snakemake-Profiles/slurm)
@@ -55,11 +55,20 @@ You can see the names of the steps in the workflow at any time by running:
 
     $ poetry run snakemake --list
 
-Then an example of how you would run the pipeline is given below:
+So for example you might:
 
-    $ SIF_PATH=`pwd`/skelshop.sif \
+1. Download the example cluster configuration.
+
+    $ wget https://github.com/frankier/skelshop/blob/master/contrib/slurm/skels.tracked.clusc.json
+
+2. Edit it if need be.
+
+3. Then run the following command after editing the placeholders (at least
+   `NUM_JOBS`, `SING_EXTRA_ARGS`, `VIDEO_BASE` and `DUMP_BASE`:
+
+    $ SIF_PATH=$(pwd)/skelshop.sif \
       SNAKEFILE=/opt/skelshop/workflow/Snakefile \
-      CLUSC_CONF=/opt/skelshop/contrib/slurm/skels.tracked.clusc.json \
+      CLUSC_CONF=$(pwd)/skels.tracked.clusc.json \
       NUM_JOBS=42 \
       SING_EXTRA_ARGS="--bind /path/to/my/extra/bind" \
       ./run_coord.sh \
@@ -67,6 +76,10 @@ Then an example of how you would run the pipeline is given below:
       --config \
       VIDEO_BASE=/path/to/my/video/corpus/ \
       DUMP_BASE=/path/to/my/dump/directory
+
+
+Please see the [singslurm](https://github.com/frankier/singslurm) repository
+for more information about the environment variables passed to `run_coord.sh`.
 
 ## Integrating SkelShop into your own pipelines
 
