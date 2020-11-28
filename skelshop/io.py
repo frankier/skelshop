@@ -65,7 +65,9 @@ class UnsegmentedWriter:
         if pose_id in self.pose_grps:
             return self.pose_grps[pose_id]
         path = f"/timeline/pose{pose_id}"
-        pose_grp = create_growable_csr(self.h5f, path, **self.create_kwargs)
+        pose_grp = create_growable_csr(
+            self.h5f, path, self.num_kps, **self.create_kwargs
+        )
         pose_grp.attrs["start_frame"] = frame_num
         last_frame_num = frame_num - 1
         self.pose_grps[pose_id] = [
