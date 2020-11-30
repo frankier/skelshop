@@ -96,7 +96,7 @@ FACE_TMPL = Template(
     "python -m skelshop face embedall "
     "--from-skels body25all.tracked.opt_lighttrack.dump.h5 "
     "$args "
-    "$var breakingnews.mp4 breakingnews.$var.h5"
+    "$var breakingnews.mp4 breakingnews.$var$varextra.h5"
 )
 
 
@@ -154,11 +154,14 @@ CMDS = {
         ),
     },
     "face": {
-        **{var: FACE_TMPL.substitute(var=var, args="") for var in EXTRACTORS.keys()},
+        **{
+            var: FACE_TMPL.substitute(var=var, varextra="", args="")
+            for var in EXTRACTORS.keys()
+        },
         **{
             var
             + ".chips": FACE_TMPL.substitute(
-                var=var, args="--write-bboxes --write-chip"
+                var=var, varextra=".chips", args="--write-bboxes --write-chip"
             )
             for var in EXTRACTORS.keys()
         },
