@@ -76,7 +76,7 @@ echo "$name" >> results.txt
 singularity exec --nv $sif \\
 $cmd \\
 > $name.log 2>&1 ; } 2>> results.txt
-echo >> result
+echo >> results.txt
 """
 )
 
@@ -174,8 +174,8 @@ CMDS = {
 def write_bench_script(header, youtube_id, out_fn, sif):
     out_fn.write(header.read())
     out_fn.write(YOUTUBE_DL.substitute(youtube_id=youtube_id))
-    out_fn.write("\necho > results\n")
+    out_fn.write("\necho > results.txt\n")
     for category, cmd_dict in CMDS.items():
-        out_fn.write(f"echo {category} > results\n")
+        out_fn.write(f"echo {category} >> results.txt\n")
         for cmd_name, cmd in cmd_dict.items():
             out_fn.write(RUN_TMPL.substitute(name=cmd_name, cmd=cmd, sif=sif))
