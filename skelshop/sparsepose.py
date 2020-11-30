@@ -56,7 +56,7 @@ def _create_csr(
         "indices",
         (0,) if indices is None else None,
         data=indices,
-        dtype=np.int16,
+        dtype=np.uint16,
         maxshape=(None,) if indices is None else None,
         chunks=indices_chunks,
         **lossless_kwargs,
@@ -70,7 +70,7 @@ def _create_csr(
         "indptr",
         (0,) if indptr is None else None,
         data=indptr,
-        dtype=np.int32,
+        dtype=np.uint32,
         maxshape=(None,) if indptr is None else None,
         chunks=indptr_chunks,
     )
