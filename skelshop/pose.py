@@ -138,7 +138,7 @@ class PoseBody25All(PoseBody25):
         if "LEGACY_SKELS" in os.environ:
             return cls.from_keypoints(np.vstack([pose, lhand[1:], rhand[1:], face]))
         else:
-            return cls.from_keypoints(np.vstack([pose, lhand, rhand]))
+            return cls.from_keypoints(np.vstack([pose, lhand, rhand, face]))
 
     @classmethod
     def from_datum(cls, datum, idx):
