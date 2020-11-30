@@ -81,6 +81,11 @@ echo >> results.txt
 )
 
 
+DUMP_TMPL = Template(
+    "python -m skelshop dump " "--mode $mode " "breakingnews.mp4 $var.dump.h5"
+)
+
+
 TRACK_TMPL = Template(
     "python -m skelshop filter "
     "--track "
@@ -115,43 +120,32 @@ CMDS = {
         ),
     },
     "dump": {
-        "body25.dump": (
-            "python -m skelshop dump " "--mode BODY_25 breakingnews.mp4 body25.dump.h5"
-        ),
-        "body25all.dump": (
-            "python -m skelshop dump "
-            "--mode BODY_25_ALL breakingnews.mp4 body25all.dump.h5"
-        ),
+        var + ".dump": DUMP_TMPL.substitute(var=var, mode=mode)
+        for var, mode in [
+            ("body25", "BODY_25"),
+            ("body25face", "BODY_25_FACE"),
+            ("body25hands", "BODY_25_HANDS"),
+            ("body25all", "BODY_25_ALL"),
+        ]
     },
     "track": {
-        "lighttrackish": TRACK_TMPL.substitute(
-            {
-                "track_conf": "lighttrackish",
-                "inf": "body25.dump.h5",
-                "outf": "body25.tracked.lighttrackish.dump.h5",
-            }
-        ),
-        "opt_lighttrack": TRACK_TMPL.substitute(
-            {
-                "track_conf": "opt_lighttrack",
-                "inf": "body25.dump.h5",
-                "outf": "body25.tracked.opt_lighttrack.dump.h5",
-            }
-        ),
-        "deepsortlike": TRACK_TMPL.substitute(
-            {
-                "track_conf": "deepsortlike",
-                "inf": "body25.dump.h5",
-                "outf": "body25.tracked.deepsortlike.dump.h5",
-            }
-        ),
-        "opt_lighttrack_body25all": TRACK_TMPL.substitute(
-            {
-                "track_conf": "opt_lighttrack",
-                "inf": "body25all.dump.h5",
-                "outf": "body25all.tracked.opt_lighttrack.dump.h5",
-            }
-        ),
+        **{
+            var: TRACK_TMPL.substitute(
+                track_conf=var,
+                inf="body25.dump.h5",
+                outf=f"body25.tracked.{var}.dump.h5",
+            )
+            for var in ["lighttrackish", "opt_lighttrack", "deepsortlike"]
+        },
+        **{
+            "opt_lighttrack_body25all": TRACK_TMPL.substitute(
+                {
+                    "track_conf": "opt_lighttrack",
+                    "inf": "body25all.dump.h5",
+                    "outf": "body25all.tracked.opt_lighttrack.dump.h5",
+                }
+            ),
+        },
     },
     "face": {
         **{
