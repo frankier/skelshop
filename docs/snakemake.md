@@ -59,23 +59,24 @@ So for example you might:
 
 1. Download the example cluster configuration.
 
-    $ wget https://github.com/frankier/skelshop/blob/master/contrib/slurm/skels.tracked.clusc.json
+        $ wget https://github.com/frankier/skelshop/blob/master/contrib/slurm/skels.tracked.clusc.json
 
 2. Edit it if need be.
 
 3. Then run the following command after editing the placeholders (at least
    `NUM_JOBS`, `SING_EXTRA_ARGS`, `VIDEO_BASE` and `DUMP_BASE`:
 
-    $ SIF_PATH=$(pwd)/skelshop.sif \
-      SNAKEFILE=/opt/skelshop/workflow/Snakefile \
-      CLUSC_CONF=$(pwd)/skels.tracked.clusc.json \
-      NUM_JOBS=42 \
-      SING_EXTRA_ARGS="--bind /path/to/my/extra/bind" \
-      ./run_coord.sh \
-      tracked_all \
-      --config \
-      VIDEO_BASE=/path/to/my/video/corpus/ \
-      DUMP_BASE=/path/to/my/dump/directory
+
+        $ SIF_PATH=$(pwd)/skelshop.sif \
+          SNAKEFILE=/opt/skelshop/workflow/Snakefile \
+          CLUSC_CONF=$(pwd)/skels.tracked.clusc.json \
+          NUM_JOBS=42 \
+          SING_EXTRA_ARGS="--bind /path/to/my/extra/bind" \
+          ./run_coord.sh \
+          tracked_all \
+          --config \
+          VIDEO_BASE=/path/to/my/video/corpus/ \
+          DUMP_BASE=/path/to/my/dump/directory
 
 
 Please see the [singslurm](https://github.com/frankier/singslurm) repository
