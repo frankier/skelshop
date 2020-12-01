@@ -9,7 +9,23 @@ logger = logging.getLogger(__name__)
 
 @contextlib.contextmanager
 def h5out(path):
-    with h5py.File(path, "w", libver=("earliest", "v110")) as out:
+    # Reasoning for parameters
+    #    rdcc_nbytes: the largest chunks can get near to 1MiB.
+    #      If we're writing we can be writing more than one dataset
+    #      simultaneously. We absolutely want our working set to all be
+    #      in-cache so 16MiB gives us quite a bit of headroom for this.
+    #    rdcc_w0: 1 means it's assume the same chunks aren't reaccessed
+    #      after they leave the working set. This is usually the case.
+    #    rdcc_nslots: This has been adjusted upward from the default by 16x
+    #      while making it a prime
+    with h5py.File(
+        path,
+        "w",
+        libver=("earliest", "v110"),
+        rdcc_nbytes=16777216,
+        rdcc_w0=1,
+        rdcc_nslots=8297,
+    ) as out:
         yield out
 
 
