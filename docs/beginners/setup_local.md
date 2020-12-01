@@ -7,19 +7,20 @@ I happened to have a clean install of Ubuntu 20.04, so the following instruction
 * Rest is copied from the dockerfiles
 
 ```
-YOUR_DIR="~/skelshop_deps"
-YOUR_SKELSHOP="~/skelshop"
-
+export SKELSHOP_DEPS="~/skelshop_deps"
+export SKELSHOP_DIR="~/skelshop"
+```
+```
 curl -sSL https://raw.githubusercontent.com/python-poetry/poetry/master/get-poetry.py | python -
-cd $YOUR_DIR && \
+cd $SKELSHOP_DEPS && \
     git clone \
       https://github.com/CMU-Perceptual-Computing-Lab/openpose.git \
       --branch master --single-branch && \
     cd openpose && \
     git submodule update --recursive --remote && \
     git describe --always > .git-describe
-mv $YOUR_DIR/openpose $YOUR_DIR/openpose_cpu
-cd $YOUR_DIR/openpose_cpu
+mv $SKELSHOP_DEPS/openpose $SKELSHOP_DEPS/openpose_cpu
+cd $SKELSHOP_DEPS/openpose_cpu
 wget https://raw.githubusercontent.com/frankier/openpose_containers/main/bionic/respect_mkldnnroot.patch
 wget https://raw.githubusercontent.com/frankier/openpose_containers/main/bionic/CMakeLists.patch
 git apply CMakeLists.patch respect_mkldnnroot.patch
@@ -54,8 +55,8 @@ git clone https://github.com/oneapi-src/oneDNN.git && \
     make install && \
     cd ../.. && \
     rm -rf oneDNN && \
-    mkdir -p $YOUR_DIR/openpose_cpu/build && \
-    cd $YOUR_DIR/openpose_cpu/ && \
+    mkdir -p $SKELSHOP_DEPS/openpose_cpu/build && \
+    cd $SKELSHOP_DEPS/openpose_cpu/ && \
     export MKLDNNROOT=/usr/local && \
     cd build && \
     cmake \
@@ -68,8 +69,39 @@ git clone https://github.com/oneapi-src/oneDNN.git && \
 #worked on 5.11.2020
 
 sudo apt-get install python-dev libsdl-image1.2-dev libsdl-mixer1.2-dev libsdl-ttf2.0-dev libsdl1.2-dev libsmpeg-dev python-numpy subversion libportmidi-dev ffmpeg libswscale-dev libavformat-dev libavcodec-dev libfreetype6-dev
-cd $YOUR_SKELSHOP
+cd $SKELSHOP_DIR
 ./install_all.sh 
 poetry run snakemake --cores 6
 
+```
+
+## Setting Environment-Variables
+
+```
+echo "export SKELSHOP_DIR="path/to/your/skelshop"
+export SKELSHOP_DEPS="path/to/your/skelshop_deps"
+export OPENPOSE=$SKELSHOP_DEPS/openpose_cpu/; \
+export LD_LIBRARY_PATH=$SKELSHOP_DEPS/openpose_cpu/build/src/openpose/; \
+export PYTHONPATH=$SKELSHOP_DEPS/openpose_cpu/build/python/; \
+export MODEL_FOLDER=$SKELSHOP_DEPS/openpose_cpu/models " >> ~/.bashrc
+```
+
+## Running code
+
+Then you should be able to run the code! 
+
+```
+cd $SKELSHOP_DIR && \
+poetry run python skelshop --ffprobe-bin /usr/bin/ffprobe playsticks \
+path/to/your/data/short_ellen.avi --skel \
+path/to/your/data/data/short_ellen.h5
+```
+or
+```
+PYTHONPATH=$SKELSHOP_DEPS/openpose_cpu/build/python/:$SKELSHOP_DEPS/openpose_cpu/build/python/:$SKELSHOP_DIR:$SKELSHOP_DIR/submodules/lighttrack/graph:$PYTHONPATH poetry run snakemake tracked_all \
+  --cores 8 \
+  --config \
+  VIDEO_BASE=path/to/your/dataset/ \
+  DUMP_BASE=path/to/your/dump \
+  WORK=path/to/your/work
 ```
