@@ -11,13 +11,30 @@ RUN export LC_ALL=C.UTF-8 && \
     apt-get remove -y cython3 && \
     apt-get install -y --no-install-recommends python3.7-venv
 
-FROM frankierr/openpose_containers:focal_${VAR} AS focal_base
+
+FROM frankierr/openpose_containers:focal_cpu AS focal_cpu_base
 
 RUN ln -sf /usr/bin/python3 /usr/bin/python
 
 RUN apt-get install -y --no-install-recommends unzip
 
-FROM ${BASE}_base
+
+FROM frankierr/openpose_containers:focal_gpu AS focal_gpu_base
+
+RUN ln -sf /usr/bin/python3 /usr/bin/python
+
+RUN apt-get install -y --no-install-recommends unzip
+
+RUN cd /opt && \
+    git clone --recursive https://github.com/dmlc/decord && \
+    cd decord && \
+    mkdir build && cd build && \
+    cmake .. -DUSE_CUDA=ON -DCMAKE_BUILD_TYPE=Release && \
+    make && \
+    cd ../python
+    python setup.py install
+
+FROM ${BASE}_${VAR}_base
 
 RUN python3 -m pip install --upgrade \
     pip==20.2.4 \
