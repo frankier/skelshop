@@ -43,18 +43,25 @@ The Case HPC uses the [Slurm Workload Manager](https://en.wikipedia.org/wiki/Slu
 
 ## Running things on the HPC
 
-After having exported all these env-variables (and re-loaded your rc-file), you should be able to run Jobs from the Snakemake-Pipeline
+After having exported all these env-variables (and re-loaded your rc-file), you should be able to run Jobs from the Snakemake-Pipeline.
 
-./run_coord.sh tracked_all --delete-all-output --config VIDEO_BASE=/home/cxs800/small_dataset/ DUMP_BASE=/home/cxs800/small_dataset/snek
+* To see what commands you can run from here, check out [Snakemake](snakemake.md).
+* This runs the `tracked_all`-part of the pipeline, which will run openpose (if necessary), dump the skeletons, perform scenecut-dection and person-tracking: 
+    ```
+    ./run_coord.sh tracked_all --delete-all-output --config VIDEO_BASE=/$HOME/your/dataset/ DUMP_BASE=$HOME/your/dataset/dump
+    ```
 
-rm *.out && rm -r work small_dataset/snek && rm hpc_run
+#### tmux
 
-./run_coord.sh poetry run snakemake --list
+It's always a good idea to use [tmux](https://tmuxcheatsheet.com/), as this allows you to run a command via a ssh-session that continues running if you log off. Important tmux-commands are:
+* `tmux` to create a new virtual terminal
+* <kbd>Ctrl</kbd> + <kbd>B</kbd>, followed by <kbd>D</kbd> to exit the current virtual terminal
+* `tmux ls` to list existing virtual terminals
+* `tmux a -t 0` to *attach* your virtual terminal *number 0*
 
-./run_coord.sh tracked_all --config VIDEO_BASE=/home/cxs800/small_dataset/ DUMP_BASE=/home/cxs800/small_dataset/snek -p &> hpc_run & 
+So, for long-running commands you may want to consider opening them in a virtual tmux-terminal. For example, you could then run the previous command as 
+```
+./run_coord.sh tracked_all --config VIDEO_BASE=/$HOME/your/dataset/ DUMP_BASE=$HOME/your/dataset/dump -p &> hpc_run & 
+```
 
-./run_coord.sh tracked_all --delete-all-output --config VIDEO_BASE=/home/cxs800/small_dataset/ DUMP_BASE=/home/cxs800/small_dataset/snek
-./run_coord.sh tracked_all --unlock --config VIDEO_BASE=/home/cxs800/small_dataset/ DUMP_BASE=/home/cxs800/small_dataset/snek
-
-[bash] scp cxs800@hpclogin.case.edu:~/*.out /home/chris/Documents/JOBS/Uhrig-Gesture-Recog/data/tiny_hpc
-scp -r cxs800@hpclogin.case.edu:~/{tiny_dataset,work} /home/chris/Documents/JOBS/Uhrig-Gesture-Recog/data/tiny_hpc
+Afterwards, you can use `scp` to copy the results to your local PC if you need to continue working on them in code outside of a container.
