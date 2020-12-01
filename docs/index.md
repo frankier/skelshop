@@ -5,6 +5,8 @@ See also the [README](https://github.com/frankier/skelshop) for a bit of extra
 background. Feel free to ask in the
 [issues](https://github.com/frankier/skelshop/issues) for help.
 
+Feel overwhelmed? Consider having a look at the [Beginner's Documentation](beginners/index.md)
+
 ## Getting started
 
 There are 3 options:

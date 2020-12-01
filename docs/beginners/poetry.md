@@ -1,0 +1,1 @@
+What you need to know is basically not more than this: https://packaging.python.org/tutorials/managing-dependencies/, even though this one's not even for poetry

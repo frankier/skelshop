@@ -1,4 +1,4 @@
-<h1><img src="https://github.com/frankier/skelshop/blob/master/skelshop/news.png" /> SkelShop</h1>
+<h1><img src="https://raw.githubusercontent.com/frankier/skelshop/master/skelshop/news.png" /> SkelShop</h1>
 
 <p align="center">
 <a href="https://gitlab.com/frankier/skelshop/-/commits/master">
@@ -12,6 +12,9 @@
 </a>
 <a href="https://frankier.github.io/skelshop/">
   <img alt="Documentation on GitHub pages" src="https://img.shields.io/badge/Docs-MkDocs-informational" />
+</a>
+<a href="https://github.com/psf/black">
+  <img alt="Code style: black" src="https://img.shields.io/badge/code%20style-black-000000.svg" />
 </a>
 </p>
 
