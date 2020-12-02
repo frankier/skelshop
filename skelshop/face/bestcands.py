@@ -45,6 +45,7 @@ def pick_best_faces(shot_skel_iter, get_confs):
                 skel_info = skel_infos[skel_id]
             skel_info.total_skels += 1
             heapq.heappush(skel_info.conf_frames, (-min_conf, frame_idx))
+    result = []
     for skel_id, skel_info in skel_infos.items():
         if skel_info.total_skels < MIN_SKELS_TOTAL:
             continue
@@ -64,7 +65,8 @@ def pick_best_faces(shot_skel_iter, get_confs):
                 shot_frames.append(frame_idx)
         if len(shot_frames) == RESULTS_PER_SHOT:
             for shot_frame in shot_frames:
-                yield skel_id, shot_frame
+                result.append((shot_frame, skel_id))
+    return sorted(result)
 
 
 def pick_best_faces_face3(shot_skel_iter):
