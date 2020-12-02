@@ -7,6 +7,9 @@ We might consider the following critera for this task:
   * Keypoints confidence: good quality keypoints probably means
     - Potentially can use different models depending on which
     - model has better keypoints available
+  * Size: too small and there's no point even embedding it because it's
+    always going to just be a smudge.
+  * TODO: Diversity of poses/mouth open/closed
   * TODO: Head pose: we might want the head to be facing forward
 
 If we get multiple embeddings, we can take the mediod embedding for
@@ -17,12 +20,27 @@ import heapq
 from dataclasses import dataclass, field
 from typing import Dict, List, Tuple
 
-from .pipe import FACE3_KPS, FACE5_KPS, get_face_kps
+from ..utils.geom import lazy_euclidean
+from .pipe import (
+    EYE_DISTANCE,
+    FACE3_KPS,
+    FACE5_KPS,
+    LEFT_EYE_KP,
+    RIGHT_EYE_KP,
+    get_face_kps,
+)
 
 MIN_SKELS_TOTAL = 15
 MIN_FRAME_SPACING = 3
 MIN_CONF = 0.8
 RESULTS_PER_SHOT = 3
+MIN_DIM = 30
+
+
+def quick_dim_estimate(skel):
+    skel_all = skel.all()
+    dist = lazy_euclidean(skel_all[LEFT_EYE_KP][:2], skel_all[RIGHT_EYE_KP][:2])
+    return dist * 1.5 / EYE_DISTANCE
 
 
 @dataclass
@@ -31,12 +49,15 @@ class SkelInfo:
     conf_frames: List[Tuple[float, int]] = field(default_factory=list)
 
 
-def pick_best_faces(shot_skel_iter, get_confs):
+def pick_best_faces(shot_skel_iter, get_confs, get_dim):
     skel_infos: Dict[int, SkelInfo] = {}
     for frame_idx, skel_bundle in enumerate(shot_skel_iter):
         for skel_id, skel in skel_bundle:
             min_conf = min(get_confs(skel))
             if min_conf < MIN_CONF:
+                continue
+            dim = get_dim(skel)
+            if dim < MIN_DIM:
                 continue
             if skel_id not in skel_infos:
                 skel_info = SkelInfo()
@@ -70,12 +91,18 @@ def pick_best_faces(shot_skel_iter, get_confs):
 
 
 def pick_best_faces_face3(shot_skel_iter):
-    return pick_best_faces(shot_skel_iter, lambda skel: skel.all()[FACE3_KPS][2])
+    return pick_best_faces(
+        shot_skel_iter, lambda skel: skel.all()[FACE3_KPS, 2], quick_dim_estimate
+    )
 
 
 def pick_best_faces_face5(shot_skel_iter):
-    return pick_best_faces(shot_skel_iter, lambda skel: skel.all()[FACE5_KPS][2])
+    return pick_best_faces(
+        shot_skel_iter, lambda skel: skel.all()[FACE5_KPS, 2], quick_dim_estimate
+    )
 
 
 def pick_best_faces_face68(shot_skel_iter):
-    return pick_best_faces(shot_skel_iter, lambda skel: get_face_kps(skel.all())[2])
+    return pick_best_faces(
+        shot_skel_iter, lambda skel: get_face_kps(skel.all())[:, 2], quick_dim_estimate
+    )

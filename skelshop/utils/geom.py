@@ -55,3 +55,9 @@ def rot(theta):
 
 def clamp(n, smallest, largest):
     return max(smallest, min(n, largest))
+
+
+def lazy_euclidean(x, y):
+    from scipy.spatial.distance import euclidean
+
+    return euclidean(x, y)
