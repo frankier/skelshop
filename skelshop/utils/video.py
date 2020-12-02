@@ -11,6 +11,9 @@ class RGBVideoCapture(cvw.VideoCapture):
             cv2.cvtColor(frame, cv2.COLOR_BGR2RGB, frame)
             yield frame
 
+    def skip_frame(self):
+        self.skip_frames(1)
+
 
 class NumpyVideoReader(VideoReader):
     def __iter__(self):
@@ -22,6 +25,9 @@ class NumpyVideoReader(VideoReader):
     def next(self):
         frame = super().next()
         return frame.asnumpy()
+
+    def skip_frame(self):
+        self.skip_frames(1)
 
 
 @contextmanager
@@ -42,3 +48,23 @@ def load_video_rgb(filename, lib="decord"):
             yield video
         finally:
             video.release()
+
+
+_decord_dev = None
+
+
+def decord_dev():
+    from decord import cpu, gpu
+
+    global _decord_dev
+    if _decord_dev is None:
+        gpu_dev = gpu(0)
+        if gpu_dev.exist:
+            _decord_dev = gpu_dev
+        else:
+            _decord_dev = cpu(0)
+    return _decord_dev
+
+
+def decord_video_reader(path):
+    return VideoReader(path, ctx=decord_dev())

@@ -139,26 +139,29 @@ def fods_to_embeddings(
     batch_fods: FullObjectDetectionsBatch,
     mask,
     include_chip=False,
-    include_bboxes=False,
+    include_fod_bboxes=False,
+    include_chip_bboxes=False,
 ):
     embeddings = batch_fods.compute_face_descriptor(batch_frames)
     embeddings_it = iter(embeddings)
     if include_chip:
         chips_it = batch_fods.get_face_chips(batch_frames)
-    if include_bboxes:
+    if include_fod_bboxes:
         batch_fods_it = batch_fods.get_fod_bboxes()
+    if include_chip_bboxes:
         batch_chip_details_it = batch_fods.get_chip_details()
     for has_faces in mask:
         if has_faces:
             embeddings = next(embeddings_it)
             if include_chip:
                 chips = next(chips_it)
-            if include_bboxes:
+            if include_fod_bboxes:
                 if batch_fods_it is None:
                     fod_bboxes = []
                 else:
                     fods = next(batch_fods_it)
                     fod_bboxes = [rect_to_x1y1x2y2(fod.rect) for fod in fods]
+            if include_chip_bboxes:
                 frame_chip_details = next(batch_chip_details_it)
                 chip_bboxes = [
                     (rect_to_x1y1x2y2(chip_details.rect), chip_details.angle)
@@ -168,52 +171,60 @@ def fods_to_embeddings(
             embeddings = []
             if include_chip:
                 chips = []
-            if include_bboxes:
+            if include_fod_bboxes:
                 fod_bboxes = []
+            if include_chip_bboxes:
                 chip_bboxes = []
         res = {
             "embeddings": embeddings,
         }
         if include_chip:
             res["chips"] = chips
-        if include_bboxes:
+        if include_fod_bboxes:
             res["fod_bboxes"] = fod_bboxes
+        if include_chip_bboxes:
             res["chip_bboxes"] = chip_bboxes
         yield res
+
+
+def dlib_detect(detector, frames):
+    if detector == "cnn":
+        return [
+            [mmod_rect.rect for mmod_rect in mmod_rects]
+            for mmod_rects in lazyimp.dlib_models.cnn_face_detector(
+                frames, batch_size=len(frames)
+            )
+        ]
+    else:
+        return [lazyimp.dlib_models.face_detector(frame) for frame in frames]
+
+
+def get_dlib_pose_predictor(keypoints="face68"):
+    if keypoints == "face68":
+        return lazyimp.dlib_models.pose_predictor_68_point
+    else:
+        return lazyimp.dlib_models.pose_predictor_5_point
+
+
+def frame_batcher(batch_size, make_batch):
+    frame_idx = 0
+    while 1:
+        frames, batch, mask = make_batch(frame_idx)
+        yield frames, batch, mask
+        actual_size = len(mask)
+        frame_idx += actual_size
+        if actual_size < batch_size:
+            break
 
 
 def dlib_face_detection_batched(
     vid_read, detector="cnn", keypoints="face68", batch_size=DEFAULT_FRAME_BATCH_SIZE
 ) -> Iterator[Tuple[List[np.ndarray], DlibFodsBatch, List[bool]]]:
-    vid_it = iter(vid_read)
-    last = False
-    if keypoints == "face68":
-        pose_predictor = lazyimp.dlib_models.pose_predictor_68_point
-    else:
-        pose_predictor = lazyimp.dlib_models.pose_predictor_5_point
-    while 1:
-        frames = []
-        cur_batch_size = 0
-        for _ in range(batch_size):
-            try:
-                frame = next(vid_it)
-            except StopIteration:
-                break
-            frames.append(frame)
-            cur_batch_size += 1
-        if cur_batch_size < batch_size:
-            last = True
-        if detector == "cnn":
-            face_locations = [
-                [mmod_rect.rect for mmod_rect in mmod_rects]
-                for mmod_rects in lazyimp.dlib_models.cnn_face_detector(
-                    frames, batch_size=cur_batch_size
-                )
-            ]
-        else:
-            face_locations = [
-                lazyimp.dlib_models.face_detector(frame) for frame in frames
-            ]
+    pose_predictor = get_dlib_pose_predictor(keypoints)
+
+    def make_batch(frame_idx):
+        frames = vid_read[frame_idx : frame_idx + batch_size]
+        face_locations = dlib_detect(detector, frames)
         batch_fods = DlibFodsBatch()
         used_frames = []
         mask = []
@@ -229,9 +240,9 @@ def dlib_face_detection_batched(
                 batch_fods.append_fods(frame_shape_predictions)
             else:
                 mask.append(False)
-        yield used_frames, batch_fods, mask
-        if last:
-            break
+        return used_frames, batch_fods, mask
+
+    yield from frame_batcher(batch_size, make_batch)
 
 
 def iter_faces_from_dlib(
@@ -251,7 +262,8 @@ def iter_faces_from_dlib(
             batch_fods,
             mask,
             include_chip=include_chip,
-            include_bboxes=include_bboxes,
+            include_fod_bboxes=include_bboxes,
+            include_chip_bboxes=include_bboxes,
         )
 
 
@@ -269,6 +281,10 @@ def mk_conf_thresh(thresh_pool=DEFAULT_THRESH_POOL, thresh_val=DEFAULT_THRESH_VA
         return func(arr) >= thresh_val
 
     return inner
+
+
+def accept_all(arr):
+    return True
 
 
 def get_face_kps(skel_kps):
@@ -372,7 +388,66 @@ def skel_bundle_to_chip_details(
     return frame_chip_details
 
 
-def iter_faces_from_skel(
+def add_frame_detections(mode, batch_fods, skel_bundle, conf_thresh):
+    if mode == FaceExtractionMode.FROM_FACE68_IN_BODY_25_ALL:
+        num_fods, fods = skel_bundle_to_fods(skel_bundle, conf_thresh)
+        if not num_fods:
+            return False
+        cast(DlibFodsBatch, batch_fods).append_fods(fods)
+    else:
+        if mode == FaceExtractionMode.FROM_FACE3_IN_BODY_25:
+            chip_details_extractor = chip_details_from_body_25_face3
+        else:
+            chip_details_extractor = chip_details_from_body_25_face5
+        child_details = skel_bundle_to_chip_details(
+            skel_bundle, conf_thresh, chip_details_extractor
+        )
+        if not child_details:
+            return False
+        cast(SkelShopFodsBatch, batch_fods).append_chip_details(child_details)
+    return True
+
+
+def get_openpose_fods_batch(mode: FaceExtractionMode) -> FullObjectDetectionsBatch:
+    if mode == FaceExtractionMode.FROM_FACE68_IN_BODY_25_ALL:
+        return DlibFodsBatch()
+    else:
+        return SkelShopFodsBatch()
+
+
+def all_chips_from_skel_batched(
+    vid_read,
+    skel_read,
+    batch_size=DEFAULT_FACES_BATCH_SIZE,
+    thresh_pool=DEFAULT_THRESH_POOL,
+    thresh_val=DEFAULT_THRESH_VAL,
+    mode=FaceExtractionMode.FROM_FACE68_IN_BODY_25_ALL,
+):
+    conf_thresh = mk_conf_thresh(thresh_pool, thresh_val)
+
+    def make_batch(frame_idx):
+        batch_fods = get_openpose_fods_batch(mode)
+        used_frames_idxs = []
+        mask = []
+        for _ in range(batch_size):
+            try:
+                skel_bundle = next(skel_read)
+            except StopIteration:
+                break
+            if not list(skel_bundle) or not add_frame_detections(
+                mode, batch_fods, skel_bundle, conf_thresh
+            ):
+                mask.append(False)
+                continue
+            used_frames_idxs.append(frame_idx)
+            mask.append(True)
+        used_frames = vid_read.get_batch(used_frames_idxs).asnumpy()
+        return used_frames, batch_fods, mask
+
+    yield from frame_batcher(batch_size, make_batch)
+
+
+def all_faces_from_skel_batched(
     vid_read,
     skel_read,
     batch_size=DEFAULT_FACES_BATCH_SIZE,
@@ -382,52 +457,64 @@ def iter_faces_from_skel(
     thresh_val=DEFAULT_THRESH_VAL,
     mode=FaceExtractionMode.FROM_FACE68_IN_BODY_25_ALL,
 ):
-    frame_skels = zip(vid_read, skel_read)
-    while 1:
-        batch_fods: FullObjectDetectionsBatch
-        if mode == FaceExtractionMode.FROM_FACE68_IN_BODY_25_ALL:
-            batch_fods = DlibFodsBatch()
-        else:
-            batch_fods = SkelShopFodsBatch()
-        used_frames = []
-        mask = []
-        cur_batch_size = 0
-        for _ in range(batch_size):
-            try:
-                frame, skel_bundle = next(frame_skels)
-            except StopIteration:
-                break
-            if not list(skel_bundle):
-                mask.append(False)
-                continue
-            conf_thresh = mk_conf_thresh(thresh_pool, thresh_val)
-            if mode == FaceExtractionMode.FROM_FACE68_IN_BODY_25_ALL:
-                num_fods, fods = skel_bundle_to_fods(skel_bundle, conf_thresh)
-                if not num_fods:
-                    mask.append(False)
-                    continue
-                cast(DlibFodsBatch, batch_fods).append_fods(fods)
-            else:
-                if mode == FaceExtractionMode.FROM_FACE3_IN_BODY_25:
-                    chip_details_extractor = chip_details_from_body_25_face3
-                else:
-                    chip_details_extractor = chip_details_from_body_25_face5
-                child_details = skel_bundle_to_chip_details(
-                    skel_bundle, conf_thresh, chip_details_extractor
-                )
-                if not child_details:
-                    mask.append(False)
-                    continue
-                cast(SkelShopFodsBatch, batch_fods).append_chip_details(child_details)
-            used_frames.append(frame)
-            mask.append(True)
-            cur_batch_size += 1
+    for frames, batch, mask in all_chips_from_skel_batched(
+        vid_read, skel_read, batch_size, thresh_pool, thresh_val, mode
+    ):
         yield from fods_to_embeddings(
-            used_frames,
-            batch_fods,
+            frames,
+            batch,
             mask,
             include_chip=include_chip,
-            include_bboxes=include_bboxes,
+            include_chip_bboxes=include_bboxes,
         )
-        if len(mask) < batch_size:
-            return
+
+
+def select_chips_from_skel_batched(
+    targets,
+    vid_read,
+    skel_read,
+    batch_size=DEFAULT_FACES_BATCH_SIZE,
+    mode=FaceExtractionMode.FROM_FACE68_IN_BODY_25_ALL,
+):
+    conf_thresh = accept_all
+
+    def make_batch(frame_idx):
+        batch_fods = get_openpose_fods_batch(mode)
+        used_frames_idxs = []
+        mask = []
+        for _ in range(batch_size):
+            try:
+                abs_frame_num, seg, seg_frame_num, pers_ids = next(targets)
+            except StopIteration:
+                break
+            skel_bundle = skel_read[seg][seg_frame_num, pers_ids]
+            if not add_frame_detections(mode, batch_fods, skel_bundle, conf_thresh):
+                mask.append(False)
+                continue
+            used_frames_idxs.append(abs_frame_num)
+            mask.append(True)
+        used_frames = vid_read.get_batch(used_frames_idxs).asnumpy()
+        return used_frames, batch_fods, mask
+
+    yield from frame_batcher(batch_size, make_batch)
+
+
+def select_faces_from_skel_batched(
+    targets,
+    vid_read,
+    skel_read,
+    batch_size=DEFAULT_FACES_BATCH_SIZE,
+    include_chip=False,
+    include_bboxes=False,
+    mode=FaceExtractionMode.FROM_FACE68_IN_BODY_25_ALL,
+):
+    for frames, batch, mask in select_chips_from_skel_batched(
+        targets, vid_read, skel_read, batch_size, mode
+    ):
+        yield from fods_to_embeddings(
+            frames,
+            batch,
+            mask,
+            include_chip=include_chip,
+            include_chip_bboxes=include_bboxes,
+        )

@@ -190,8 +190,12 @@ class FaceDraw:
 
     def draw_bundle(self, frame, bundle):
         for fod_bbox in bundle.get("fod_bbox", ()):
+            if fod_bbox is None:
+                continue
             self.draw_bbox(frame, fod_bbox, color=(0, 255, 0))
         for chip_bbox in bundle.get("chip_bbox", ()):
+            if chip_bbox is None:
+                continue
             self.draw_bbox(
                 frame, chip_bbox[:4], angle=chip_bbox[4], color=(255, 255, 0)
             )
@@ -202,11 +206,12 @@ class FaceDraw:
             bundle.get("chip_bbox", ()),
             bundle.get("chip", ()),
         ):
-            if (
-                fod_bbox is not None and self.is_point_in_bbox(mouse_pos, fod_bbox)
-            ) or (
-                chip_bbox is not None
-                and self.is_point_in_chip_bbox(mouse_pos, chip_bbox)
+            if chip is not None and (
+                (fod_bbox is not None and self.is_point_in_bbox(mouse_pos, fod_bbox))
+                or (
+                    chip_bbox is not None
+                    and self.is_point_in_chip_bbox(mouse_pos, chip_bbox)
+                )
             ):
                 return cv2.cvtColor(chip, cv2.COLOR_RGB2BGR)
         return None

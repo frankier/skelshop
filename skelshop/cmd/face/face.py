@@ -2,6 +2,7 @@ import click
 
 from .bestcands import bestcands
 from .embedall import embedall
+from .embedselect import embedselect
 from .idsegs import idsegs
 
 
@@ -11,5 +12,6 @@ def face():
 
 
 face.add_command(embedall)
+face.add_command(embedselect)
 face.add_command(idsegs)
 face.add_command(bestcands)

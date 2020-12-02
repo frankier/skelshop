@@ -1,32 +1,28 @@
+from contextlib import ExitStack
+
 import click
-import h5py
 from imutils.video.count_frames import count_frames
 
 from skelshop.dump import add_basic_metadata
-from skelshop.face.consts import DEFAULT_THRESH_POOL, DEFAULT_THRESH_VAL
+from skelshop.face.cmd import check_extractor, mode_of_extractor_info, open_skels
+from skelshop.face.consts import (
+    DEFAULT_FRAME_BATCH_SIZE,
+    DEFAULT_THRESH_POOL,
+    DEFAULT_THRESH_VAL,
+)
 from skelshop.face.io import FaceWriter, write_faces
-from skelshop.io import AsIfSingleShot, ShotSegmentedReader
+from skelshop.face.modes import EXTRACTORS
 from skelshop.utils.h5py import h5out
-from skelshop.utils.video import load_video_rgb
-
-EXTRACTORS = {
-    "dlib-hog-face5": {"type": "dlib", "detector": "hog", "keypoints": "face5",},
-    "dlib-hog-face68": {"type": "dlib", "detector": "hog", "keypoints": "face68",},
-    "dlib-cnn-face5": {"type": "dlib", "detector": "cnn", "keypoints": "face5",},
-    "dlib-cnn-face68": {"type": "dlib", "detector": "cnn", "keypoints": "face68",},
-    "openpose-face68": {"type": "openpose", "keypoints": "face68",},
-    "openpose-face3": {"type": "openpose", "keypoints": "face3",},
-    "openpose-face5": {"type": "openpose", "keypoints": "face5",},
-}
+from skelshop.utils.video import decord_video_reader, load_video_rgb
 
 
 @click.command()
 @click.argument(
     "face_extractor", type=click.Choice(list(EXTRACTORS.keys())),
 )
-@click.argument("video", type=click.Path())
+@click.argument("video", type=click.Path(exists=True))
 @click.argument("h5fn", type=click.Path())
-@click.option("--from-skels", type=click.Path())
+@click.option("--from-skels", type=click.Path(exists=True))
 @click.option("--start-frame", type=int, default=0)
 @click.option(
     "--skel-thresh-pool",
@@ -34,7 +30,7 @@ EXTRACTORS = {
     default=DEFAULT_THRESH_POOL,
 )
 @click.option("--skel-thresh-val", type=float, default=DEFAULT_THRESH_VAL)
-@click.option("--batch-size", type=int)
+@click.option("--batch-size", type=int, default=DEFAULT_FRAME_BATCH_SIZE)
 @click.option("--write-bboxes/--no-write-bboxes")
 @click.option("--write-chip/--no-write-chip")
 def embedall(
@@ -52,20 +48,13 @@ def embedall(
     """
     Create a HDF5 face dump from a video using dlib.
     """
-    from skelshop.face.pipe import (
-        FaceExtractionMode,
-        iter_faces_from_dlib,
-        iter_faces_from_skel,
-    )
+    from skelshop.face.pipe import all_faces_from_skel_batched, iter_faces_from_dlib
 
+    check_extractor(face_extractor, from_skels)
     extractor_info = EXTRACTORS[face_extractor]
-    if extractor_info["type"] == "openpose" and from_skels is None:
-        raise click.BadOptionUsage(
-            "--from-skels",
-            f"--from-skels required when FACE EXTRACTOR uses OpenPose (got: {face_extractor})",
-        )
     num_frames = count_frames(video) - start_frame
-    with h5out(h5fn) as h5f, load_video_rgb(video) as vid_read:
+    with ExitStack() as stack:
+        h5f = stack.enter_context(h5out(h5fn))
         add_basic_metadata(h5f, video, num_frames)
         has_fod = extractor_info["type"] == "dlib"
         writer = FaceWriter(
@@ -81,6 +70,7 @@ def embedall(
         if batch_size is not None:
             kwargs["batch_size"] = batch_size
         if extractor_info["type"] == "dlib":
+            vid_read = stack.enter_context(load_video_rgb(video))
             face_iter = iter_faces_from_dlib(
                 vid_read,
                 detector=extractor_info["detector"],
@@ -88,13 +78,10 @@ def embedall(
                 **kwargs,
             )
         else:
-            skels_h5 = h5py.File(from_skels, "r")
-            skel_read = AsIfSingleShot(ShotSegmentedReader(skels_h5, infinite=False))
-            if extractor_info["keypoints"] == "face68":
-                mode = FaceExtractionMode.FROM_FACE68_IN_BODY_25_ALL
-            else:
-                mode = FaceExtractionMode.FROM_FACE3_IN_BODY_25
-            face_iter = iter_faces_from_skel(
+            vid_read = decord_video_reader(video)
+            skel_read = open_skels(from_skels)
+            mode = mode_of_extractor_info(extractor_info)
+            face_iter = all_faces_from_skel_batched(
                 vid_read,
                 skel_read,
                 thresh_pool=skel_thresh_pool,

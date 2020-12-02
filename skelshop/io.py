@@ -250,6 +250,12 @@ class ShotSegmentedReader:
     def _mk_reader(self, start_frame, end_frame, bundles):
         return ShotReader(start_frame, end_frame, bundles, self.limbs, self.mk_bundle)
 
+    def __getitem__(self, idx):
+        shot_name = f"shot{idx}"
+        shot_grp = self.h5f[f"/timeline/{shot_name}"]
+        start_frame, end_frame, bundles = read_grp(shot_grp)
+        return self._mk_reader(start_frame, end_frame, bundles)
+
     def _iter(self, req_start=0):
         end_frame = req_start
         for shot_name, shot_grp in self.h5f["/timeline"].items():
@@ -375,6 +381,23 @@ class ShotReader:
             end_frame = pose_grp.attrs["end_frame"]
             sparse_pose = SparsePose(pose_grp, num_limbs)
             self.poses.append((pose_num, start_frame, end_frame, sparse_pose))
+
+    def __getitem__(self, tpl):
+        if isinstance(tpl, int):
+            frame_num = tpl
+            pose_nums = None
+        else:
+            frame_num, pose_nums = tpl
+        abs_frame_num = frame_num + self.start_frame
+        bundle = {}
+        for pose_num, start_frame, end_frame, sparse_pose in self.poses:
+            if pose_nums is not None and pose_num not in pose_nums:
+                continue
+            if abs_frame_num < start_frame or abs_frame_num >= end_frame:
+                continue
+            row_num = abs_frame_num - start_frame
+            bundle[pose_num] = sparse_pose.get_row(row_num)
+        return self.mk_bundle(bundle)
 
     def __iter__(self):
         """

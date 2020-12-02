@@ -7,7 +7,7 @@ import h5py
 import opencv_wrapper as cvw
 
 from skelshop.drawsticks import FaceDraw, ScaledVideo, SkelDraw, get_skel
-from skelshop.face.io import FaceReader
+from skelshop.face.io import get_dense_face_reader
 from skelshop.io import AsIfTracked, ShotSegmentedReader, UnsegmentedReader
 from skelshop.utils.h5py import log_open
 
@@ -39,7 +39,7 @@ def get_skels_read_and_draws(
         for h5fn in faces:
             face_h5f = stack.enter_context(h5py.File(h5fn, "r"))
             log_open(h5fn, face_h5f, "face")
-            result.append((FaceReader(face_h5f), get_face_draw(face_h5f)))
+            result.append((get_dense_face_reader(face_h5f), get_face_draw(face_h5f)))
         if is_seg and (skel_len != 1 or face_len != 0):
             raise click.UsageError(
                 "Currently segmented playback is only supported for a single --skel and no --face."
