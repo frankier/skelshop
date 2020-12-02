@@ -12,15 +12,17 @@ RUN export LC_ALL=C.UTF-8 && \
     apt-get install -y --no-install-recommends python3.7-venv
 
 
-FROM frankierr/openpose_containers:focal_${VAR} AS focal_${VAR}_base
+FROM frankierr/openpose_containers:focal_cpu AS focal_cpu_base
 
 RUN ln -sf /usr/bin/python3 /usr/bin/python
 
 RUN apt-get install -y --no-install-recommends unzip libjpeg62-dev
 
-FROM frankierr/openpose_containers:focal_cpu_base AS focal_cpu_extra
+FROM frankierr/openpose_containers:focal_gpu AS focal_gpu_base
 
-FROM frankierr/openpose_containers:focal_gpu_base AS focal_gpu_extra
+RUN ln -sf /usr/bin/python3 /usr/bin/python
+
+RUN apt-get install -y --no-install-recommends unzip libjpeg62-dev
 
 RUN cd /opt && \
     git clone --recursive https://github.com/dmlc/decord && \
@@ -31,7 +33,7 @@ RUN cd /opt && \
     cd ../python && \
     python setup.py install
 
-FROM ${BASE}_${VAR}_extra
+FROM ${BASE}_${VAR}_base
 
 RUN python3 -m pip install --upgrade \
     pip==20.2.4 \
