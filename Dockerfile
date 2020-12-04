@@ -18,7 +18,7 @@ RUN ln -sf /usr/bin/python3 /usr/bin/python
 
 RUN apt-get install -y --no-install-recommends unzip libjpeg62-dev
 
-FROM frankierr/openpose_containers:focal_gpu AS focal_gpu_base
+FROM frankierr/openpose_containers:focal_nvcaffe AS focal_gpu_base
 
 RUN ln -sf /usr/bin/python3 /usr/bin/python
 
