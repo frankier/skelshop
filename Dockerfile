@@ -28,7 +28,10 @@ RUN cd /opt && \
     git clone --recursive https://github.com/dmlc/decord && \
     cd decord && \
     mkdir build && cd build && \
-    cmake .. -DUSE_CUDA=ON -DCMAKE_BUILD_TYPE=Release && \
+    cmake .. \
+      -DUSE_CUDA=/usr/local/cuda \
+      -DCMAKE_CUDA_COMPILER=usr/local/cuda/bin/nvcc \
+      -DCMAKE_BUILD_TYPE=Release && \
     make && \
     cd ../python && \
     python setup.py install
