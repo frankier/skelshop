@@ -30,7 +30,7 @@ RUN cd /opt && \
     mkdir build && cd build && \
     cmake .. \
       -DUSE_CUDA=/usr/local/cuda \
-      -DCMAKE_CUDA_COMPILER=usr/local/cuda/bin/nvcc \
+      -DCMAKE_CUDA_COMPILER=/usr/local/cuda/bin/nvcc \
       -DCMAKE_BUILD_TYPE=Release && \
     make && \
     cd ../python && \
