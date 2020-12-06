@@ -33,7 +33,7 @@ class NumpyVideoReader(VideoReader):
 @contextmanager
 def load_video_rgb(filename, lib="decord"):
     if lib == "decord":
-        vid_read = NumpyVideoReader(filename)
+        vid_read = NumpyVideoReader(filename, ctx=decord_dev())
         try:
             yield vid_read
         finally:
