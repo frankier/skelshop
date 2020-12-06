@@ -1,10 +1,11 @@
-from itertools import count
-from typing import Any, Dict, List
+from itertools import count, groupby
+from typing import Any, Dict, Iterator, List, Tuple, TypeVar, cast
 
 import numpy as np
 from more_itertools import peekable
 
 from skelshop.io import grow_ds
+from skelshop.shotseg.io import ShotGrouper
 
 from .consts import EMBED_SIZE
 
@@ -99,9 +100,9 @@ class SparseFaceReader:
         self.keys = list(self.face_grp.keys())
         self.keys.remove("frame_pers")
 
-    def __iter__(self):
+    def __iter__(self) -> Iterator[Tuple[Tuple[int, int], Dict[str, Any]]]:
         for idx in range(len(self.frame_pers)):
-            yield tuple(self.frame_pers[idx]), {
+            yield cast(Tuple[int, int], tuple(self.frame_pers[idx])), {
                 key: self.face_grp[key][idx] for key in self.keys
             }
 
@@ -112,13 +113,15 @@ class SparseFaceReaderAdapter:
     Warning: the resulting iterator is infinite.
     """
 
-    def __init__(self, sparse_reader):
+    sparse_reader: SparseFaceReader
+
+    def __init__(self, sparse_reader: SparseFaceReader):
         self.sparse_reader = sparse_reader
 
-    def __iter__(self):
+    def __iter__(self) -> Iterator[Dict[str, List[Any]]]:
         return self.iter_from(0)
 
-    def iter_from(self, start_frame):
+    def iter_from(self, start_frame: int) -> Iterator[Dict[str, List[Any]]]:
         sparse_it = peekable(self.sparse_reader)
         # TODO: More efficient search here
         while sparse_it.peek()[0][0] < start_frame:
@@ -134,6 +137,30 @@ class SparseFaceReaderAdapter:
                         result[key].append(None)
                     result[key].append(arr)
             yield result
+
+
+class FaceReaderAdapter:
+    """
+    Adapts a dense face embedding dump to behave like a sparse one.
+    """
+
+    dense_reader: FaceReader
+
+    def __init__(self, dense_reader: FaceReader):
+        self.dense_reader = dense_reader
+
+    def __iter__(self) -> Iterator[Tuple[Tuple[int, int], Dict[str, Any]]]:
+        for frame_num, frame_data in enumerate(self.dense_reader):
+            keys = frame_data.keys()
+            for pers_num, pers_vals in enumerate(zip(*frame_data.values())):
+                yield (frame_num, pers_num), dict(zip(keys, pers_vals))
+
+
+def get_sparse_face_reader(h5in):
+    if "/faces/frame_pers" in h5in:
+        return SparseFaceReader(h5in)
+    else:
+        return FaceReaderAdapter(FaceReader(h5in))
 
 
 def get_dense_face_reader(h5in):
@@ -182,3 +209,23 @@ def write_faces(face_iter, face_writer):
             chip_bboxes=chip_bboxes,
             face_chips=face_chips,
         )
+
+
+PersonData = TypeVar("PersonData")
+
+
+def shot_pers_group(
+    shot_grouper: ShotGrouper,
+    frame_pers_it: Iterator[Tuple[Tuple[int, int], PersonData]],
+) -> Iterator[Tuple[int, Iterator[Tuple[int, Iterator[Tuple[int, PersonData]]]]]]:
+    def shot_iter() -> Iterator[Tuple[int, Iterator[Tuple[int, PersonData]]]]:
+        for pers_id, shot_pers_grp in groupby(
+            sorted(((pers_id, frame_num, face) for frame_num, (pers_id, face) in shot)),
+            key=lambda tpl: tpl[0],
+        ):
+            yield pers_id, ((frame_num, face) for _, frame_num, face in shot_pers_grp)
+
+    frame_it = ((frame, (pers_id, face)) for (frame, pers_id), face in frame_pers_it)
+    segmented = shot_grouper.segment_enum(frame_it)
+    for seg_idx, shot in enumerate(segmented):
+        yield seg_idx, shot_iter()
