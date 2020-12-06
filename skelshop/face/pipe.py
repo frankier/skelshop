@@ -59,7 +59,9 @@ BODY_25_FACE5_TARGETS = np.vstack(
 
 class FullObjectDetectionsBatch(ABC):
     @abstractmethod
-    def get_face_chips(self, frame: np.ndarray) -> Iterator[List[np.ndarray]]:
+    def get_face_chips(
+        self, frame: np.ndarray, size: int = 150, padding: float = 0.25
+    ) -> Iterator[List[np.ndarray]]:
         ...
 
     @abstractmethod
@@ -81,10 +83,10 @@ class DlibFodsBatch(FullObjectDetectionsBatch):
         self.batch_fods.append(to_full_object_detections(fods))
 
     def get_face_chips(
-        self, batch_frames: Iterable[np.ndarray]
+        self, batch_frames: Iterable[np.ndarray], size=150, padding=0.25
     ) -> Iterator[List[np.ndarray]]:
         for frame, fods in zip(batch_frames, self.batch_fods):
-            yield lazyimp.dlib.get_face_chips(frame, fods, size=150, padding=0.25)
+            yield lazyimp.dlib.get_face_chips(frame, fods, size=size, padding=0)
 
     def compute_face_descriptor(self, batch_frames: List[np.ndarray]) -> np.ndarray:
         return lazyimp.dlib_models.face_encoder.compute_face_descriptor(
@@ -107,10 +109,12 @@ class SkelShopFodsBatch(FullObjectDetectionsBatch):
         self.chip_details.append(chip_details)
 
     def get_face_chips(
-        self, batch_frames: Iterator[np.ndarray]
+        self, batch_frames: Iterator[np.ndarray], size=150, padding=0.25
     ) -> Iterator[List[np.ndarray]]:
         for frame, chip_details in zip(batch_frames, self.chip_details):
-            yield lazyimp.dlib.extract_image_chips(frame, chip_details)
+            yield lazyimp.dlib.extract_image_chips(
+                frame, chip_details, size=size, padding=padding
+            )
 
     def compute_face_descriptor(self, batch_frames: List[np.ndarray]) -> np.ndarray:
         batch_imgs = []
