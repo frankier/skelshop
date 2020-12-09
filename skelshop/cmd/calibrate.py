@@ -134,6 +134,7 @@ def kps_in_chip(skel, chip, add_symmetries=False, add_synthetic=False):
             continue
         joint_name = BODY_25_SYNTH_JOINTS[kp_idx]
         yield (
+            False,
             joint_name,
             *kp,
             c,
@@ -141,6 +142,7 @@ def kps_in_chip(skel, chip, add_symmetries=False, add_synthetic=False):
         if add_symmetries:
             flipped_joint_name = flip_joint_name(joint_name)
             yield (
+                True,
                 flipped_joint_name,
                 1 - kp[0],
                 kp[1],
@@ -174,7 +176,17 @@ def process_dlib_dir(dirin, h5in, dfout, add_symmetries, add_synthetic):
                         data.append(row)
 
     df = lazyimp.pandas.DataFrame.from_records(
-        data, columns=["filename", "chip_idx", "skel_idx", "kp", "x", "y", "c"]
+        data,
+        columns=[
+            "filename",
+            "chip_idx",
+            "skel_idx",
+            "is_reflected",
+            "kp",
+            "x",
+            "y",
+            "c",
+        ],
     )
     df.to_parquet(dfout)
 
@@ -217,7 +229,17 @@ def process_video(video, h5infn, dfout):
                 frame_idx += 1
 
         df = lazyimp.pandas.DataFrame.from_records(
-            data, columns=["frame_idx", "chip_idx", "skel_idx", "kp", "x", "y", "c"]
+            data,
+            columns=[
+                "frame_idx",
+                "chip_idx",
+                "skel_idx",
+                "is_reflected",
+                "kp",
+                "x",
+                "y",
+                "c",
+            ],
         )
         df.to_parquet(dfout)
 
@@ -273,17 +295,40 @@ def multipage(filename, figs=None):
 
 @calibrate.command()
 @click.argument("dfin", type=click.Path(exists=True))
-@click.option("--chartout", type=click.Path())
+@click.option("--chart-out", type=click.Path())
 @click.option("--kps")
 @click.option("--thresh", type=float)
-def analyse(dfin, chartout, kps, thresh):
+@click.option("--excl-thresh", type=float, default=0.05)
+@click.option("--mask")
+def analyse(dfin, chart_out, kps, thresh, excl_thresh, mask):
     from matplotlib.patches import Rectangle
 
     df = lazyimp.pandas.read_parquet(dfin)
     if kps is not None:
         kps_list = proc_kps_arg(kps)
         df = df[df["kp"].isin(kps_list)]
-    if thresh is not None:
+    if mask is not None:
+        if kps is None:
+            raise click.BadOptionUsage("--mask", "--mask needs --kps")
+        incl_kps = set()
+        excl_kps = set()
+        for c, kp in zip(mask, kps_list):
+            if c == "1":
+                incl_kps.add(kp)
+            else:
+                excl_kps.add(kp)
+
+        def match_mask(grp):
+            all_incl = (grp[grp["kp"].isin(incl_kps)]["c"] > thresh).all()
+            all_excl = (grp[grp["kp"].isin(excl_kps)]["c"] < excl_thresh).all()
+            return all_incl and all_excl
+
+        df = (
+            df.groupby(["filename", "chip_idx", "skel_idx", "is_reflected"])
+            .filter(match_mask)
+            .reset_index()
+        )
+    elif thresh is not None:
         df = df[df["c"] > thresh]
     for ax_idx in range(3):
         if ax_idx == 0:
@@ -333,7 +378,7 @@ def analyse(dfin, chartout, kps, thresh):
     print(
         df.groupby("kp").apply(weighted_median, weight_col="c", select_cols=["x", "y"])
     )
-    if chartout is not None:
-        multipage(chartout)
+    if chart_out is not None:
+        multipage(chart_out)
     else:
         lazyimp.pyplot.show()

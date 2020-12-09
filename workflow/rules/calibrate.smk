@@ -44,15 +44,15 @@ rule calibrate_process:
         calib_df = pjoin(CALIB_WORK, "dlib.examples.calib.pqt")
     shell:
         "python -m skelshop calibrate process-dlib-dir " +
-        "{input.faces} {input.skels} {output.calib_df}"
+        "--add-symmetries {input.faces} {input.skels} {output.calib_df}"
 
 
 rule calibrate_analyse:
     input:
         calib_df = pjoin(CALIB_WORK, "dlib.examples.calib.pqt")
     output:
-        chartout = pjoin(CALIB_WORK, "chart.png"),
+        chart_out = pjoin(CALIB_WORK, "chart.pdf"),
         means = pjoin(CALIB_WORK, "means.txt")
     shell:
         "python -m skelshop calibrate analyse " +
-        "{input.calib_df} {output.chartout} > {output.means}"
+        "{input.calib_df} --chart-out {output.chart_out} > {output.means}"
