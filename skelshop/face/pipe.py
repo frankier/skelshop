@@ -27,6 +27,8 @@ class FaceExtractionMode(Enum):
     FROM_FACE68_IN_BODY_25_ALL = 0
     FROM_FACE3_IN_BODY_25 = 1
     FROM_FACE5_IN_BODY_25 = 2
+    FROM_FACE4_LEFT_IN_BODY_25 = 3
+    FROM_FACE4_RIGHT_IN_BODY_25 = 4
 
 
 LEFT_EAR_KP = BODY_25_JOINTS.index("left ear")
@@ -37,22 +39,42 @@ RIGHT_EYE_KP = BODY_25_JOINTS.index("right eye")
 RIGHT_EAR_KP = BODY_25_JOINTS.index("right ear")
 
 FACE3_KPS = [LEFT_EYE_KP, NOSE_KP, RIGHT_EYE_KP]
+FACE4_LEFT_KPS = [LEFT_EYE_KP, NOSE_KP, RIGHT_EYE_KP, LEFT_EAR_KP]
+FACE4_RIGHT_KPS = [LEFT_EYE_KP, NOSE_KP, RIGHT_EYE_KP, RIGHT_EAR_KP]
 FACE5_KPS = [LEFT_EYE_KP, NOSE_KP, RIGHT_EYE_KP, LEFT_EAR_KP, RIGHT_EAR_KP]
 
-LEFT_EYE_X = 0.781901
-RIGHT_EYE_X = 0.218099
+LEFT_EYE_X = 0.768050
+RIGHT_EYE_X = 0.231950
 EYE_DISTANCE = LEFT_EYE_X - RIGHT_EYE_X
 
 BODY_25_FACE3_TARGETS = np.array(
-    [[LEFT_EYE_X, 0.182221], [0.5, 0.455327], [RIGHT_EYE_X, 0.182221],]
+    [[LEFT_EYE_X, 0.169153], [0.5, 0.442034], [RIGHT_EYE_X, 0.169153],]
 )
+
+LEFT_EYE_FACE4_LEFT = 0.778662
+RIGHT_EYE_FACE4_LEFT = 0.261414
+
+BODY_25_FACE4_LEFT_TARGETS = np.array(
+    [
+        [LEFT_EYE_FACE4_LEFT, 0.149618],
+        [0.428321, 0.442581],
+        [RIGHT_EYE_FACE4_LEFT, 0.168763],
+        [1.561309, 0.314543],
+    ]
+)
+
+FACE4_EYE_DISTANCE = LEFT_EYE_FACE4_LEFT - RIGHT_EYE_FACE4_LEFT
+
+BODY_25_FACE4_RIGHT_TARGETS = np.array(
+    [[-1, 1]]
+) * BODY_25_FACE4_LEFT_TARGETS + np.array([[0.5, 0]])
 
 BODY_25_FACE5_TARGETS = np.vstack(
     [
         BODY_25_FACE3_TARGETS,
         # These are not very stable usually. These values are found by thresholding
         # c > 0.9, which would thus also be recommended at runtime.
-        np.array([[1.403953, 0.358962], [-0.403953, 0.358962]]),
+        np.array([[1.525813, 0.273182], [-0.525813, 0.273182]]),
     ]
 )
 
@@ -330,6 +352,13 @@ chip_details_from_body_25_face3 = partial(
     chip_details_from_body_25, kps=FACE3_KPS, targets=BODY_25_FACE3_TARGETS,
 )
 
+chip_details_from_body_25_face4_left = partial(
+    chip_details_from_body_25, kps=FACE4_LEFT_KPS, targets=BODY_25_FACE4_LEFT_TARGETS,
+)
+
+chip_details_from_body_25_face4_right = partial(
+    chip_details_from_body_25, kps=FACE4_RIGHT_KPS, targets=BODY_25_FACE4_RIGHT_TARGETS,
+)
 
 chip_details_from_body_25_face5 = partial(
     chip_details_from_body_25, kps=FACE5_KPS, targets=BODY_25_FACE5_TARGETS,
@@ -401,8 +430,14 @@ def add_frame_detections(mode, batch_fods, skel_bundle, conf_thresh):
     else:
         if mode == FaceExtractionMode.FROM_FACE3_IN_BODY_25:
             chip_details_extractor = chip_details_from_body_25_face3
-        else:
+        elif mode == FaceExtractionMode.FROM_FACE5_IN_BODY_25:
             chip_details_extractor = chip_details_from_body_25_face5
+        elif mode == FaceExtractionMode.FROM_FACE4_LEFT_IN_BODY_25:
+            chip_details_extractor = chip_details_from_body_25_face4_left
+        elif mode == FaceExtractionMode.FROM_FACE4_RIGHT_IN_BODY_25:
+            chip_details_extractor = chip_details_from_body_25_face4_right
+        else:
+            raise ValueError(f"Unknown mode {mode}")
         child_details = skel_bundle_to_chip_details(
             skel_bundle, conf_thresh, chip_details_extractor
         )
