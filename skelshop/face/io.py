@@ -99,6 +99,31 @@ class SparseFaceReader:
         self.frame_pers = self.face_grp["frame_pers"]
         self.keys = list(self.face_grp.keys())
         self.keys.remove("frame_pers")
+        self._frame_pers_recs = None
+
+    def __getitem__(self, tpl):
+        if len(tpl) != 2:
+            raise ValueError(
+                "SparseFaceReader can only be indexed by (frame_num, pers_id) pair"
+            )
+        start_idx = np.searchsorted(self.frame_pers[:, 0], tpl[0])
+        while (
+            self.frame_pers[start_idx, 0] == tpl[0]
+            and self.frame_pers[start_idx, 1] < tpl[1]
+        ):
+            start_idx += 1
+        if (
+            self.frame_pers[start_idx, 0] != tpl[0]
+            or self.frame_pers[start_idx, 1] != tpl[1]
+        ):
+            raise IndexError()
+        end_idx = start_idx
+        while (
+            self.frame_pers[end_idx, 0] == tpl[0]
+            and self.frame_pers[end_idx, 1] == tpl[1]
+        ):
+            end_idx += 1
+        return {key: self.face_grp[key][start_idx:end_idx] for key in self.keys}
 
     def __iter__(self) -> Iterator[Tuple[Tuple[int, int], Dict[str, Any]]]:
         for idx in range(len(self.frame_pers)):
