@@ -15,9 +15,9 @@ def read_assignment(assign_in: TextIO) -> Dict[str, str]:
 @click.argument("segs_in", type=click.File("r"))
 @click.argument("assign_in", type=click.File("r"))
 @click.argument("segs_out", type=click.File("w"))
-@click.option("--filter-unlabelled/--keep-unlabelled")
+@click.option("--filter-unlabeled/--keep-unlabeled")
 def applymap(
-    segs_in: TextIO, assign_in: TextIO, segs_out: TextIO, filter_unlabelled: bool
+    segs_in: TextIO, assign_in: TextIO, segs_out: TextIO, filter_unlabeled: bool
 ):
     assignment = read_assignment(assign_in)
     segs_out.write(next(segs_in))
@@ -25,7 +25,7 @@ def applymap(
         tpl = row.strip().split(",")
         if tpl[-1] in assignment:
             label = assignment[tpl[-1]]
-        elif not filter_unlabelled:
+        elif not filter_unlabeled:
             label = tpl[-1]
         else:
             continue

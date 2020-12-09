@@ -56,7 +56,7 @@ class SingleDirReferenceEmbeddings:
         self.label = label
         self.ref = ref_embeddings(ref_dir)
 
-    def labelled_embeddings(self) -> Iterator[Tuple[str, np.ndarray]]:
+    def labeled_embeddings(self) -> Iterator[Tuple[str, np.ndarray]]:
         return iter([(self.label, self.ref)])
 
     def dist(self, embedding) -> float:
@@ -74,7 +74,7 @@ class MultiDirReferenceEmbeddings:
         for label, entry in multi_ref_embeddings(ref_dir):
             self.refs[label] = entry
 
-    def labelled_embeddings(self) -> Iterator[Tuple[str, np.ndarray]]:
+    def labeled_embeddings(self) -> Iterator[Tuple[str, np.ndarray]]:
         return iter(self.refs.items())
 
     def dist(self, label: str, embedding):
