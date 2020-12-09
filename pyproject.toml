@@ -33,6 +33,7 @@ pyarrow = { version = "^2.0.0", optional = true }
 dlib = {git = "https://github.com/frankier/dlib", rev = "get_face_chip_details-python", optional = true}
 imagesize = "^1.2.0"
 hdf5plugin = "^2.3.1"
+faiss-cpu = "^1.6.5"
 
 [tool.poetry.extras]
 pipeline = ["scenedetect", "snakemake"]

@@ -34,8 +34,10 @@ skelshop.add_command(dump)
 face_recognition_loader = find_spec("face_recognition")
 if face_recognition_loader is not None:
     from .face import face
+    from .iden import iden
 
     skelshop.add_command(face)
+    skelshop.add_command(iden)
 skelshop.add_command(drawsticks)
 skelshop.add_command(playsticks)
 skelshop.add_command(filter)
