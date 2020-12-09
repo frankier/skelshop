@@ -25,9 +25,8 @@ from dataclasses import dataclass, field
 from functools import partial
 from typing import TYPE_CHECKING, Any, Dict, List, Tuple
 
-from more_itertools import chunked
-
 from ..utils.geom import lazy_euclidean
+from ..utils.video import read_numpy_chunks
 from .pipe import (
     EYE_DISTANCE,
     FACE3_KPS,
@@ -45,8 +44,6 @@ from .pipe import (
     get_face_kps,
     get_openpose_fods_batch,
 )
-
-FRAME_BATCH_SIZE = 16
 
 MIN_CHIP_CLARITY = 10
 MIN_SKELS_TOTAL = 15
@@ -204,24 +201,22 @@ def pick_best_body_25_face(start_frame, shot_skel_iter, video_reader, sort="blur
         for frame_idx, (skel, model, measures) in frame_infos.items():
             frame_idxs.setdefault(frame_idx, []).append((skel_id, skel, model))
     # Get actual video frames in a batch
-    for frame_idx_batch in chunked(frame_idxs, FRAME_BATCH_SIZE):
-        batch_frames = video_reader.get_batch(
-            [start_frame + frame_idx for frame_idx in frame_idx_batch]
-        )
-        for frame_idx, frame in zip(frame_idx_batch, batch_frames.asnumpy()):
-            for skel_id, skel, model in frame_idxs[frame_idx]:
-                chip = skel_tight_chip(frame, skel, MODEL_MAP[model])
-                chip_clarity = clarity(chip)
-                if chip_clarity < MIN_CHIP_CLARITY:
-                    del skel_infos[skel_id][1][frame_idx]
+    for frame_idx, frame in read_numpy_chunks(
+        video_reader, frame_idxs, offset=start_frame
+    ):
+        for skel_id, skel, model in frame_idxs[frame_idx]:
+            chip = skel_tight_chip(frame, skel, MODEL_MAP[model])
+            chip_clarity = clarity(chip)
+            if chip_clarity < MIN_CHIP_CLARITY:
+                del skel_infos[skel_id][1][frame_idx]
+            else:
+                measures = skel_infos[skel_id][1][frame_idx][2]
+                blurredness = -chip_clarity
+                if sort == "blur":
+                    insert_idx = 1
                 else:
-                    measures = skel_infos[skel_id][1][frame_idx][2]
-                    blurredness = -chip_clarity
-                    if sort == "blur":
-                        insert_idx = 1
-                    else:
-                        insert_idx = 2
-                    measures.insert(insert_idx, blurredness)
+                    insert_idx = 2
+                measures.insert(insert_idx, blurredness)
     # Filter again and output
     result = []
     for skel_id in list(skel_infos.keys()):

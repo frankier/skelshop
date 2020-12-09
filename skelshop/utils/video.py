@@ -3,6 +3,9 @@ from contextlib import contextmanager
 import cv2
 import opencv_wrapper as cvw
 from decord.video_reader import VideoReader
+from more_itertools import chunked
+
+DEFAULT_FRAME_BATCH_SIZE = 16
 
 
 class RGBVideoCapture(cvw.VideoCapture):
@@ -68,3 +71,14 @@ def decord_dev():
 
 def decord_video_reader(path):
     return VideoReader(path, ctx=decord_dev())
+
+
+def read_numpy_chunks(
+    video_reader, frame_idxs, batch_size=DEFAULT_FRAME_BATCH_SIZE, offset=0
+):
+    for frame_idx_batch in chunked(frame_idxs, batch_size):
+        batch_frames = video_reader.get_batch(
+            [frame_idx + offset for frame_idx in frame_idx_batch]
+        )
+        for frame_idx, frame in zip(frame_idx_batch, batch_frames.asnumpy()):
+            yield frame_idx, frame
