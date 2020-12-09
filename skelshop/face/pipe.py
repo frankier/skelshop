@@ -78,11 +78,17 @@ BODY_25_FACE5_TARGETS = np.vstack(
     ]
 )
 
+DEFAULT_CHIP_SIZE = 150
+DEFAULT_CHIP_PADDING = 0.25
+
 
 class FullObjectDetectionsBatch(ABC):
     @abstractmethod
     def get_face_chips(
-        self, frame: np.ndarray, size: int = 150, padding: float = 0.25
+        self,
+        frame: np.ndarray,
+        size: int = DEFAULT_CHIP_SIZE,
+        padding: float = DEFAULT_CHIP_PADDING,
     ) -> Iterator[List[np.ndarray]]:
         ...
 
@@ -105,7 +111,10 @@ class DlibFodsBatch(FullObjectDetectionsBatch):
         self.batch_fods.append(to_full_object_detections(fods))
 
     def get_face_chips(
-        self, batch_frames: Iterable[np.ndarray], size=150, padding=0.25
+        self,
+        batch_frames: Iterable[np.ndarray],
+        size=DEFAULT_CHIP_SIZE,
+        padding=DEFAULT_CHIP_PADDING,
     ) -> Iterator[List[np.ndarray]]:
         for frame, fods in zip(batch_frames, self.batch_fods):
             yield lazyimp.dlib.get_face_chips(frame, fods, size=size, padding=0)
@@ -120,7 +129,9 @@ class DlibFodsBatch(FullObjectDetectionsBatch):
 
     def get_chip_details(self) -> Iterator[List[lazyimp.dlib.chip_details]]:
         for fods in self.batch_fods:
-            yield lazyimp.dlib.get_face_chip_details(fods, size=150, padding=0.25)
+            yield lazyimp.dlib.get_face_chip_details(
+                fods, size=DEFAULT_CHIP_SIZE, padding=DEFAULT_CHIP_PADDING
+            )
 
 
 class SkelShopFodsBatch(FullObjectDetectionsBatch):
@@ -131,11 +142,16 @@ class SkelShopFodsBatch(FullObjectDetectionsBatch):
         self.chip_details.append(chip_details)
 
     def get_face_chips(
-        self, batch_frames: Iterator[np.ndarray], size=150, padding=0.25
+        self,
+        batch_frames: Iterator[np.ndarray],
+        size=DEFAULT_CHIP_SIZE,
+        padding=DEFAULT_CHIP_PADDING,
     ) -> Iterator[List[np.ndarray]]:
+        # XXX: size/padding is ignored in this case since it's already in the
+        # chip_details. Might need to rethink the interface here.
         for frame, chip_details in zip(batch_frames, self.chip_details):
             yield lazyimp.dlib.extract_image_chips(
-                frame, chip_details, size=size, padding=padding
+                frame, chip_details,
             )
 
     def compute_face_descriptor(self, batch_frames: List[np.ndarray]) -> np.ndarray:
@@ -334,7 +350,12 @@ def fod_from_body_25_all_face68(skel, conf_thresh):
 
 
 def chip_details_from_body_25(
-    body25, conf_thresh, kps, targets, size=150, padding=0.25
+    body25,
+    conf_thresh,
+    kps,
+    targets,
+    size=DEFAULT_CHIP_SIZE,
+    padding=DEFAULT_CHIP_PADDING,
 ) -> "dlib.chip_details":
     body25_arr = body25.all()
     if not conf_thresh(body25_arr[kps, 2]):
@@ -408,12 +429,18 @@ def skel_bundle_to_fods(skel_bundle, conf_thresh):
 
 
 def skel_bundle_to_chip_details(
-    skel_bundle, conf_thresh, chip_details_extractor
+    skel_bundle,
+    conf_thresh,
+    chip_details_extractor,
+    size=DEFAULT_CHIP_SIZE,
+    padding=DEFAULT_CHIP_PADDING,
 ) -> List["dlib.chip_details"]:
     skel_ids = []
     frame_chip_details: List[lazyimp.dlib.chip_details] = []
     for skel_id, skel in skel_bundle:
-        chip_details = chip_details_extractor(skel, conf_thresh)
+        chip_details = chip_details_extractor(
+            skel, conf_thresh, size=size, padding=padding
+        )
         if chip_details is None:
             continue
         skel_ids.append(skel_id)
@@ -421,7 +448,14 @@ def skel_bundle_to_chip_details(
     return frame_chip_details
 
 
-def add_frame_detections(mode, batch_fods, skel_bundle, conf_thresh):
+def add_frame_detections(
+    mode,
+    batch_fods,
+    skel_bundle,
+    conf_thresh,
+    size=DEFAULT_CHIP_SIZE,
+    padding=DEFAULT_CHIP_PADDING,
+):
     if mode == FaceExtractionMode.FROM_FACE68_IN_BODY_25_ALL:
         num_fods, fods = skel_bundle_to_fods(skel_bundle, conf_thresh)
         if not num_fods:
@@ -439,7 +473,7 @@ def add_frame_detections(mode, batch_fods, skel_bundle, conf_thresh):
         else:
             raise ValueError(f"Unknown mode {mode}")
         child_details = skel_bundle_to_chip_details(
-            skel_bundle, conf_thresh, chip_details_extractor
+            skel_bundle, conf_thresh, chip_details_extractor, size=size, padding=padding
         )
         if not child_details:
             return False
