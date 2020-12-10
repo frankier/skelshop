@@ -9,7 +9,9 @@ background. Feel free to ask in the
 
 There are 2 options:
 
-1. A Docker container, recommended for general usage.
+1. A Docker container:
+  * Which is run with the Docker runtime in general usage with a personal computers/workstations.
+  * And run with Singularity in HPC environments.
 2. Manual setup, which may be convenient for development of SkelShop, usage as
    a library, or if you want to use GUI components such as the `playsticks`
    command. (It may also be possible to run `playsticks` with
