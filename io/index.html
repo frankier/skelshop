@@ -7,9 +7,9 @@
 <meta content="width=device-width,initial-scale=1" name="viewport"/>
 <meta content="Documentation of SkelShop, a toolkit for offline skeleton and face analysis of talking heads videos" name="description"/>
 <link href="../assets/images/favicon.png" rel="shortcut icon"/>
-<meta content="mkdocs-1.1.2, mkdocs-material-6.1.5" name="generator"/>
+<meta content="mkdocs-1.1.2, mkdocs-material-6.1.6" name="generator"/>
 <title>Reading and writing the formats from your own code - SkelShop Documentation</title>
-<link href="../assets/stylesheets/main.21aed14c.min.css" rel="stylesheet"/>
+<link href="../assets/stylesheets/main.6910b76c.min.css" rel="stylesheet"/>
 <link href="../assets/stylesheets/palette.196e0c26.min.css" rel="stylesheet"/>
 <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
 <link href="https://fonts.googleapis.com/css?family=Roboto:300,400,400i,700%7CRoboto+Mono&amp;display=fallback" rel="stylesheet"/>
@@ -600,7 +600,7 @@ that poses are not tracked.</p>
 <div class="doc doc-object doc-method">
 <h3 class="doc doc-heading" id="skelshop.io.UnsegmentedWriter.__init__">
 <code class="highlight language-python">
-__init__<span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">h5f</span><span class="p">)</span> </code>
+__init__<span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">h5f</span><span class="p">,</span> <span class="n">num_kps</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">create_kwargs</span><span class="p">)</span> </code>
 <span class="doc doc-properties">
 <small class="doc doc-property doc-property-special"><code>special</code></small>
 </span>
@@ -610,14 +610,16 @@ __init__<span class="p">(</span><span class="bp">self</span><span class="p">,</s
 <details class="quote">
 <summary>Source code in <code>skelshop/io.py</code></summary>
 <div class="highlight">
-<pre><span></span><code><span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">h5f</span><span class="p">:</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">):</span>
+<pre><span></span><code><span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">h5f</span><span class="p">:</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">,</span> <span class="n">num_kps</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">create_kwargs</span><span class="p">):</span>
     <span class="sd">"""</span>
 <span class="sd">    Constructs an unsegmented pose writer</span>
 <span class="sd">    """</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">h5f</span> <span class="o">=</span> <span class="n">h5f</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">num_kps</span> <span class="o">=</span> <span class="n">num_kps</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">timeline_grp</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">h5f</span><span class="o">.</span><span class="n">create_group</span><span class="p">(</span><span class="s2">"/timeline"</span><span class="p">,</span> <span class="n">track_order</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">pose_grps</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">Any</span><span class="p">]]</span> <span class="o">=</span> <span class="p">{}</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">start_frame</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">create_kwargs</span> <span class="o">=</span> <span class="n">create_kwargs</span>
 </code></pre>
 </div>
 </details>
@@ -718,7 +720,7 @@ that poses are are tracked.</p>
 <div class="doc doc-object doc-method">
 <h3 class="doc doc-heading" id="skelshop.io.ShotSegmentedWriter.__init__">
 <code class="highlight language-python">
-__init__<span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">h5f</span><span class="p">)</span> </code>
+__init__<span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">h5f</span><span class="p">,</span> <span class="n">num_kps</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">create_kwargs</span><span class="p">)</span> </code>
 <span class="doc doc-properties">
 <small class="doc doc-property doc-property-special"><code>special</code></small>
 </span>
@@ -728,11 +730,12 @@ __init__<span class="p">(</span><span class="bp">self</span><span class="p">,</s
 <details class="quote">
 <summary>Source code in <code>skelshop/io.py</code></summary>
 <div class="highlight">
-<pre><span></span><code><span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">h5f</span><span class="p">:</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">):</span>
+<pre><span></span><code><span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">h5f</span><span class="p">:</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">,</span> <span class="n">num_kps</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">create_kwargs</span><span class="p">):</span>
     <span class="sd">"""</span>
 <span class="sd">    Constructs a shot segmented writer</span>
 <span class="sd">    """</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">h5f</span> <span class="o">=</span> <span class="n">h5f</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">num_kps</span> <span class="o">=</span> <span class="n">num_kps</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">h5f</span><span class="o">.</span><span class="n">create_group</span><span class="p">(</span><span class="s2">"/timeline"</span><span class="p">,</span> <span class="n">track_order</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
     <span class="bp">self</span><span class="o">.</span><span class="n">pose_data</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">ndarray</span><span class="p">]]</span> <span class="o">=</span> <span class="p">{}</span>
@@ -741,6 +744,7 @@ __init__<span class="p">(</span><span class="bp">self</span><span class="p">,</s
     <span class="bp">self</span><span class="o">.</span><span class="n">shot_idx</span> <span class="o">=</span> <span class="mi">0</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">shot_start</span> <span class="o">=</span> <span class="mi">0</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">last_frame</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">create_kwargs</span> <span class="o">=</span> <span class="n">create_kwargs</span>
 </code></pre>
 </div>
 </details>
@@ -814,9 +818,11 @@ end_shot<span class="p">(</span><span class="bp">self</span><span class="p">)</s
         <span class="n">pose_group</span> <span class="o">=</span> <span class="n">create_csr</span><span class="p">(</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">h5f</span><span class="p">,</span>
             <span class="sa">f</span><span class="s2">"/timeline/shot</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">shot_idx</span><span class="si">}</span><span class="s2">/pose</span><span class="si">{</span><span class="n">pose_id</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span>
-            <span class="n">data</span><span class="p">,</span>
-            <span class="n">indices</span><span class="p">,</span>
-            <span class="n">indptr</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">num_kps</span><span class="p">,</span>
+            <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">,</span>
+            <span class="n">indices</span><span class="o">=</span><span class="n">indices</span><span class="p">,</span>
+            <span class="n">indptr</span><span class="o">=</span><span class="n">indptr</span><span class="p">,</span>
+            <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">create_kwargs</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="n">pose_group</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">"start_frame"</span><span class="p">]</span> <span class="o">=</span> <span class="n">pose_first_frame</span>
         <span class="n">pose_group</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">"end_frame"</span><span class="p">]</span> <span class="o">=</span> <span class="n">pose_last_frame</span>
@@ -1177,8 +1183,8 @@ UnsegmentedReader.</p>
 </div>
 </footer>
 </div>
-<script src="../assets/javascripts/vendor.7e0ee788.min.js"></script>
-<script src="../assets/javascripts/bundle.b3a72adc.min.js"></script><script id="__lang" type="application/json">{"clipboard.copy": "Copy to clipboard", "clipboard.copied": "Copied to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.placeholder": "Search", "search.result.placeholder": "Type to start searching", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.term.missing": "Missing"}</script>
+<script src="../assets/javascripts/vendor.fd16492e.min.js"></script>
+<script src="../assets/javascripts/bundle.7836ba4d.min.js"></script><script id="__lang" type="application/json">{"clipboard.copy": "Copy to clipboard", "clipboard.copied": "Copied to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.placeholder": "Search", "search.result.placeholder": "Type to start searching", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.term.missing": "Missing"}</script>
 <script>
         app = initialize({
           base: "..",

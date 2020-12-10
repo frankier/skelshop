@@ -12,7 +12,7 @@
       
       
       <link rel="shortcut icon" href="assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.1.2, mkdocs-material-6.1.5">
+      <meta name="generator" content="mkdocs-1.1.2, mkdocs-material-6.1.6">
     
     
       
@@ -20,7 +20,7 @@
       
     
     
-      <link rel="stylesheet" href="assets/stylesheets/main.21aed14c.min.css">
+      <link rel="stylesheet" href="assets/stylesheets/main.6910b76c.min.css">
       
         
         <link rel="stylesheet" href="assets/stylesheets/palette.196e0c26.min.css">
@@ -228,15 +228,15 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#docker-container" class="md-nav__link">
-    Docker container
+  <a href="#running-the-docker-container-with-docker" class="md-nav__link">
+    Running the Docker container with Docker
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#singularity-container" class="md-nav__link">
-    Singularity container
+  <a href="#running-the-docker-container-with-singularity" class="md-nav__link">
+    Running the Docker container with Singularity
   </a>
   
 </li>
@@ -572,15 +572,15 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#docker-container" class="md-nav__link">
-    Docker container
+  <a href="#running-the-docker-container-with-docker" class="md-nav__link">
+    Running the Docker container with Docker
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#singularity-container" class="md-nav__link">
-    Singularity container
+  <a href="#running-the-docker-container-with-singularity" class="md-nav__link">
+    Running the Docker container with Singularity
   </a>
   
 </li>
@@ -620,10 +620,9 @@ See also the <a href="https://github.com/frankier/skelshop">README</a> for a bit
 background. Feel free to ask in the
 <a href="https://github.com/frankier/skelshop/issues">issues</a> for help.</p>
 <h2 id="getting-started">Getting started</h2>
-<p>There are 3 options:</p>
+<p>There are 2 options:</p>
 <ol>
 <li>A Docker container, recommended for general usage.</li>
-<li>A Singularity container, for HPC environments.</li>
 <li>Manual setup, which may be convenient for development of SkelShop, usage as
    a library, or if you want to use GUI components such as the <code>playsticks</code>
    command. (It may also be possible to run <code>playsticks</code> with
@@ -632,7 +631,7 @@ background. Feel free to ask in the
 </ol>
 <p>You may find it easiest to combine these, e.g. dump skeletons from one of the
 container, while only running <code>playsticks</code> with the manual installation.</p>
-<h3 id="docker-container">Docker container</h3>
+<h3 id="running-the-docker-container-with-docker">Running the Docker container with Docker</h3>
 <p>There are two Docker containers, one based on CUDA and one able to run
 (slowly...) using only a CPU. For the CUDA (10.2) version, make sure you have
 CUDA 10 and <a href="https://github.com/NVIDIA/nvidia-docker">nvidia-docker</a> on the
@@ -646,18 +645,22 @@ host and then run:</p>
 Hub</a> and <a href="https://github.com/frankier/openpose_containers">the
 openpose_containers repository where the bases are
 built</a>.</p>
-<h3 id="singularity-container">Singularity container</h3>
-<p>There is a GPU Singularity container. Run it like so:</p>
-<pre><code>$ singularity run --nv shub://frankier/skelshop:latest python -m skelshop --help
+<h3 id="running-the-docker-container-with-singularity">Running the Docker container with Singularity</h3>
+<p>You can also run the container with Singularity, which is convenient in HPC environments.</p>
+<pre><code>$ singularity pull skelshop.sif docker://frankierr/skelshop:focal_nvcaffe
+$ singularity run --nv skelshop.sif python -m skelshop --help
 </code></pre>
 <h3 id="manual-setup">Manual setup</h3>
-<p>You need to install <a href="https://github.com/python-poetry/poetry">Poetry</a> and
+<p>First you need to install <a href="https://github.com/python-poetry/poetry">Poetry</a> and
 <a href="https://github.com/CMU-Perceptual-Computing-Lab/openpose/tree/v1.7.0">OpenPose v1.7.0
 </a>.</p>
-<pre><code>$ ./install_all.sh
+<p>Then you can install using the script:</p>
+<pre><code>$ git clone https://github.com/frankier/skelshop
+$ cd skelshop
+$ ./install_all.sh
 $ poetry run snakemake
 </code></pre>
-<p>If you only want to run the <code>playsticks</code> command you do not need to install OpenPose, can instead run</p>
+<p>If you only want to run the <code>playsticks</code> command you do not need to install OpenPose, and can instead run:</p>
 <pre><code>$ ./install.sh -E playsticks
 </code></pre>
                 
@@ -712,8 +715,8 @@ $ poetry run snakemake
       
     </div>
     
-      <script src="assets/javascripts/vendor.7e0ee788.min.js"></script>
-      <script src="assets/javascripts/bundle.b3a72adc.min.js"></script><script id="__lang" type="application/json">{"clipboard.copy": "Copy to clipboard", "clipboard.copied": "Copied to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.placeholder": "Search", "search.result.placeholder": "Type to start searching", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.term.missing": "Missing"}</script>
+      <script src="assets/javascripts/vendor.fd16492e.min.js"></script>
+      <script src="assets/javascripts/bundle.7836ba4d.min.js"></script><script id="__lang" type="application/json">{"clipboard.copy": "Copy to clipboard", "clipboard.copied": "Copied to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.placeholder": "Search", "search.result.placeholder": "Type to start searching", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.term.missing": "Missing"}</script>
       
       <script>
         app = initialize({
