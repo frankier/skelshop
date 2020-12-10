@@ -38,9 +38,9 @@ execution:
     $ wget https://raw.githubusercontent.com/frankier/singslurm/master/run_coord.sh
     $ chmod +x run_coord.sh
 
-Now you can download the Singularity image:
+Now you can download the Docker image with Singularity:
 
-    $ singularity pull shub://frankier/skelshop:latest skelshop.sif
+    $ singularity pull skelshop.sif docker://frankierr/skelshop:focal_nvcaffe
 
 Next, you need to create a JSON file specifying which type of nodes you would
 like to assign to different rules (steps in the workflow). [There is an example

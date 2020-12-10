@@ -7,9 +7,6 @@
 <a href="https://hub.docker.com/r/frankierr/skelshop/builds">
   <img alt="DockerHub hosted images" src="https://img.shields.io/docker/pulls/frankierr/skelshop?style=flat" />
 </a>
-<a href="https://singularity-hub.org/collections/4494">
-  <img alt="SingularityHub hosted images" src="https://www.singularity-hub.org/static/img/hosted-singularity--hub-%23e32929.svg" />
-</a>
 <a href="https://frankier.github.io/skelshop/">
   <img alt="Documentation on GitHub pages" src="https://img.shields.io/badge/Docs-MkDocs-informational" />
 </a>
