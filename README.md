@@ -41,7 +41,13 @@ main attributes of this type of material is:
  * Embed faces using dlib
    * Using OpenPose's face detection and keypoint estimation
    * Or using dlib's own face detection/keypoint estimation
+   * Select best frames for best quality embeddings
  * Dump across heterogeneous HPC environments including GPU and CPU nodes.
+ * Identify faces based on embeddings
+   * Identify by direct comparison with references
+   * Or cluster faces with no reference (also useful re-identitication)
+   * Identify faces based on clusters, either with a reference or interactively
+   * Quickly build up libraries of references using data from WikiData/WikiMedia commons
 
 Here's a screenshot of the playsticks command:
 
