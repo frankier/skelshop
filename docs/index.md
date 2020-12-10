@@ -2,8 +2,8 @@
 
 This is the documentation for [SkelShop](https://github.com/frankier/skelshop).
 See also the [README](https://github.com/frankier/skelshop) for a bit of extra
-background. Feel free to ask in the
-[issues](https://github.com/frankier/skelshop/issues) for help.
+background. Feel free to ask on [GitHub
+discussions](https://github.com/frankier/skelshop/discussions) for help.
 
 ## Getting started
 
