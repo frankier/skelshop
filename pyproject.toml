@@ -34,6 +34,8 @@ dlib = {git = "https://github.com/frankier/dlib", rev = "get_face_chip_details-p
 imagesize = "^1.2.0"
 hdf5plugin = "^2.3.1"
 faiss-cpu = "^1.6.5"
+SPARQLWrapper = { version = "^1.8.5", optional = true }
+certifi = { version = "^2020.12.5", optional = true }
 
 [tool.poetry.extras]
 pipeline = ["scenedetect", "snakemake"]
@@ -41,6 +43,7 @@ play = ["pygame"]
 face = ["face_recognition", "dlib"]
 ssmat = ["numba", "matplotlib", "scikit-learn", "scipy"]
 calibrate = ["pandas", "seaborn", "pyarrow"]
+buildrefs = ["SPARQLWrapper", "certifi"]
 
 [tool.poetry.dev-dependencies]
 black = "^19.10b0"
