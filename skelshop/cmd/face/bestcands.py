@@ -56,5 +56,4 @@ def bestcands(skelin, segsout, strategy, video, uncaptured):
             for frame_num, pers_id, face_name in frame_pers_iter:
                 abs_frame_num = shot.start_frame + frame_num
                 row = f"{seg_idx},{pers_id},{frame_num},{abs_frame_num},{face_name}\n"
-                print(row)
                 segsout.write(row)
