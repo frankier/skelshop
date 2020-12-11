@@ -25,7 +25,7 @@ RUN ln -sf /usr/bin/python3 /usr/bin/python
 RUN apt-get install -y --no-install-recommends unzip libjpeg62-dev
 
 RUN cd /opt && \
-    git clone --recursive --branch v0.4.0 \
+    git clone --recursive --branch v0.4.1 \
       https://github.com/dmlc/decord && \
     cd decord && \
     mkdir build && cd build && \
