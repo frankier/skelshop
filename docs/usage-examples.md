@@ -1,7 +1,7 @@
 ## Usage examples
 
 Here are some usage examples. There is more help available through the `--help'
-flag and on the CLI reference page.
+flag and on the [CLI reference page](cli.md).
 
 ### Dumping/tracking
 
