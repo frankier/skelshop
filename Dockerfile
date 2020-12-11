@@ -50,7 +50,7 @@ WORKDIR /opt/skelshop
 
 COPY pyproject.toml poetry.lock ./
 
-RUN poetry install --no-dev -E pipeline -E play -E ssmat -E face -E calibrate && \
+RUN poetry install --no-dev -E pipeline -E play -E ssmat -E face -E calibrate -E buildrefs && \
     rm -rf /root/.cache
 
 COPY . /opt/skelshop
@@ -58,7 +58,7 @@ COPY . /opt/skelshop
 # Install virtualenv because it gets removed for some reason in the previous step
 # Install again to get the skelshop package itself
 RUN pip install virtualenv && \
-    poetry install --no-dev -E pipeline -E play -E ssmat -E face -E calibrate && \
+    poetry install --no-dev -E pipeline -E play -E ssmat -E face -E calibrate -E buildrefs && \
     rm -rf /root/.cache
 
 # And reinstall again...(!)
