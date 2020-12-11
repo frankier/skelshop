@@ -14,6 +14,9 @@ from skelshop.utils.click import PathPath
 @group_in_arg
 @click.argument("imgout", type=PathPath())
 def savechips(h5fin: Path, groupin: ShotGrouper, imgout: Path):
+    """
+    Extract chips into image files from a face dump with chips embedded inside it.
+    """
     import cv2
 
     makedirs(imgout, exist_ok=True)

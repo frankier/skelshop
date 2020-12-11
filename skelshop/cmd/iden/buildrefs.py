@@ -42,6 +42,9 @@ def get_source_info(source, oauth_creds):
 def buildrefs(
     type: str, listin: TextIO, refout: Path, source: str, oauth_creds: TextIO
 ):
+    """
+    Build a reference face library from a list of entities or categories.
+    """
     if source == "commons" and oauth_creds is None:
         raise click.BadOptionUsage(
             "--oauth-creds", "--oauth-creds must be provided when source is 'commons'"

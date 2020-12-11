@@ -33,6 +33,9 @@ def skel_chip(frame: np.ndarray, skel_bundle, mode) -> np.ndarray:
 @click.argument("protos_dir", type=PathPath(exists=False))
 @click.option("--corpus-base", type=PathPath(exists=True))
 def writeprotos(protos: TextIO, corpus_desc: Path, protos_dir: Path, corpus_base: Path):
+    """
+    Given prototypes description file as produced by `clus`, dumps the corresponding images.
+    """
     import cv2
 
     reader = DictReader(protos)

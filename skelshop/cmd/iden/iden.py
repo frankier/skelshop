@@ -11,7 +11,9 @@ from .writeprotos import writeprotos
 
 @click.group()
 def iden():
-    pass
+    """
+    Commands to do with identification based on face embedding dumps
+    """
 
 
 iden.add_command(buildrefs)

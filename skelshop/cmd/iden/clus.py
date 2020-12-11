@@ -144,7 +144,7 @@ def write_prototypes(protof, corpus, all_embeddings_np, clus_labels, n):
 @click.option("--num-protos", type=int, default=1)
 def clus(corpus_desc: Path, corpus_base: Path, proto_out: Path, num_protos: int):
     """
-    Clusters embeddings from videos.
+    Clusters embeddings from multiple videos descriped in a corpus description file.
     """
     with CorpusReader(corpus_desc, corpus_base) as corpus:
         all_embeddings_np = collect_embeddings(corpus)

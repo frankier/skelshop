@@ -100,6 +100,10 @@ class ResultMerger:
 def embedselect(
     video, selection, h5fn, from_skels, batch_size, write_bboxes, write_chip,
 ):
+    """
+    Embed faces into a sparse face dump according to a predetermined selection
+    of frame-person pairs.
+    """
     from skelshop.face.pipe import select_faces_from_skel_batched
 
     vid_read = decord_video_reader(video)

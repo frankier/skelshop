@@ -27,14 +27,15 @@ STRATEGIES: Dict[str, Tuple[Any, Optional[str]]] = {
 
 
 @click.command()
-@click.argument(
-    "strategy", type=click.Choice(STRATEGIES.keys()),
-)
+@click.argument("strategy", type=click.Choice(STRATEGIES.keys()))
 @click.argument("skelin", type=click.Path(exists=True))
 @click.argument("segsout", type=click.File("w"))
 @click.option("--video", type=click.Path(exists=True))
 @click.option("--uncaptured", type=click.Path())
 def bestcands(skelin, segsout, strategy, video, uncaptured):
+    """
+    Select the best frame-person pairs to use for face embedding.
+    """
     import h5py
 
     if video is not None:

@@ -19,6 +19,9 @@ def read_assignment(assign_in: TextIO) -> Dict[str, str]:
 def applymap(
     segs_in: TextIO, assign_in: TextIO, segs_out: TextIO, filter_unlabeled: bool
 ):
+    """
+    Apply a mapping from clusters to known IDs (e.g. Wikidata Q-ids)
+    """
     assignment = read_assignment(assign_in)
     segs_out.write(next(segs_in))
     for row in segs_in:

@@ -8,7 +8,9 @@ from .savechips import savechips
 
 @click.group()
 def face():
-    pass
+    """
+    Commands for creating face embedding dumps
+    """
 
 
 face.add_command(bestcands)
