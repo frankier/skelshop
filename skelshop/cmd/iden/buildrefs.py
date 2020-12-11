@@ -2,19 +2,7 @@ from pathlib import Path
 from typing import List, TextIO
 
 import click
-from SPARQLWrapper import SPARQLWrapper
 
-from skelshop.iden.buildrefs import (
-    COMMONS_ENDPOINT,
-    COMMONS_QUERY,
-    WIKIDATA_ENDPOINT,
-    WIKIDATA_QUERY,
-    OAuth1SPARQLWrapper,
-    build_in_category_snippet,
-    build_in_list_snippet,
-    download_refs,
-    oauth_client,
-)
 from skelshop.utils.click import PathPath
 
 
@@ -26,6 +14,17 @@ def read_entities(listin: TextIO) -> List[str]:
 
 
 def get_source_info(source, oauth_creds):
+    from SPARQLWrapper import SPARQLWrapper
+
+    from skelshop.iden.buildrefs import (
+        COMMONS_ENDPOINT,
+        COMMONS_QUERY,
+        WIKIDATA_ENDPOINT,
+        WIKIDATA_QUERY,
+        OAuth1SPARQLWrapper,
+        oauth_client,
+    )
+
     if source == "wikidata":
         return SPARQLWrapper(WIKIDATA_ENDPOINT), WIKIDATA_QUERY
     else:
@@ -45,6 +44,12 @@ def buildrefs(
     """
     Build a reference face library from a list of entities or categories.
     """
+    from skelshop.iden.buildrefs import (
+        build_in_category_snippet,
+        build_in_list_snippet,
+        download_refs,
+    )
+
     if source == "commons" and oauth_creds is None:
         raise click.BadOptionUsage(
             "--oauth-creds", "--oauth-creds must be provided when source is 'commons'"
