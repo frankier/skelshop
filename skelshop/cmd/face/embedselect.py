@@ -114,19 +114,21 @@ def embedselect(
     Embed faces into a sparse face dump according to a predetermined selection
     of frame-person pairs.
     """
-    import dlib.cuda as cuda
+    import dlib
 
     from skelshop.face.pipe import select_faces_from_skel_batched
 
     if batch_size is None:
-        if cuda.get_num_devices():
+        if dlib.cuda.get_num_devices():
             batch_size = "guess"
         else:
             batch_size = DEFAULT_FRAME_BATCH_SIZE
     if batch_size == "guess":
-        if not cuda.get_num_devices():
+        if not dlib.cuda.get_num_devices():
             raise click.UsageError("Can not use --batch-size=guess on CPU")
-        memory = torch.cuda.get_device_properties(cuda.get_active_device()).total_memory
+        memory = torch.cuda.get_device_properties(
+            dlib.cuda.get_active_device()
+        ).total_memory
         # Probably enough room for decord
         mem_head = max(memory * 0.9, memory - 128 * 2 ** 20)
         # Can fit each chip 3x over
