@@ -158,7 +158,7 @@ python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*"
 
 [[package]]
 name = "decord"
-version = "0.4.1"
+version = "0.4.0"
 description = "Decord Video Loader"
 category = "main"
 optional = false
@@ -1282,7 +1282,7 @@ ssmat = ["numba", "matplotlib", "scikit-learn", "scipy"]
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.7"
-content-hash = "51218c00a93c01921dadc1ce965b4d355a140a878bca14032a308b5fd10243ff"
+content-hash = "98ee662117266b4bcc0ffc66446229cef8bf5ee80dc487362984ba173b1deeae"
 
 [metadata.files]
 amply = [
@@ -1370,8 +1370,10 @@ datrie = [
     {file = "datrie-0.8.2.tar.gz", hash = "sha256:525b08f638d5cf6115df6ccd818e5a01298cd230b2dac91c8ff2e6499d18765d"},
 ]
 decord = [
-    {file = "decord-0.4.1-py2.py3-none-manylinux1_x86_64.whl", hash = "sha256:cd203c2ff29fed2da70c04cafefdbeadf264d6e0cdbd410329db9a8be1efe91e"},
-    {file = "decord-0.4.1-py2.py3-none-win_amd64.whl", hash = "sha256:4783ebde74d613be13a2209e192a20ee29192a340aea4843d045d9c9ce2269a9"},
+    {file = "decord-0.4.0-cp36-cp36m-macosx_10_13_x86_64.whl", hash = "sha256:46fe1783905e1953c9f015e80f3fef6d216a08f9f9813d963a20296a47f11441"},
+    {file = "decord-0.4.0-cp37-cp37m-macosx_10_13_x86_64.whl", hash = "sha256:610ecf26fa560b45cd87a1fca7c0cd57fa53abfc96c736eeaec30cd67496e169"},
+    {file = "decord-0.4.0-py2.py3-none-manylinux1_x86_64.whl", hash = "sha256:113329c6074e46f423a0fc086d0c5f4d4f75881fe4eb7c64c4cd0623c76e6628"},
+    {file = "decord-0.4.0-py2.py3-none-win_amd64.whl", hash = "sha256:42ec7a42d1bd3631fe77e034523e5006b893102a271426a46e481a3fd84f44fb"},
 ]
 distlib = [
     {file = "distlib-0.3.1-py2.py3-none-any.whl", hash = "sha256:8c09de2c67b3e7deef7184574fc060ab8a793e7adbb183d942c389c8b13c52fb"},
