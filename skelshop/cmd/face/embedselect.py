@@ -1,3 +1,4 @@
+import logging
 from functools import total_ordering
 from heapq import heappop, heappush
 from typing import Any, Dict, List, Tuple
@@ -5,6 +6,7 @@ from typing import Any, Dict, List, Tuple
 import click
 import h5py
 import numpy as np
+import torch
 from imutils.video.count_frames import count_frames
 from more_itertools import peekable
 
@@ -18,6 +20,9 @@ from skelshop.utils.h5py import h5out
 from skelshop.utils.video import decord_video_reader
 
 DEFAULT_MAX_FRAMES_BYTES = 2 * 2 ** 30
+
+
+logger = logging.getLogger(__name__)
 
 
 @total_ordering
@@ -94,7 +99,12 @@ class ResultMerger:
 @click.argument("selection", type=click.File("r"))
 @click.argument("h5fn", type=click.Path())
 @click.option("--from-skels", type=click.Path())
-@click.option("--batch-size", type=int, default=DEFAULT_FRAME_BATCH_SIZE)
+@click.option(
+    "--batch-size",
+    type=str,
+    default=None,
+    help=f"The batch size to use. Valid values are 'guess' or an integer. The default is to guess on GPU otherwise use {DEFAULT_FRAME_BATCH_SIZE}",
+)
 @click.option("--write-bboxes/--no-write-bboxes")
 @click.option("--write-chip/--no-write-chip")
 def embedselect(
@@ -104,7 +114,24 @@ def embedselect(
     Embed faces into a sparse face dump according to a predetermined selection
     of frame-person pairs.
     """
+    import dlib.cuda as cuda
+
     from skelshop.face.pipe import select_faces_from_skel_batched
+
+    if batch_size is None:
+        if cuda.get_num_devices():
+            batch_size = "guess"
+        else:
+            batch_size = DEFAULT_FRAME_BATCH_SIZE
+    if batch_size == "guess":
+        if not cuda.get_num_devices():
+            raise click.UsageError("Can not use --batch-size=guess on CPU")
+        memory = torch.cuda.get_device_properties(cuda.get_active_device()).total_memory
+        # Probably enough room for decord
+        mem_head = max(memory * 0.9, memory - 128 * 2 ** 20)
+        # Can fit each chip 3x over
+        batch_size = int(mem_head / (3 * 150 * 150 * 3))
+        logging.info("Guessing --batch-size=%s", batch_size)
 
     vid_read = decord_video_reader(video)
     next(selection)
