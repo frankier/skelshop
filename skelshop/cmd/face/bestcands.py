@@ -31,8 +31,7 @@ STRATEGIES: Dict[str, Tuple[Any, Optional[str]]] = {
 @click.argument("skelin", type=click.Path(exists=True))
 @click.argument("segsout", type=click.File("w"))
 @click.option("--video", type=click.Path(exists=True))
-@click.option("--uncaptured", type=click.Path())
-def bestcands(skelin, segsout, strategy, video, uncaptured):
+def bestcands(skelin, segsout, strategy, video):
     """
     Select the best frame-person pairs to use for face embedding.
     """
