@@ -53,7 +53,7 @@ RUN poetry export \
 
 COPY . /opt/skelshop
 
-RUN echo "skelshop.pth" > \
+RUN echo "/opt/skelshop" > \
     /usr/local/lib/python3.8/dist-packages/skelshop.pth
 
 # And reinstall again...(!)
