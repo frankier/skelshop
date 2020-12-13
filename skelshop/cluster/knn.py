@@ -5,6 +5,7 @@ from abc import ABC
 from pathlib import Path
 from typing import Any, List, Tuple
 
+import faiss
 import numpy as np
 
 from skelshop.utils.timer import Timer
@@ -63,17 +64,36 @@ def build_knns(
     num_process=None,
     is_rebuild=False,
     feat_create_time=None,
+    metric_str="cosine",
 ):
     index_path = knn_prefix / f"{knn_method}_k_{k}.index"
     index: KnnBase
+    metric = None
+    if knn_method in ("faiss", "faiss_gpu"):
+        if metric_str == "cosine":
+            metric = faiss.METRIC_INNER_PRODUCT
+        elif metric_str == "euclidean":
+            metric = faiss.METRIC_L2
+        else:
+            raise ValueError("Only cosine and euclidean supported for faiss")
+    else:
+        if metric_str != "cosine":
+            raise ValueError("Only cosine supported for hnsw")
     if knn_method == "hnsw":
         index = KnnHnsw(feats, k, index_path)
     elif knn_method == "faiss":
         index = KnnFaiss(
-            feats, k, index_path, omp_num_threads=num_process, rebuild_index=True
+            feats,
+            k,
+            index_path,
+            omp_num_threads=num_process,
+            rebuild_index=True,
+            metric=metric,
         )
     elif knn_method == "faiss_gpu":
-        index = KnnFaissGpu(feats, k, index_path, num_process=num_process)
+        index = KnnFaissGpu(
+            feats, k, index_path, num_process=num_process, metric=metric
+        )
     else:
         raise KeyError("Only support hnsw and faiss currently ({}).".format(knn_method))
     knns = index.get_knns()
@@ -174,6 +194,7 @@ class KnnFaiss(KnnBase):
         nprobe=128,
         omp_num_threads=None,
         rebuild_index=True,
+        metric=faiss.METRIC_INNER_PRODUCT,
         **kwargs,
     ):
         import faiss
@@ -193,7 +214,6 @@ class KnnFaiss(KnnBase):
                     assert (
                         index_key.find("HNSW") < 0
                     ), "HNSW returns distances insted of sims"
-                    metric = faiss.METRIC_INNER_PRODUCT
                     nlist = min(4096, 8 * round(math.sqrt(size)))
                     if index_key == "IVF":
                         quantizer = index
@@ -240,6 +260,7 @@ class KnnFaissGpu(KnnBase):
         num_process=4,
         is_precise=True,
         sort=True,
+        metric=faiss.METRIC_INNER_PRODUCT,
         **kwargs,
     ):
         with Timer("[faiss_gpu] query topk {}".format(k)):
@@ -255,6 +276,7 @@ class KnnFaissGpu(KnnBase):
                     num_process=num_process,
                     is_precise=is_precise,
                     sort=sort,
+                    metric=metric,
                 )
 
                 self.knns = [

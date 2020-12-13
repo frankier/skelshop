@@ -2,9 +2,7 @@ from __future__ import annotations
 
 import logging
 from collections import Counter
-from pathlib import Path
-from statistics import median
-from typing import Iterable, Iterator, List, cast
+from typing import Any, Iterator, Optional, cast
 
 import click
 import h5py
@@ -13,20 +11,15 @@ from scipy.spatial.distance import pdist, squareform
 
 from skelshop.corpus import CorpusReader
 from skelshop.face.io import SparseFaceReader, shot_pers_group
-from skelshop.iden.idsegs import SingleDirReferenceEmbeddings
-from skelshop.utils.click import PathPath
-
-MEDIAN_THRESHOLD = 0.6
-
+from skelshop.utils.click import PathPath, save_options
 
 logger = logging.getLogger(__name__)
 
 
-def detect_shot(ref: SingleDirReferenceEmbeddings, faces: Iterable[np.ndarray]) -> bool:
-    dists: List[float] = []
-    for face in faces:
-        dists.append(ref.dist(face))
-    return median(dists) < MEDIAN_THRESHOLD
+DEFAULT_EPS = 0.09
+DEFAULT_MIN_SAMPLES = 3
+DEFAULT_EPS_LIST = [0.02, 0.03, 0.04, 0.05, 0.06, 0.07]
+DEFAULT_MIN_SAMPLES_LIST = [3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
 
 
 # Possible TODO: have references participate in clustering
@@ -39,6 +32,23 @@ def detect_shot(ref: SingleDirReferenceEmbeddings, faces: Iterable[np.ndarray]) 
 #    all_embeddings.extend(embeddings)
 
 
+def read_seg_pers(corpus: CorpusReader):
+    seg_pers = []
+    for video_idx, video_info in enumerate(corpus):
+        with open(video_info["bestcands"], "r") as bestcands:
+            next(bestcands)
+            for line in bestcands:
+                (
+                    seg,
+                    pers_id,
+                    seg_frame_num,
+                    abs_frame_num,
+                    extractor,
+                ) = line.strip().split(",")
+                seg_pers.append((video_idx, seg, pers_id))
+    return seg_pers
+
+
 def collect_embeddings(corpus: CorpusReader):
     all_embeddings = []
     for video_info in corpus:
@@ -48,19 +58,6 @@ def collect_embeddings(corpus: CorpusReader):
     all_embeddings_np = np.vstack(all_embeddings)
     all_embeddings_np /= np.linalg.norm(all_embeddings_np, axis=1)[:, np.newaxis]
     return all_embeddings_np
-
-
-def do_clustering(all_embeddings_np: np.ndarray) -> np.ndarray:
-    from skelshop.cluster.dbscan import dbscan
-
-    k = 160
-    if k > len(all_embeddings_np) - 1:
-        k = len(all_embeddings_np) - 1
-        logging.info(
-            "Only got %s embeddings so reducing k to %s", len(all_embeddings_np), k
-        )
-    # result = knn_dbscan(all_embeddings_np, knn=k, th_sim=0., eps=0.09, min_samples=3, knn_method="faiss")
-    return dbscan(all_embeddings_np, eps=0.09, min_samples=3, knn_method="faiss")
 
 
 def write_seg_clusts(corpus: CorpusReader, label_it: Iterator[int]):
@@ -137,18 +134,25 @@ def write_prototypes(protof, corpus, all_embeddings_np, clus_labels, n):
         protof.write(f"{clus_idx},{video_idx},{frame_num},{pers_id}\n")
 
 
-@click.command()
-@click.argument("corpus_desc", type=PathPath(exists=True))
-@click.option("--corpus-base", type=PathPath(exists=True))
-@click.option("--proto-out", type=PathPath())
-@click.option("--num-protos", type=int, default=1)
-def clus(corpus_desc: Path, corpus_base: Path, proto_out: Path, num_protos: int):
-    """
-    Clusters embeddings from multiple videos descriped in a corpus description file.
-    """
+def process_common_clus_options(args, kwargs, inner):
+    corpus_desc = kwargs.pop("corpus_desc")
+    corpus_base = kwargs.pop("corpus_base")
+    proto_out = kwargs.pop("proto_out")
+    num_protos = kwargs.pop("num_protos")
     with CorpusReader(corpus_desc, corpus_base) as corpus:
+        kwargs["corpus"] = corpus
         all_embeddings_np = collect_embeddings(corpus)
-        clus_labels = do_clustering(all_embeddings_np)
+        knn = kwargs.get("knn")
+        if knn is not None and knn > len(all_embeddings_np) - 1:
+            knn = len(all_embeddings_np) - 1
+            logging.info(
+                "Only got %s embeddings so reducing k to %s",
+                len(all_embeddings_np),
+                knn,
+            )
+            kwargs["knn"] = knn
+        kwargs["all_embeddings_np"] = all_embeddings_np
+        clus_labels = inner(*args, **kwargs)
         if proto_out:
             with open(proto_out, "w") as protof:
                 write_prototypes(
@@ -158,3 +162,141 @@ def clus(corpus_desc: Path, corpus_base: Path, proto_out: Path, num_protos: int)
         # write that
         label_it: Iterator[int] = cast(Iterator[int], iter(clus_labels))
         write_seg_clusts(corpus, label_it)
+
+
+common_clus_options = save_options(
+    [
+        click.argument("corpus_desc", type=PathPath(exists=True)),
+        click.option("--corpus-base", type=PathPath(exists=True)),
+        click.option("--proto-out", type=PathPath()),
+        click.option("--num-protos", type=int, default=1),
+        click.option("--use-tracklets/--no-use-tracklets"),
+        click.option(
+            "--pool", type=click.Choice(["med", "min", "vote"]), default="vote"
+        ),
+        click.option("--knn", type=int, default=None),
+    ],
+    process_common_clus_options,
+)
+
+
+@click.group()
+def clus():
+    """
+    Clusters embeddings from multiple videos descriped in a corpus description file.
+    """
+    pass
+
+
+@clus.command()
+@common_clus_options
+@click.option("--eps", type=float, default=DEFAULT_EPS)
+@click.option("--min-samples", type=float, default=DEFAULT_MIN_SAMPLES)
+def fixed(
+    all_embeddings_np: np.ndarray,
+    corpus: CorpusReader,
+    use_tracklets: bool,
+    pool: str,
+    knn: Optional[int],
+    eps: float,
+    min_samples: float,
+):
+    """
+    Performs dbscan with fixed parameters.
+    """
+    from sklearn.cluster import DBSCAN
+
+    from skelshop.cluster.dbscan import KnnDBSCAN
+
+    if knn is None:
+        clus_alg = DBSCAN(eps=eps, min_samples=min_samples, metric="cosine",)
+    else:
+        clus_alg = KnnDBSCAN(
+            knn=knn,
+            th_sim=0.0,
+            eps=eps,
+            min_samples=min_samples,
+            knn_method="faiss",
+            metric="cosine",
+        )
+
+    return clus_alg.fit_predict(all_embeddings_np)
+
+
+@clus.command()
+@common_clus_options
+@click.option("--eps")
+@click.option("--min-samples")
+@click.option(
+    "--score", type=click.Choice(["silhouette", "tracks-macc"]), default="silhouette"
+)
+def search(
+    all_embeddings_np: np.ndarray,
+    corpus: CorpusReader,
+    use_tracklets: bool,
+    pool: str,
+    knn: Optional[int],
+    eps: Optional[str],
+    min_samples: Optional[str],
+    score: str,
+):
+    """
+    Performs grid search to find best clustering parameters.
+    """
+    from sklearn.cluster import DBSCAN
+    from sklearn.model_selection import GridSearchCV
+
+    from skelshop.cluster.dbscan import KnnDBSCAN
+    from skelshop.cluster.score import silhouette_scorer, tracks_macc
+
+    seg_pers = read_seg_pers(corpus)
+
+    if eps is not None:
+        eps_list = [float(x) for x in eps.split(",")]
+    else:
+        eps_list = DEFAULT_EPS_LIST
+
+    if min_samples is not None:
+        min_samples_list = [int(x) for x in min_samples.split(",")]
+    else:
+        min_samples_list = DEFAULT_MIN_SAMPLES_LIST
+
+    scorer: Any
+    if score == "silhouette":
+        scorer = silhouette_scorer
+    else:
+        scorer = tracks_macc
+
+    if knn is None:
+        clus_alg = DBSCAN(metric="cosine")
+    else:
+        clus_alg = KnnDBSCAN(knn=knn, th_sim=0.0, knn_method="faiss", metric="cosine",)
+
+    grid_search = GridSearchCV(
+        estimator=clus_alg,
+        param_grid={"eps": eps_list, "min_samples": min_samples_list},
+        scoring=scorer,
+        # Disable cross validation
+        cv=[(slice(None), slice(None))],
+    )
+    grid_search.fit(all_embeddings_np, y=None if score == "silhouette" else seg_pers)
+    if logger.isEnabledFor(logging.DEBUG):
+        logger.debug(
+            "{}, Min samples, Eps".format(
+                "Silhouette" if score == "silhouette" else "Track rand index/accuracy"
+            )
+        )
+        for lst in zip(
+            *(
+                grid_search.cv_results_[k]
+                for k in ["mean_test_score", "param_min_samples", "param_eps"]
+            )
+        ):
+            logger.debug(" ".join((str(x) for x in lst)))
+    if logger.isEnabledFor(logging.INFO):
+        logger.info("Best estimator: %s", grid_search.best_estimator_)
+        logger.info("Best params: %s", grid_search.best_params_)
+        logger.info("Best score: %s", grid_search.best_score_)
+    predicted_labels = grid_search.best_estimator_.labels_
+
+    return predicted_labels

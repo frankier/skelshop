@@ -1,5 +1,6 @@
 import gc
 
+import faiss
 import numpy as np
 from tqdm import tqdm
 
@@ -79,11 +80,18 @@ def bmm(feat, nbrs, dist, sid, eid, sort=True, process_unit=4000, verbose=False)
 
 
 def faiss_search_knn(
-    feat, k, nprobe=128, num_process=4, is_precise=True, sort=True, verbose=False
+    feat,
+    k,
+    nprobe=128,
+    num_process=4,
+    is_precise=True,
+    sort=True,
+    verbose=False,
+    metric=faiss.METRIC_INNER_PRODUCT,
 ):
 
     dists, nbrs = faiss_search_approx_knn(
-        query=feat, target=feat, k=k, nprobe=nprobe, verbose=verbose
+        query=feat, target=feat, k=k, nprobe=nprobe, verbose=verbose, metric=metric
     )
 
     if is_precise:
@@ -104,6 +112,7 @@ class faiss_index_wrapper:
         verbose=False,
         mode="proxy",
         using_gpu=True,
+        metric=faiss.METRIC_INNER_PRODUCT,
     ):
         import faiss
 
@@ -119,7 +128,7 @@ class faiss_index_wrapper:
             if index_factory_str is None
             else index_factory_str
         )
-        cpu_index = faiss.index_factory(dim, index_factory_str)
+        cpu_index = faiss.index_factory(dim, index_factory_str, metric)
         cpu_index.nprobe = nprobe
 
         if mode == "proxy":
@@ -188,10 +197,21 @@ def batch_search(index, query, k, bs, verbose=False):
 
 
 def faiss_search_approx_knn(
-    query, target, k, nprobe=128, bs=int(1e6), index_factory_str=None, verbose=False
+    query,
+    target,
+    k,
+    nprobe=128,
+    bs=int(1e6),
+    index_factory_str=None,
+    verbose=False,
+    metric=faiss.METRIC_INNER_PRODUCT,
 ):
     index = faiss_index_wrapper(
-        target, nprobe=nprobe, index_factory_str=index_factory_str, verbose=verbose
+        target,
+        nprobe=nprobe,
+        index_factory_str=index_factory_str,
+        verbose=verbose,
+        metric=metric,
     )
     dists, nbrs = batch_search(index, query, k=k, bs=bs, verbose=verbose)
 
