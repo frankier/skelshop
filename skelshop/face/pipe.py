@@ -576,7 +576,7 @@ def select_faces_from_skel_batched(
     targets,
     vid_read,
     skel_read,
-    batch_size=DEFAULT_FACES_BATCH_SIZE,
+    batch_size: int = DEFAULT_FACES_BATCH_SIZE,
     include_chip=False,
     include_bboxes=False,
     mode=FaceExtractionMode.FROM_FACE68_IN_BODY_25_ALL,

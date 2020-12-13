@@ -1,7 +1,7 @@
 import logging
 from functools import total_ordering
 from heapq import heappop, heappush
-from typing import Any, Dict, List, Tuple
+from typing import Any, Dict, List, Optional, Tuple
 
 import click
 import h5py
@@ -94,6 +94,32 @@ class ResultMerger:
         return self
 
 
+def process_batch_size(batch_size_str: Optional[str]) -> int:
+    import dlib
+
+    is_guess = batch_size_str == "guess"
+    if batch_size_str is None:
+        if dlib.cuda.get_num_devices():
+            is_guess = True
+        else:
+            return DEFAULT_FRAME_BATCH_SIZE
+    if is_guess:
+        if not dlib.cuda.get_num_devices():
+            raise click.UsageError("Can not use --batch-size=guess on CPU")
+        memory = torch.cuda.get_device_properties(
+            dlib.cuda.get_active_device()
+        ).total_memory
+        # Probably enough room for decord
+        mem_head = max(memory * 0.9, memory - 128 * 2 ** 20)
+        # Can fit each chip 3x over
+        batch_size = int(mem_head / (3 * 150 * 150 * 3))
+        logging.info("Guessing --batch-size=%s", batch_size)
+        return batch_size
+    else:
+        assert batch_size_str is not None
+        return int(batch_size_str)
+
+
 @click.command()
 @click.argument("video", type=click.Path(exists=True))
 @click.argument("selection", type=click.File("r"))
@@ -108,32 +134,21 @@ class ResultMerger:
 @click.option("--write-bboxes/--no-write-bboxes")
 @click.option("--write-chip/--no-write-chip")
 def embedselect(
-    video, selection, h5fn, from_skels, batch_size, write_bboxes, write_chip,
+    video,
+    selection,
+    h5fn,
+    from_skels,
+    batch_size: Optional[str],
+    write_bboxes,
+    write_chip,
 ):
     """
     Embed faces into a sparse face dump according to a predetermined selection
     of frame-person pairs.
     """
-    import dlib
-
     from skelshop.face.pipe import select_faces_from_skel_batched
 
-    if batch_size is None:
-        if dlib.cuda.get_num_devices():
-            batch_size = "guess"
-        else:
-            batch_size = DEFAULT_FRAME_BATCH_SIZE
-    if batch_size == "guess":
-        if not dlib.cuda.get_num_devices():
-            raise click.UsageError("Can not use --batch-size=guess on CPU")
-        memory = torch.cuda.get_device_properties(
-            dlib.cuda.get_active_device()
-        ).total_memory
-        # Probably enough room for decord
-        mem_head = max(memory * 0.9, memory - 128 * 2 ** 20)
-        # Can fit each chip 3x over
-        batch_size = int(mem_head / (3 * 150 * 150 * 3))
-        logging.info("Guessing --batch-size=%s", batch_size)
+    batch_size_num = process_batch_size(batch_size)
 
     vid_read = decord_video_reader(video)
     next(selection)
@@ -161,7 +176,7 @@ def embedselect(
                 iter(targets),
                 vid_read,
                 skel_read,
-                batch_size=batch_size,
+                batch_size=batch_size_num,
                 mode=mode,
                 include_bboxes=write_bboxes,
                 include_chip=write_chip,
