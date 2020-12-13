@@ -111,8 +111,8 @@ def process_batch_size(batch_size_str: Optional[str]) -> int:
         ).total_memory
         # Probably enough room for decord
         mem_head = max(memory * 0.9, memory - 128 * 2 ** 20)
-        # Can fit each chip 3x over
-        batch_size = int(mem_head / (3 * 150 * 150 * 3))
+        # Each chip is 150 * 150 * 3 = 68k, but empirically takes up about 1mb (about 0.85 was observed but pad for safety)
+        batch_size = int(mem_head / 2 ** 20)
         logging.info("Guessing --batch-size=%s", batch_size)
         return batch_size
     else:
