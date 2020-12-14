@@ -55,8 +55,11 @@ def collect_embeddings(corpus: CorpusReader):
     all_embeddings = []
     for video_info in corpus:
         with h5py.File(video_info["faces"], "r") as face_h5f:
-            for _, face in SparseFaceReader(face_h5f):
+            face_reader = SparseFaceReader(face_h5f)
+            for _, face in face_reader:
                 all_embeddings.append(face["embed"])
+            # Try extra hard to remove references to HDF5 file
+            del face_reader
     all_embeddings_np = np.vstack(all_embeddings)
     all_embeddings_np /= np.linalg.norm(all_embeddings_np, axis=1)[:, np.newaxis]
     return all_embeddings_np
