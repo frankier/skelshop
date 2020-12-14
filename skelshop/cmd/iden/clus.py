@@ -16,6 +16,7 @@ from skelshop.corpus import CorpusReader
 from skelshop.face.io import SparseFaceReader
 from skelshop.utils.click import PathPath, save_options
 from skelshop.utils.numpy import min_pool_dists
+from skelshop.utils.ray import maybe_ray
 
 logger = logging.getLogger(__name__)
 
@@ -207,6 +208,7 @@ common_clus_options = save_options(
             "--pool", type=click.Choice(["med", "min", "vote"]), default="vote"
         ),
         click.option("--knn", type=int, default=None),
+        click.option("--n-jobs", type=int, default=-1),
     ],
     process_common_clus_options,
 )
@@ -256,12 +258,14 @@ def fixed(
     knn: Optional[int],
     eps: float,
     min_samples: float,
+    n_jobs: int,
 ):
     """
     Performs dbscan with fixed parameters.
     """
-    clus_alg = get_clus_alg(knn, pool, eps=eps, min_samples=min_samples)
-    return clus_alg.fit_predict(proc_data(all_embeddings_np, seg_pers, pool))
+    clus_alg = get_clus_alg(knn, pool, eps=eps, min_samples=min_samples, n_jobs=n_jobs)
+    with maybe_ray():
+        return clus_alg.fit_predict(proc_data(all_embeddings_np, seg_pers, pool))
 
 
 def med_pool_vecs(embeddings, seg_pers: List[Tuple[str, str, str]]):
@@ -293,6 +297,7 @@ def search(
     knn: Optional[int],
     eps: Optional[str],
     min_samples: Optional[str],
+    n_jobs: int,
     score: str,
 ):
     """
@@ -325,7 +330,7 @@ def search(
             )
         scorer = tracks_macc
 
-    clus_alg = get_clus_alg(knn, pool)
+    clus_alg = get_clus_alg(knn, pool, n_jobs=n_jobs)
 
     grid_search = GridSearchCV(
         estimator=clus_alg,
@@ -333,11 +338,13 @@ def search(
         scoring=scorer,
         # Disable cross validation
         cv=[(slice(None), slice(None))],
+        n_jobs=n_jobs,
     )
-    grid_search.fit(
-        proc_data(all_embeddings_np, seg_pers, pool),
-        y=None if score == "silhouette" else seg_pers,
-    )
+    with maybe_ray():
+        grid_search.fit(
+            proc_data(all_embeddings_np, seg_pers, pool),
+            y=None if score == "silhouette" else seg_pers,
+        )
     if logger.isEnabledFor(logging.DEBUG):
         logger.debug(
             "{}, Min samples, Eps".format(
