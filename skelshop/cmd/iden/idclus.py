@@ -2,7 +2,7 @@ from csv import DictReader
 from functools import lru_cache
 from itertools import groupby
 from pathlib import Path
-from typing import Any, TextIO
+from typing import TextIO
 
 import click
 import h5py
@@ -11,32 +11,7 @@ from scipy.spatial.distance import cdist
 from skelshop.corpus import index_corpus_desc
 from skelshop.iden.idsegs import MultiDirReferenceEmbeddings
 from skelshop.utils.click import PathPath
-
-
-def group_size_to_indices(group_sizes, depth=0):
-    indices = []
-    for idx, group_size in enumerate(group_sizes):
-        val: Any = idx
-        for _ in range(depth):
-            val = [val]
-        indices.extend([val] * group_size)
-    return indices
-
-
-def min_pool_dists(distances, ref_group_sizes, proto_group_sizes):
-    import numpy as np
-
-    pooled_dists = np.full(
-        (len(ref_group_sizes), len(proto_group_sizes)),
-        float("inf"),
-        dtype=distances.dtype,
-    )
-    indices = (
-        group_size_to_indices(ref_group_sizes, depth=1),
-        group_size_to_indices(proto_group_sizes),
-    )
-    np.minimum.at(pooled_dists, indices, distances)
-    return pooled_dists
+from skelshop.utils.numpy import min_pool_dists
 
 
 @lru_cache(maxsize=128)

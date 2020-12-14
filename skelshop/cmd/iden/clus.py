@@ -3,16 +3,19 @@ from __future__ import annotations
 import logging
 import os
 from collections import Counter
-from typing import Any, Iterator, Optional, cast
+from itertools import groupby
+from typing import Any, Iterator, List, Optional, Tuple
 
 import click
 import h5py
 import numpy as np
+from more_itertools import ilen, peekable
 from scipy.spatial.distance import pdist, squareform
 
 from skelshop.corpus import CorpusReader
-from skelshop.face.io import SparseFaceReader, shot_pers_group
+from skelshop.face.io import SparseFaceReader
 from skelshop.utils.click import PathPath, save_options
+from skelshop.utils.numpy import min_pool_dists
 
 logger = logging.getLogger(__name__)
 
@@ -65,33 +68,50 @@ def collect_embeddings(corpus: CorpusReader):
     return all_embeddings_np
 
 
-def write_seg_clusts(corpus: CorpusReader, label_it: Iterator[int]):
-    for video_info in corpus:
-        with h5py.File(video_info["faces"], "r") as face_h5f, video_info[
-            "group"
-        ]() as shot_grouper, open(video_info["segsout"], "w") as outf:
+def num_to_clus(num: int):
+    if num == -1:
+        return "noclus"
+    return f"c{num}"
+
+
+def get_seg_clusts_vote(seg_pers: List[Tuple[str, str, str]], label_it: Iterator[int]):
+    for grp, seg_pers_label in groupby(zip(seg_pers, label_it), lambda tpl: tpl[0]):
+        label_cnts = Counter((label for _, label in seg_pers_label))
+        clus: str
+        if len(label_cnts) == 1:
+            clus = num_to_clus(next(iter(label_cnts)))
+        else:
+            top, second = label_cnts.most_common(2)
+            if top[1] == second[1]:
+                clus = "noclus"
+            else:
+                clus = num_to_clus(top[0])
+        yield grp, clus
+
+
+def get_seg_clusts(seg_pers: List[Tuple[str, str, str]], label_it: Iterator[int]):
+    for (grp, _it), label in zip(groupby(seg_pers), label_it):
+        yield grp, num_to_clus(label)
+
+
+def write_seg_clusts(
+    corpus: CorpusReader, label_it: Iterator[Tuple[Tuple[str, str, str], str]]
+):
+    peek = peekable(label_it)
+    for video_idx, video_info in enumerate(corpus):
+        with open(video_info["segsout"], "w") as outf:
             outf.write("seg,skel_id,label\n")
-            frame_pers_labels = (
-                (frame_pers, next(label_it))
-                for frame_pers, _ in SparseFaceReader(face_h5f)
-            )
-            segmented = shot_pers_group(shot_grouper, frame_pers_labels)
-            for seg_idx, shot in segmented:
-                for pers_id, frame_labels in shot:
-                    label_cnts = Counter((label for _, label in frame_labels))
-                    clus: str
-                    if len(label_cnts) == 1:
-                        clus = "c" + str(next(iter(label_cnts)))
-                    else:
-                        top, second = label_cnts.most_common(2)
-                        if top[1] == second[1]:
-                            clus = "noclus"
-                        else:
-                            clus = "c" + str(top[0])
-                    outf.write(f"{seg_idx},{pers_id},{clus}\n")
+            while peek.peek(((None,),))[0][0] == video_idx:
+                (_video_idx, seg, skel_id), clus = next(peek)
+                outf.write(f"{seg},{skel_id},{clus}\n")
 
 
-def mediod_vecs(vecs, n):
+def medoid_vec(vecs):
+    dists = squareform(pdist(vecs, metric="cosine"))
+    return np.argmax(dists.sum(axis=0))
+
+
+def medoid_vecs(vecs, n=1):
     dists = squareform(pdist(vecs, metric="cosine"))
     return np.argsort(dists.sum(axis=0))[:n]
 
@@ -103,8 +123,8 @@ def get_prototypes(all_embeddings_np, clus_labels, n):
         if not len(clus_idxs):
             break
         clus_embeddings = all_embeddings_np[clus_idxs]
-        medioid_clus_idxs = mediod_vecs(clus_embeddings, n)
-        yield idx, (clus_idxs[idx] for idx in medioid_clus_idxs)
+        medoid_clus_idxs = medoid_vecs(clus_embeddings, n)
+        yield idx, (clus_idxs[idx] for idx in medoid_clus_idxs)
         idx += 1
 
 
@@ -144,6 +164,7 @@ def process_common_clus_options(args, kwargs, inner):
     corpus_base = kwargs.pop("corpus_base")
     proto_out = kwargs.pop("proto_out")
     num_protos = kwargs.pop("num_protos")
+    pool = kwargs["pool"]
     with CorpusReader(corpus_desc, corpus_base) as corpus:
         kwargs["corpus"] = corpus
         all_embeddings_np = collect_embeddings(corpus)
@@ -156,6 +177,10 @@ def process_common_clus_options(args, kwargs, inner):
                 knn,
             )
             kwargs["knn"] = knn
+        seg_pers = read_seg_pers(corpus)
+        kwargs["seg_pers"] = seg_pers
+        if pool == "med":
+            all_embeddings_np = med_pool_vecs(all_embeddings_np, seg_pers)
         kwargs["all_embeddings_np"] = all_embeddings_np
         clus_labels = inner(*args, **kwargs)
         if proto_out:
@@ -165,8 +190,11 @@ def process_common_clus_options(args, kwargs, inner):
                 )
         # XXX: Actually I think it's numpy int32 but can't figure out how to
         # write that
-        label_it: Iterator[int] = cast(Iterator[int], iter(clus_labels))
-        write_seg_clusts(corpus, label_it)
+        if pool == "vote":
+            grouped_label_it = get_seg_clusts_vote(seg_pers, iter(clus_labels))
+        else:
+            grouped_label_it = get_seg_clusts(seg_pers, iter(clus_labels))
+        write_seg_clusts(corpus, grouped_label_it)
 
 
 common_clus_options = save_options(
@@ -175,7 +203,6 @@ common_clus_options = save_options(
         click.option("--corpus-base", type=PathPath(exists=True)),
         click.option("--proto-out", type=PathPath()),
         click.option("--num-protos", type=int, default=1),
-        click.option("--use-tracklets/--no-use-tracklets"),
         click.option(
             "--pool", type=click.Choice(["med", "min", "vote"]), default="vote"
         ),
@@ -193,6 +220,30 @@ def clus():
     pass
 
 
+def get_clus_alg(knn: Optional[int], pool: str, **kwargs):
+    from sklearn.cluster import DBSCAN
+
+    from skelshop.cluster.dbscan import KnnDBSCAN
+
+    if knn is None:
+        return DBSCAN(metric="precomputed" if pool == "min" else "cosine", **kwargs)
+    else:
+        if pool == "min":
+            raise NotImplementedError("Min pooling not implemented for KNN DBSCAN")
+        return KnnDBSCAN(
+            knn=knn, th_sim=0.0, knn_method="faiss", metric="cosine", **kwargs
+        )
+
+
+def proc_data(vecs, seg_pers: List[Tuple[str, str, str]], pool: str):
+    if pool == "min":
+        dists = squareform(pdist(vecs, metric="cosine"))
+        sizes = [ilen(it) for _, it in groupby(seg_pers)]
+        return min_pool_dists(dists, sizes, sizes)
+    else:
+        return vecs
+
+
 @clus.command()
 @common_clus_options
 @click.option("--eps", type=float, default=DEFAULT_EPS)
@@ -200,7 +251,7 @@ def clus():
 def fixed(
     all_embeddings_np: np.ndarray,
     corpus: CorpusReader,
-    use_tracklets: bool,
+    seg_pers: List[Tuple[str, str, str]],
     pool: str,
     knn: Optional[int],
     eps: float,
@@ -209,23 +260,22 @@ def fixed(
     """
     Performs dbscan with fixed parameters.
     """
-    from sklearn.cluster import DBSCAN
+    clus_alg = get_clus_alg(knn, pool, eps=eps, min_samples=min_samples)
+    return clus_alg.fit_predict(proc_data(all_embeddings_np, seg_pers, pool))
 
-    from skelshop.cluster.dbscan import KnnDBSCAN
 
-    if knn is None:
-        clus_alg = DBSCAN(eps=eps, min_samples=min_samples, metric="cosine",)
-    else:
-        clus_alg = KnnDBSCAN(
-            knn=knn,
-            th_sim=0.0,
-            eps=eps,
-            min_samples=min_samples,
-            knn_method="faiss",
-            metric="cosine",
-        )
-
-    return clus_alg.fit_predict(all_embeddings_np)
+def med_pool_vecs(embeddings, seg_pers: List[Tuple[str, str, str]]):
+    output_size = ilen(groupby(seg_pers))
+    output_arr = np.empty((output_size, embeddings.shape[1]), dtype=embeddings.dtype)
+    output_idx = 0
+    input_idx = 0
+    for grp, it in groupby(seg_pers):
+        grp_size = ilen(it)
+        new_input_idx = input_idx + grp_size
+        output_arr[output_idx] = medoid_vec(embeddings[input_idx:new_input_idx])
+        input_idx = new_input_idx
+        output_idx += 1
+    return output_arr
 
 
 @clus.command()
@@ -238,7 +288,7 @@ def fixed(
 def search(
     all_embeddings_np: np.ndarray,
     corpus: CorpusReader,
-    use_tracklets: bool,
+    seg_pers: List[Tuple[str, str, str]],
     pool: str,
     knn: Optional[int],
     eps: Optional[str],
@@ -248,13 +298,12 @@ def search(
     """
     Performs grid search to find best clustering parameters.
     """
-    from sklearn.cluster import DBSCAN
     from sklearn.model_selection import GridSearchCV
 
-    from skelshop.cluster.dbscan import KnnDBSCAN
     from skelshop.cluster.score import silhouette_scorer, tracks_macc
 
-    seg_pers = read_seg_pers(corpus)
+    if pool == "med":
+        all_embeddings_np = med_pool_vecs(all_embeddings_np, seg_pers)
 
     if eps is not None:
         eps_list = [float(x) for x in eps.split(",")]
@@ -270,12 +319,13 @@ def search(
     if score == "silhouette":
         scorer = silhouette_scorer
     else:
+        if pool != "vote":
+            raise click.UsageError(
+                "--score=tracks-macc can only be used with --pool=vote"
+            )
         scorer = tracks_macc
 
-    if knn is None:
-        clus_alg = DBSCAN(metric="cosine")
-    else:
-        clus_alg = KnnDBSCAN(knn=knn, th_sim=0.0, knn_method="faiss", metric="cosine",)
+    clus_alg = get_clus_alg(knn, pool)
 
     grid_search = GridSearchCV(
         estimator=clus_alg,
@@ -284,7 +334,10 @@ def search(
         # Disable cross validation
         cv=[(slice(None), slice(None))],
     )
-    grid_search.fit(all_embeddings_np, y=None if score == "silhouette" else seg_pers)
+    grid_search.fit(
+        proc_data(all_embeddings_np, seg_pers, pool),
+        y=None if score == "silhouette" else seg_pers,
+    )
     if logger.isEnabledFor(logging.DEBUG):
         logger.debug(
             "{}, Min samples, Eps".format(
