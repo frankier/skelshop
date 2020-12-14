@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import logging
+import os
 from collections import Counter
 from typing import Any, Iterator, Optional, cast
 
@@ -50,6 +51,7 @@ def read_seg_pers(corpus: CorpusReader):
 
 
 def collect_embeddings(corpus: CorpusReader):
+    os.environ["HDF5_USE_FILE_LOCKING"] = "FALSE"
     all_embeddings = []
     for video_info in corpus:
         with h5py.File(video_info["faces"], "r") as face_h5f:
