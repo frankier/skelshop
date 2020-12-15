@@ -4,7 +4,7 @@ import logging
 import os
 from collections import Counter
 from itertools import groupby
-from typing import Any, Iterator, List, Optional, Tuple
+from typing import Any, Dict, Iterator, List, Optional, Tuple
 
 import click
 import h5py
@@ -21,9 +21,10 @@ from skelshop.utils.ray import maybe_ray
 logger = logging.getLogger(__name__)
 
 
+DEFAULT_MAX_EPS = 0.2
 DEFAULT_EPS = 0.09
 DEFAULT_MIN_SAMPLES = 3
-DEFAULT_EPS_LIST = [0.02, 0.03, 0.04, 0.05, 0.06, 0.07]
+DEFAULT_EPS_LIST = [0.02, 0.03, 0.04, 0.05, 0.06, 0.07, 0.08, 0.09, 0.1]
 DEFAULT_MIN_SAMPLES_LIST = [3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
 
 
@@ -216,6 +217,7 @@ common_clus_options = save_options(
         click.option("--corpus-base", type=PathPath(exists=True)),
         click.option("--proto-out", type=PathPath()),
         click.option("--num-protos", type=int, default=1),
+        click.option("--algorithm", type=click.Choice(["dbscan", "optics-dbscan"])),
         click.option(
             "--pool", type=click.Choice(["med", "min", "vote"]), default="vote"
         ),
@@ -234,14 +236,25 @@ def clus():
     pass
 
 
-def get_clus_alg(knn: Optional[int], pool: str, **kwargs):
-    from sklearn.cluster import DBSCAN
+def get_clus_alg(algorithm: str, knn: Optional[int], pool: str, **kwargs):
+    from sklearn.cluster import DBSCAN, OPTICS
 
     from skelshop.cluster.dbscan import KnnDBSCAN
 
     if knn is None:
-        return DBSCAN(metric="precomputed" if pool == "min" else "cosine", **kwargs)
+        metric = "precomputed" if pool == "min" else "cosine"
+        if algorithm == "optics-dbscan":
+            return OPTICS(
+                metric=metric,
+                max_eps=DEFAULT_MAX_EPS,
+                cluster_method="dbscan",
+                **kwargs,
+            )
+        else:
+            return DBSCAN(metric=metric, **kwargs)
     else:
+        if algorithm == "optics-dbscan":
+            raise NotImplementedError("KNN is not implemented for OPTICS")
         if pool == "min":
             raise NotImplementedError("Min pooling not implemented for KNN DBSCAN")
         return KnnDBSCAN(
@@ -266,6 +279,7 @@ def fixed(
     all_embeddings_np: np.ndarray,
     corpus: CorpusReader,
     seg_pers: List[Tuple[str, str, str]],
+    algorithm: str,
     pool: str,
     knn: Optional[int],
     eps: float,
@@ -275,7 +289,9 @@ def fixed(
     """
     Performs dbscan with fixed parameters.
     """
-    clus_alg = get_clus_alg(knn, pool, eps=eps, min_samples=min_samples, n_jobs=n_jobs)
+    clus_alg = get_clus_alg(
+        algorithm, knn, pool, eps=eps, min_samples=min_samples, n_jobs=n_jobs
+    )
     with maybe_ray():
         return clus_alg.fit_predict(proc_data(all_embeddings_np, seg_pers, pool))
 
@@ -299,12 +315,15 @@ def med_pool_vecs(embeddings, seg_pers: List[Tuple[str, str, str]]):
 @click.option("--eps")
 @click.option("--min-samples")
 @click.option(
-    "--score", type=click.Choice(["silhouette", "tracks-macc"]), default="silhouette"
+    "--score",
+    type=click.Choice(["both", "silhouette", "tracks-acc"]),
+    default="silhouette",
 )
 def search(
     all_embeddings_np: np.ndarray,
     corpus: CorpusReader,
     seg_pers: List[Tuple[str, str, str]],
+    algorithm: str,
     pool: str,
     knn: Optional[int],
     eps: Optional[str],
@@ -315,9 +334,8 @@ def search(
     """
     Performs grid search to find best clustering parameters.
     """
-    from sklearn.model_selection import GridSearchCV
-
-    from skelshop.cluster.score import silhouette_scorer, tracks_macc
+    from skelshop.cluster.param_search import GridSearchClus
+    from skelshop.cluster.score import silhouette_scorer, tracks_acc
 
     if pool == "med":
         all_embeddings_np = med_pool_vecs(all_embeddings_np, seg_pers)
@@ -333,44 +351,64 @@ def search(
         min_samples_list = DEFAULT_MIN_SAMPLES_LIST
 
     scorer: Any
+    refit: Any = True
     if score == "silhouette":
         scorer = silhouette_scorer
     else:
         if pool != "vote":
             raise click.UsageError(
-                "--score=tracks-macc can only be used with --pool=vote"
+                "--score=tracks-acc can only be used with --pool=vote"
             )
-        scorer = tracks_macc
+        if score == "both":
+            scorer = {"tracks_acc": tracks_acc, "silhouette": silhouette_scorer}
+            refit = "silhouette"
+        else:
+            scorer = tracks_acc
 
-    clus_alg = get_clus_alg(knn, pool, n_jobs=n_jobs)
+    clus_kwargs: Dict[str, Any] = {"n_jobs": n_jobs}
+    if algorithm == "optics-dbscan" and "JOBLIB_CACHE_DIR" in os.environ:
+        logger.debug("Using JOBLIB_CACHE_DIR=%s", os.environ["JOBLIB_CACHE_DIR"])
+        clus_kwargs["memory"] = os.environ["JOBLIB_CACHE_DIR"]
 
-    grid_search = GridSearchCV(
+    clus_alg = get_clus_alg(algorithm, knn, pool, **clus_kwargs)
+
+    param_grid: Dict[str, List[Any]] = {
+        "min_samples": min_samples_list,
+        "eps": eps_list,
+    }
+
+    grid_search = GridSearchClus(
         estimator=clus_alg,
-        param_grid={"eps": eps_list, "min_samples": min_samples_list},
+        param_grid=param_grid,
         scoring=scorer,
-        # Disable cross validation
-        cv=[(slice(None), slice(None))],
+        refit=refit,
         n_jobs=n_jobs,
     )
+    X = proc_data(all_embeddings_np, seg_pers, pool)
     with maybe_ray():
         grid_search.fit(
-            proc_data(all_embeddings_np, seg_pers, pool),
-            y=None if score == "silhouette" else seg_pers,
+            X, y=None if score == "silhouette" else seg_pers,
         )
-    if logger.isEnabledFor(logging.DEBUG):
-        logger.debug(
-            "{}, Min samples, Eps".format(
-                "Silhouette" if score == "silhouette" else "Track rand index/accuracy"
-            )
-        )
-        for lst in zip(
-            *(
-                grid_search.cv_results_[k]
-                for k in ["mean_test_score", "param_min_samples", "param_eps"]
-            )
-        ):
-            logger.debug(" ".join((str(x) for x in lst)))
     if logger.isEnabledFor(logging.INFO):
+        if score == "both":
+            score_heading = "Silhouette, Track rand index/accuracy"
+        elif score == "silhouette":
+            score_heading = "Silhouette"
+        else:
+            score_heading = "Track rand index/accuracy"
+        logger.info(
+            "{}, Min samples".format(score_heading)
+            + (", Eps" if algorithm != "optics-dbscan" else "")
+        )
+        keys = ["param_min_samples"]
+        if algorithm != "optics-dbscan":
+            keys = [*keys, "param_eps"]
+        if score == "both":
+            keys = ["mean_test_silhouette", "mean_test_tracks_acc", *keys]
+        else:
+            keys = ["mean_test_score", *keys]
+        for lst in zip(*(grid_search.cv_results_[k] for k in keys)):
+            logger.info(" ".join((str(x) for x in lst)))
         logger.info("Best estimator: %s", grid_search.best_estimator_)
         logger.info("Best params: %s", grid_search.best_params_)
         logger.info("Best score: %s", grid_search.best_score_)

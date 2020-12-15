@@ -1,16 +1,20 @@
 from operator import itemgetter
 
 
-def silhouette_scorer(estimator, X):
+def silhouette_scorer(estimator, X, y=None):
+    estimator.fit(X)
+    labels = estimator.labels_
+    return silhouette_score_labels(labels, X)
+
+
+def silhouette_score_labels(labels, X):
     from sklearn import metrics
 
-    estimator.fit(X)
-    cluster_labels = estimator.labels_
     seen_labels = set()
-    for label in cluster_labels:
+    for label in labels:
         seen_labels.add(label)
         if len(seen_labels) > 1:
-            return metrics.silhouette_score(X, cluster_labels, metric="cosine")
+            return metrics.silhouette_score(X, labels, metric="cosine")
     return 0
 
 
@@ -25,17 +29,21 @@ def acc(tp, tn, fp, fn):
     return (tp + tn) / (tp + tn + fp + fn)
 
 
-def tracks_macc(estimator, X, y):
+def tracks_acc(estimator, X, y):
+    estimator.fit(X)
+    labels = estimator.labels_
+    return tracks_acc_labels(labels, X, y)
+
+
+def tracks_acc_labels(labels, X, y):
     from itertools import groupby
 
-    estimator.fit(X)
-    cluster_labels = estimator.labels_
     idx = 0
     tp = tn = fp = fn = 0
     for grp, items in groupby(y, itemgetter(0, 1)):
         pers_ids = [pers_id for _, _, pers_id in items]
         end_idx = idx + len(pers_ids)
-        label_slice = cluster_labels[idx:end_idx]
+        label_slice = labels[idx:end_idx]
         for pers_id1, label1 in zip(pers_ids, label_slice):
             for pers_id2, label2 in zip(pers_ids, label_slice):
                 if pers_id1 == pers_id2:

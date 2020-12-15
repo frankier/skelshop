@@ -45,7 +45,8 @@ RUN poetry export \
       -E ssmat \
       -E face \
       -E calibrate \
-      -E buildrefs | \
+      -E buildrefs \
+      -E clus | \
     sed '/decord/d' > requirements.txt && \
     python3 -m pip install -r requirements.txt && \
     rm requirements.txt && \
