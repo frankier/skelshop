@@ -13,6 +13,8 @@ from skelshop.iden.idsegs import MultiDirReferenceEmbeddings
 from skelshop.utils.click import PathPath
 from skelshop.utils.numpy import min_pool_dists
 
+PENALTY_WEIGHT = 1e6
+
 
 @lru_cache(maxsize=128)
 def get_sparse_reader(face_path: str):
@@ -28,12 +30,14 @@ def get_sparse_reader(face_path: str):
 @click.argument("protos", type=click.File("r"))
 @click.argument("corpus_desc", type=PathPath(exists=True))
 @click.argument("assign_out", type=click.File("w"))
+@click.option("--thresh", type=float, default=float("inf"))
 @click.option("--corpus-base", type=PathPath(exists=True))
 def idclus(
     refin: Path,
     protos: TextIO,
     corpus_desc: Path,
     assign_out: TextIO,
+    thresh: float,
     corpus_base: Path,
 ):
     """
@@ -67,9 +71,12 @@ def idclus(
         proto_group_sizes.append(num_protos)
         clus_idxs.append("c" + clus_idx)
     proto_embeddings_np = np.vstack(proto_embeddings)
-    dists = cdist(ref_embeddings, proto_embeddings_np)
+    dists = cdist(ref_embeddings, proto_embeddings_np, metric="cosine")
     dists = min_pool_dists(dists, ref_group_sizes, proto_group_sizes)
+    dists[dists > thresh] = PENALTY_WEIGHT
     assignment = linear_sum_assignment(dists)
     assign_out.write("label,clus\n")
     for ref_idx, clus in zip(*assignment):
+        if dists[ref_idx, clus] == PENALTY_WEIGHT:
+            continue
         assign_out.write("{},{}\n".format(ref_labels[ref_idx], clus_idxs[clus]))
