@@ -66,6 +66,18 @@ def collect_embeddings(corpus: CorpusReader):
             del face_reader
     all_embeddings_np = np.vstack(all_embeddings)
     all_embeddings_np /= np.linalg.norm(all_embeddings_np, axis=1)[:, np.newaxis]
+    del all_embeddings
+    if logger.isEnabledFor(logging.INFO):
+        logger.info("Loaded all embeddings into memory")
+        num_embeddings = len(all_embeddings_np)
+        logger.info("Number of face embeddings: %d", num_embeddings)
+        logger.info(
+            "Size: %d bytes", (all_embeddings_np.size * all_embeddings_np.itemsize)
+        )
+        logger.info(
+            "Full squared distance matrix would take: %d bytes",
+            num_embeddings ** 2 * all_embeddings_np.itemsize,
+        )
     return all_embeddings_np
 
 
