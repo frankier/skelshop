@@ -1059,7 +1059,7 @@ test = ["ipaddress", "mock", "unittest2", "enum34", "pywin32", "wmi"]
 
 [[package]]
 name = "pulp"
-version = "2.3.1"
+version = "2.4"
 description = "PuLP is an LP modeler written in python. PuLP can generate MPS or LP files and call GLPK, COIN CLP/CBC, CPLEX, and GUROBI to solve linear problems."
 category = "main"
 optional = true
@@ -1398,7 +1398,7 @@ python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*"
 
 [[package]]
 name = "snakemake"
-version = "5.30.1"
+version = "5.30.2"
 description = "Snakemake is a workflow management system that aims to reduce the complexity of creating workflows by providing a fast and comfortable execution environment, together with a clean and modern specification language in python style. Snakemake workflows are essentially Python scripts extended by declarative code to define rules. Rules describe how to create output files from input files."
 category = "main"
 optional = true
@@ -1624,7 +1624,7 @@ testing = ["pytest (>=3.5,!=3.7.3)", "pytest-checkdocs (>=1.2.3)", "pytest-flake
 [extras]
 buildrefs = ["SPARQLWrapper", "certifi"]
 calibrate = ["pandas", "seaborn", "pyarrow"]
-clus = ["faiss-cpu", "scikit-learn", "ray"]
+clus = ["faiss-cpu", "scikit-learn", "ray", "joblib"]
 face = ["face_recognition", "dlib"]
 pipeline = ["scenedetect", "snakemake"]
 play = ["pygame"]
@@ -1633,7 +1633,7 @@ ssmat = ["numba", "matplotlib", "scikit-learn", "scipy"]
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.7"
-content-hash = "2a64eac4e218f527f26b65e98d59bddf2c9f4892507b0232dbceb888b578c38b"
+content-hash = "2fca505c5623e05eff2741ed0b07f7a67d62cdd5b82255272f68c067f23afa29"
 
 [metadata.files]
 aiohttp = [
@@ -2505,8 +2505,8 @@ psutil = [
     {file = "psutil-5.7.3.tar.gz", hash = "sha256:af73f7bcebdc538eda9cc81d19db1db7bf26f103f91081d780bbacfcb620dee2"},
 ]
 pulp = [
-    {file = "PuLP-2.3.1-py3-none-any.whl", hash = "sha256:399f95edae0ac0abd9baddc75465632ebfb368861086c86bdf94bd850af192da"},
-    {file = "PuLP-2.3.1.tar.gz", hash = "sha256:5bbe53f854fb3b689e4faacac5bdb5fa576cb270fc12c78edef827dd46a4fb50"},
+    {file = "PuLP-2.4-py3-none-any.whl", hash = "sha256:10aa02198435ad5792b7922737fb66a19a7cb4579d49317e402c8a1e1fc099ed"},
+    {file = "PuLP-2.4.tar.gz", hash = "sha256:b2aff10989b3692e3a59301a0cb0acddeb25dcea378f8804c86007075eae55b5"},
 ]
 py = [
     {file = "py-1.10.0-py2.py3-none-any.whl", hash = "sha256:3b80836aa6d1feeaa108e046da6423ab8f6ceda6468545ae8d02d9d58d18818a"},
@@ -2791,7 +2791,7 @@ smmap = [
     {file = "smmap-3.0.4.tar.gz", hash = "sha256:9c98bbd1f9786d22f14b3d4126894d56befb835ec90cef151af566c7e19b5d24"},
 ]
 snakemake = [
-    {file = "snakemake-5.30.1.tar.gz", hash = "sha256:edaed8bca9478e0393106e817a576260a1bed5e8b3bfa55e1706ef0efcffd6f6"},
+    {file = "snakemake-5.30.2.tar.gz", hash = "sha256:c4264da7462839fc21a724f23b366efafaf2ecbcf6a5f9287ae84ae871b66683"},
 ]
 soupsieve = [
     {file = "soupsieve-2.1-py3-none-any.whl", hash = "sha256:4bb21a6ee4707bf43b61230e80740e71bfe56e55d1f1f50924b087bb2975c851"},
