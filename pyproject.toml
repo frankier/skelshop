@@ -39,6 +39,7 @@ hdf5plugin = "^2.3.1"
 faiss-cpu = { version = "^1.6.5", optional = true }
 SPARQLWrapper = { version = "^1.8.5", optional = true }
 certifi = { version = "^2020.12.5", optional = true }
+ray = {version = "^1.0.1", optional = true}
 
 [tool.poetry.extras]
 pipeline = ["scenedetect", "snakemake"]
@@ -47,7 +48,7 @@ face = ["face_recognition", "dlib"]
 ssmat = ["numba", "matplotlib", "scikit-learn", "scipy"]
 calibrate = ["pandas", "seaborn", "pyarrow"]
 buildrefs = ["SPARQLWrapper", "certifi"]
-clus = ["faiss-cpu", "scikit-learn", "hdbscan"]
+clus = ["faiss-cpu", "scikit-learn", "hdbscan", "ray"]
 
 [tool.poetry.dev-dependencies]
 black = "^19.10b0"
