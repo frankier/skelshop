@@ -5,6 +5,9 @@ description = "Utilities for dealing with pose skeleton data, currently from Ope
 authors = ["Frankie Robertson <frankie@robertson.name>"]
 license = "MIT"
 
+[tool.poetry.scripts]
+skelshop = 'skelshop.cmd.skelshop:skelshop'
+
 [tool.poetry.dependencies]
 python = "^3.7"
 h5py = "^3.1.0"
