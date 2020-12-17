@@ -8,10 +8,13 @@ from typing import Any, Dict, Iterator, List, Optional, Tuple
 
 import click
 import h5py
+import numba
 import numpy as np
 from more_itertools import ilen, peekable
 from scipy.spatial.distance import pdist, squareform
+from sklearn.utils.random import sample_without_replacement
 
+from skelshop.cluster.knn import mk_faiss_index
 from skelshop.corpus import CorpusReader
 from skelshop.face.io import SparseFaceReader
 from skelshop.utils.click import PathPath, save_options
@@ -26,6 +29,8 @@ DEFAULT_EPS = 0.09
 DEFAULT_MIN_SAMPLES = 3
 DEFAULT_EPS_LIST = [0.02, 0.03, 0.04, 0.05, 0.06, 0.07, 0.08, 0.09, 0.1]
 DEFAULT_MIN_SAMPLES_LIST = [3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
+SAMPLE_KNN = 128
+SAMPLE_BATCH_SIZE = 1024
 
 
 # Possible TODO: have references participate in clustering
@@ -55,23 +60,61 @@ def read_seg_pers(corpus: CorpusReader):
     return seg_pers
 
 
-def collect_embeddings(corpus: CorpusReader):
-    os.environ["HDF5_USE_FILE_LOCKING"] = "FALSE"
-    all_embeddings = []
+def corpus_reader_indices(corpus):
     for video_info in corpus:
+        logger.debug("Loading embeddings from", video_info["faces"])
         with h5py.File(video_info["faces"], "r") as face_h5f:
             face_reader = SparseFaceReader(face_h5f)
-            for _, face in face_reader:
-                all_embeddings.append(face["embed"])
+            for idx in range(len(face_reader)):
+                yield face_reader, idx
             # Try extra hard to remove references to HDF5 file
-            del face_reader
-    all_embeddings_np = np.vstack(all_embeddings)
+            # del face_reader
+
+
+def corpus_embedding_fmt(corpus):
+    corpus_indices = corpus_reader_indices(corpus)
+    face_reader = next(corpus_indices)[0]
+    embedding = face_reader.embedding_at(0)
+    del corpus_indices
+    return embedding.shape, embedding.dtype
+
+
+def collect_embeddings(corpus: CorpusReader, sample_size=None):
+    os.environ["HDF5_USE_FILE_LOCKING"] = "FALSE"
+    shape, dtype = corpus_embedding_fmt(corpus)
+    logger.debug("Counting total number of embeddings")
+    total_num_embeddings = ilen(corpus_reader_indices(corpus))
+    logger.debug("Got %d", total_num_embeddings)
+    if sample_size is None:
+        logger.debug("Loading all of them...")
+        all_embeddings_np = np.zeros((total_num_embeddings, *shape), dtype=dtype)
+        for abs_idx, (face_reader, face_idx) in enumerate(
+            corpus_reader_indices(corpus)
+        ):
+            all_embeddings_np[abs_idx] = face_reader.embedding_at(face_idx)
+        logger.debug("Done")
+    else:
+        logger.debug("Sampling and loading %d of them...", sample_size)
+        sampled_indices = sample_without_replacement(
+            total_num_embeddings, sample_size, method="reservoir_sampling"
+        )
+        sampled_indices.sort()
+        sampled_indices_peek = peekable(sampled_indices)
+        all_embeddings_np = np.zeros((sample_size, *shape), dtype=dtype)
+        idx = 0
+        for abs_idx, (face_reader, face_idx) in enumerate(
+            corpus_reader_indices(corpus)
+        ):
+            if abs_idx != sampled_indices_peek.peek(None):
+                continue
+            all_embeddings_np[idx] = face_reader.embedding_at(face_idx)
+            next(sampled_indices_peek)
+            idx += 1
+        logger.debug("Done")
     all_embeddings_np /= np.linalg.norm(all_embeddings_np, axis=1)[:, np.newaxis]
-    del all_embeddings
     if logger.isEnabledFor(logging.INFO):
-        logger.info("Loaded all embeddings into memory")
         num_embeddings = len(all_embeddings_np)
-        logger.info("Number of face embeddings: %d", num_embeddings)
+        logger.info("Number of loaded face embeddings: %d", num_embeddings)
         logger.info(
             "Size: %d bytes", (all_embeddings_np.size * all_embeddings_np.itemsize)
         )
@@ -79,7 +122,10 @@ def collect_embeddings(corpus: CorpusReader):
             "Full squared distance matrix would take: %d bytes",
             num_embeddings ** 2 * all_embeddings_np.itemsize,
         )
-    return all_embeddings_np
+    if sample_size is None:
+        return all_embeddings_np
+    else:
+        return total_num_embeddings, sampled_indices, all_embeddings_np
 
 
 def num_to_clus(num: int):
@@ -173,6 +219,117 @@ def write_prototypes(protof, corpus, all_embeddings_np, clus_labels, n):
         protof.write(f"{clus_idx},{video_idx},{frame_num},{pers_id}\n")
 
 
+@numba.guvectorize(["int32[:], int32[:], int32[:]"], "(n),(n)->()", nopython=True)
+def vote(elems, cnts, res):
+    max_elem = -1
+    max_cnt = 0
+    num_maxes = 0
+    for idx, (elem, cnt) in enumerate(zip(elems, cnts)):
+        if elem == -1:
+            continue
+        if cnt > max_cnt:
+            max_elem = elem
+            max_cnt = cnt
+            num_maxes = 0
+        elif cnt == max_cnt:
+            num_maxes += 1
+    if num_maxes == 1:
+        res[0] = max_elem
+    else:
+        res[0] = -1
+
+
+def mk_count_vote(min_samples):
+    @numba.guvectorize(
+        ["int32[:], int32[:]", "int64[:], int64[:]"], "(n)->()", nopython=True
+    )
+    def count_vote(nbr_labels, res):
+        max_elem = -1
+        max_count = 0
+        num_maxes = 0
+        cur_elem = -1
+        cur_count = 0
+
+        def flush():
+            nonlocal max_count, num_maxes, max_elem
+            if cur_count > max_count:
+                max_count = cur_count
+                num_maxes = 1
+                max_elem = cur_elem
+            elif cur_count == max_count:
+                num_maxes += 1
+
+        for nbr_label in nbr_labels:
+            if nbr_label == -1:
+                break
+            elif nbr_label != cur_elem:
+                flush()
+                cur_elem = nbr_label
+                cur_count = 1
+            else:
+                cur_count += 1
+        flush()
+
+        # bool(...) due to https://github.com/numba/numba/issues/6585
+        if bool(num_maxes == 1) and ((max_count - 1) >= min_samples):
+            res[0] = max_elem
+        else:
+            res[0] = -1
+
+    return count_vote
+
+
+def expand_clus_labels(
+    corpus,
+    num_embeddings_total,
+    sampled_embeddings,
+    sampled_labels,
+    sample_idxs,
+    eps,
+    min_samples,
+):
+    all_clus_labels = np.full(num_embeddings_total, -1)
+    sampled_labels_it = iter(sampled_labels)
+    index = mk_faiss_index(sampled_embeddings)
+    del sampled_embeddings
+    sample_indices_peek = peekable(sample_idxs)
+    batch: List[np.ndarray] = []
+    batch_idxs: List[int] = []
+
+    count_vote = mk_count_vote(min_samples)
+
+    def flush_batch():
+        batch_np = np.vstack(batch)
+        batch_np /= np.linalg.norm(batch_np, axis=1)[:, np.newaxis]
+        dists, nbrs = index.search(batch_np, k=SAMPLE_KNN)
+        # Convert sims -> dists
+        dists = 1 - dists
+        # Mask out those over dist
+        nbrs[dists > eps] = -1
+        del dists
+        # Get the labels of the neighbours where not masked out
+        nbr_labels = np.where(nbrs != -1, sampled_labels[nbrs], -1)
+        del nbrs
+        nbr_labels.sort(axis=1)
+        nbr_labels = np.flip(nbr_labels, axis=1)
+        nearest_labels = count_vote(nbr_labels, axis=1)
+        all_clus_labels[batch_idxs] = nearest_labels
+        batch.clear()
+        batch_idxs.clear()
+
+    for abs_idx, (face_reader, face_idx) in enumerate(corpus_reader_indices(corpus)):
+        if abs_idx == sample_indices_peek.peek(None):
+            all_clus_labels[abs_idx] = next(sampled_labels_it)
+            next(sample_indices_peek)
+        else:
+            batch.append(face_reader.embedding_at(face_idx))
+            batch_idxs.append(abs_idx)
+        if len(batch_idxs) >= SAMPLE_BATCH_SIZE:
+            flush_batch()
+    flush_batch()
+    return all_clus_labels
+
+
 def process_common_clus_options(args, kwargs, inner):
     corpus_desc = kwargs.pop("corpus_desc")
     corpus_base = kwargs.pop("corpus_base")
@@ -181,7 +338,14 @@ def process_common_clus_options(args, kwargs, inner):
     pool = kwargs["pool"]
     with CorpusReader(corpus_desc, corpus_base) as corpus:
         kwargs["corpus"] = corpus
-        all_embeddings_np = collect_embeddings(corpus)
+        sample_idxs = None
+        if "sample_size" in kwargs:
+            sample_size = kwargs.pop("sample_size")
+            num_embeddings, sample_idxs, all_embeddings_np = collect_embeddings(
+                corpus, sample_size
+            )
+        else:
+            all_embeddings_np = collect_embeddings(corpus)
         knn = kwargs.get("knn")
         if knn is not None and knn > len(all_embeddings_np) - 1:
             knn = len(all_embeddings_np) - 1
@@ -196,12 +360,22 @@ def process_common_clus_options(args, kwargs, inner):
         if pool == "med":
             all_embeddings_np = med_pool_vecs(all_embeddings_np, seg_pers)
         kwargs["all_embeddings_np"] = all_embeddings_np
-        clus_labels = inner(*args, **kwargs)
+        clus_labels, eps, min_samples = inner(*args, **kwargs)
         if proto_out:
             with open(proto_out, "w") as protof:
                 write_prototypes(
                     protof, corpus, all_embeddings_np, clus_labels, num_protos
                 )
+        if sample_idxs is not None:
+            clus_labels = expand_clus_labels(
+                corpus,
+                num_embeddings,
+                all_embeddings_np,
+                clus_labels,
+                sample_idxs,
+                eps,
+                min_samples,
+            )
         # XXX: Actually I think it's numpy int32 but can't figure out how to
         # write that
         if pool == "vote":
@@ -222,6 +396,7 @@ common_clus_options = save_options(
             "--pool", type=click.Choice(["med", "min", "vote"]), default="vote"
         ),
         click.option("--knn", type=int, default=None),
+        click.option("--sample-size", type=int, default=None),
         click.option("--n-jobs", type=int, default=-1),
     ],
     process_common_clus_options,
@@ -274,7 +449,7 @@ def proc_data(vecs, seg_pers: List[Tuple[str, str, str]], pool: str):
 @clus.command()
 @common_clus_options
 @click.option("--eps", type=float, default=DEFAULT_EPS)
-@click.option("--min-samples", type=float, default=DEFAULT_MIN_SAMPLES)
+@click.option("--min-samples", type=int, default=DEFAULT_MIN_SAMPLES)
 def fixed(
     all_embeddings_np: np.ndarray,
     corpus: CorpusReader,
@@ -293,7 +468,11 @@ def fixed(
         algorithm, knn, pool, eps=eps, min_samples=min_samples, n_jobs=n_jobs
     )
     with maybe_ray():
-        return clus_alg.fit_predict(proc_data(all_embeddings_np, seg_pers, pool))
+        return (
+            clus_alg.fit_predict(proc_data(all_embeddings_np, seg_pers, pool)),
+            eps,
+            min_samples,
+        )
 
 
 def med_pool_vecs(embeddings, seg_pers: List[Tuple[str, str, str]]):
@@ -414,4 +593,8 @@ def search(
         logger.info("Best score: %s", grid_search.best_score_)
     predicted_labels = grid_search.best_estimator_.labels_
 
-    return predicted_labels
+    return (
+        predicted_labels,
+        grid_search.best_params_["eps"],
+        grid_search.best_params_["min_samples"],
+    )

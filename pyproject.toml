@@ -49,7 +49,7 @@ face = ["face_recognition", "dlib"]
 ssmat = ["numba", "matplotlib", "scikit-learn", "scipy"]
 calibrate = ["pandas", "seaborn", "pyarrow"]
 buildrefs = ["SPARQLWrapper", "certifi"]
-clus = ["faiss-cpu", "scikit-learn", "hdbscan", "ray", "joblib"]
+clus = ["faiss-cpu", "scikit-learn", "hdbscan", "ray", "joblib", "numba"]
 
 [tool.poetry.dev-dependencies]
 black = "^19.10b0"

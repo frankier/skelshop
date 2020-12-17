@@ -1,3 +1,4 @@
+import logging
 import math
 import multiprocessing as mp
 import os
@@ -11,6 +12,8 @@ import numpy as np
 from skelshop.utils.timer import Timer
 
 from .faiss_utils import faiss_search_knn
+
+logger = logging.getLogger(__name__)
 
 
 def fast_knns2spmat(knns, k, th_sim=0.7, use_sim=False, fill_value=None):
@@ -62,7 +65,6 @@ def build_knns(
     knn_method,
     k,
     num_process=None,
-    is_rebuild=False,
     feat_create_time=None,
     metric_str="cosine",
 ):
@@ -82,18 +84,9 @@ def build_knns(
     if knn_method == "hnsw":
         index = KnnHnsw(feats, k, index_path)
     elif knn_method == "faiss":
-        index = KnnFaiss(
-            feats,
-            k,
-            index_path,
-            omp_num_threads=num_process,
-            rebuild_index=True,
-            metric=metric,
-        )
+        index = KnnFaiss(feats, k, omp_num_threads=num_process, metric=metric,)
     elif knn_method == "faiss_gpu":
-        index = KnnFaissGpu(
-            feats, k, index_path, num_process=num_process, metric=metric
-        )
+        index = KnnFaissGpu(feats, k, num_process=num_process, metric=metric)
     else:
         raise KeyError("Only support hnsw and faiss currently ({}).".format(knn_method))
     knns = index.get_knns()
@@ -182,6 +175,33 @@ class KnnHnsw(KnnBase):
                 self.knns = index.knnQueryBatch(feats, k=k)
 
 
+def mk_faiss_index(feats, metric=faiss.METRIC_INNER_PRODUCT, index_key="", nprobe=128):
+    feats = feats.astype("float32")
+    size, dim = feats.shape
+    logger.debug("Building FAISS index: %dx%d", size, dim)
+    if not index_key:
+        if metric == faiss.METRIC_INNER_PRODUCT:
+            index = faiss.IndexFlatIP(dim)
+        else:
+            index = faiss.IndexFlatL2(dim)
+    else:
+        assert index_key.find("HNSW") < 0, "HNSW returns distances insted of sims"
+        nlist = min(4096, 8 * round(math.sqrt(size)))
+        if index_key == "IVF":
+            quantizer = index
+            index = faiss.IndexIVFFlat(quantizer, dim, nlist, metric)
+        else:
+            index = faiss.index_factory(dim, index_key, metric)
+        if index_key.find("Flat") < 0:
+            assert not index.is_trained
+        index.train(feats)
+        index.nprobe = min(nprobe, nlist)
+        assert index.is_trained
+        logger.debug("nlist: %d, nprobe: %d", nlist, nprobe)
+    index.add(feats)
+    return index
+
+
 class KnnFaiss(KnnBase):
     knns: List[Tuple[Any, Any]]
 
@@ -189,11 +209,9 @@ class KnnFaiss(KnnBase):
         self,
         feats,
         k,
-        index_path="",
         index_key="",
         nprobe=128,
         omp_num_threads=None,
-        rebuild_index=True,
         metric=faiss.METRIC_INNER_PRODUCT,
         **kwargs,
     ):
@@ -202,49 +220,13 @@ class KnnFaiss(KnnBase):
         if omp_num_threads is not None:
             faiss.omp_set_num_threads(omp_num_threads)
         with Timer("[faiss] build index"):
-            if index_path != "" and not rebuild_index and os.path.exists(index_path):
-                print("[faiss] read index from {}".format(index_path))
-                index = faiss.read_index(index_path)
-            else:
-                feats = feats.astype("float32")
-                size, dim = feats.shape
-                print("size, dim", size, dim)
-                index = faiss.IndexFlatIP(dim)
-                if index_key != "":
-                    assert (
-                        index_key.find("HNSW") < 0
-                    ), "HNSW returns distances insted of sims"
-                    nlist = min(4096, 8 * round(math.sqrt(size)))
-                    if index_key == "IVF":
-                        quantizer = index
-                        index = faiss.IndexIVFFlat(quantizer, dim, nlist, metric)
-                    else:
-                        index = faiss.index_factory(dim, index_key, metric)
-                    if index_key.find("Flat") < 0:
-                        assert not index.is_trained
-                    index.train(feats)
-                    index.nprobe = min(nprobe, nlist)
-                    assert index.is_trained
-                    print("nlist: {}, nprobe: {}".format(nlist, nprobe))
-                index.add(feats)
-                if index_path != "":
-                    print("[faiss] save index to {}".format(index_path))
-                    os.makedirs(index_path.parent, exist_ok=True)
-                    print("index", index)
-                    faiss.write_index(index, str(index_path))
+            index = mk_faiss_index(feats, metric, index_key, nprobe)
         with Timer("[faiss] query topk {}".format(k)):
-            knn_ofn = index_path.with_suffix(".npz")
-            if os.path.exists(knn_ofn):
-                print("[faiss] read knns from {}".format(knn_ofn))
-                self.knns = np.load(knn_ofn)["data"]
-            else:
-                sims, nbrs = index.search(feats, k=k)
-                print("sims", sims)
-                print("nbrs", nbrs)
-                self.knns = [
-                    (np.array(nbr, dtype=np.int32), 1 - np.array(sim, dtype=np.float32))
-                    for nbr, sim in zip(nbrs, sims)
-                ]
+            sims, nbrs = index.search(feats, k=k)
+            self.knns = [
+                (np.array(nbr, dtype=np.int32), 1 - np.array(sim, dtype=np.float32))
+                for nbr, sim in zip(nbrs, sims)
+            ]
 
 
 class KnnFaissGpu(KnnBase):
@@ -254,7 +236,6 @@ class KnnFaissGpu(KnnBase):
         self,
         feats,
         k,
-        index_path="",
         index_key="",
         nprobe=128,
         num_process=4,
@@ -264,22 +245,17 @@ class KnnFaissGpu(KnnBase):
         **kwargs,
     ):
         with Timer("[faiss_gpu] query topk {}".format(k)):
-            knn_ofn = index_path + ".npz"
-            if os.path.exists(knn_ofn):
-                print("[faiss_gpu] read knns from {}".format(knn_ofn))
-                self.knns = np.load(knn_ofn)["data"]
-            else:
-                dists, nbrs = faiss_search_knn(
-                    feats,
-                    k=k,
-                    nprobe=nprobe,
-                    num_process=num_process,
-                    is_precise=is_precise,
-                    sort=sort,
-                    metric=metric,
-                )
+            dists, nbrs = faiss_search_knn(
+                feats,
+                k=k,
+                nprobe=nprobe,
+                num_process=num_process,
+                is_precise=is_precise,
+                sort=sort,
+                metric=metric,
+            )
 
-                self.knns = [
-                    (np.array(nbr, dtype=np.int32), np.array(dist, dtype=np.float32))
-                    for nbr, dist in zip(nbrs, dists)
-                ]
+            self.knns = [
+                (np.array(nbr, dtype=np.int32), np.array(dist, dtype=np.float32))
+                for nbr, dist in zip(nbrs, dists)
+            ]

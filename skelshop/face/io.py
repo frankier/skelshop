@@ -127,9 +127,19 @@ class SparseFaceReader:
 
     def __iter__(self) -> Iterator[Tuple[Tuple[int, int], Dict[str, Any]]]:
         for idx in range(len(self.frame_pers)):
-            yield cast(Tuple[int, int], tuple(self.frame_pers[idx])), {
-                key: self.face_grp[key][idx] for key in self.keys
-            }
+            yield self.entry_at(idx)
+
+    def __len__(self) -> int:
+        return len(self.frame_pers)
+
+    def entry_at(self, idx):
+        return (
+            cast(Tuple[int, int], tuple(self.frame_pers[idx])),
+            {key: self.face_grp[key][idx] for key in self.keys},
+        )
+
+    def embedding_at(self, idx):
+        return self.face_grp["embed"][idx]
 
 
 class SparseFaceReaderAdapter:
