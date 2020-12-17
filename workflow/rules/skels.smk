@@ -38,7 +38,7 @@ rule skel_untracked:
 rule skel_filter_csvshotseg_opt_lighttrack:
     "Runs opt_lighttrack OpenPose tracking"
     input:
-        gcn_config = GCN_CONFIG,
+        gcn_config = ancient(GCN_CONFIG),
         untracked = pjoin(DUMP_BASE, "{base}.untracked.h5"),
         scenes_csv = pjoin(DUMP_BASE, "{base}-Scenes.csv")
     output:
