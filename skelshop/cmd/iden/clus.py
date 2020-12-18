@@ -3,6 +3,7 @@ from __future__ import annotations
 import logging
 import os
 from collections import Counter
+from functools import partial
 from itertools import groupby
 from typing import Any, Dict, Iterator, List, Optional, Tuple
 
@@ -14,8 +15,9 @@ from more_itertools import ilen, peekable
 from scipy.spatial.distance import pdist, squareform
 from sklearn.utils.random import sample_without_replacement
 
-from skelshop.cluster.knn import mk_faiss_index
+from skelshop.cluster.knn import FaissIndex
 from skelshop.corpus import CorpusReader
+from skelshop.face.consts import DEFAULT_METRIC
 from skelshop.face.io import SparseFaceReader
 from skelshop.utils.click import PathPath, save_options
 from skelshop.utils.numpy import min_pool_dists
@@ -111,7 +113,6 @@ def collect_embeddings(corpus: CorpusReader, sample_size=None):
             next(sampled_indices_peek)
             idx += 1
         logger.debug("Done")
-    all_embeddings_np /= np.linalg.norm(all_embeddings_np, axis=1)[:, np.newaxis]
     if logger.isEnabledFor(logging.INFO):
         num_embeddings = len(all_embeddings_np)
         logger.info("Number of loaded face embeddings: %d", num_embeddings)
@@ -166,34 +167,36 @@ def write_seg_clusts(
                 outf.write(f"{seg},{skel_id},{clus}\n")
 
 
-def medoid_vec(vecs):
-    dists = squareform(pdist(vecs, metric="cosine"))
+def medoid_vec(vecs, metric):
+    dists = squareform(pdist(vecs, metric=metric))
     return np.argmax(dists.sum(axis=0))
 
 
-def medoid_vecs(vecs, n=1):
-    dists = squareform(pdist(vecs, metric="cosine"))
+def medoid_vecs(vecs, metric, n=1):
+    dists = squareform(pdist(vecs, metric=metric))
     return np.argsort(dists.sum(axis=0))[:n]
 
 
-def get_prototypes(all_embeddings_np, clus_labels, n):
+def get_prototypes(all_embeddings_np, clus_labels, metric, n):
     idx = 0
     while 1:
         clus_idxs = np.nonzero(clus_labels == idx)[0]
         if not len(clus_idxs):
             break
         clus_embeddings = all_embeddings_np[clus_idxs]
-        medoid_clus_idxs = medoid_vecs(clus_embeddings, n)
+        medoid_clus_idxs = medoid_vecs(clus_embeddings, metric, n)
         yield idx, (clus_idxs[idx] for idx in medoid_clus_idxs)
         idx += 1
 
 
-def write_prototypes(protof, corpus, all_embeddings_np, clus_labels, n):
+def write_prototypes(protof, corpus, all_embeddings_np, clus_labels, metric, n):
     protof.write("clus_idx,video_idx,frame_num,pers_id\n")
     face_sorted = sorted(
         (
             (face_idx, clus_idx)
-            for clus_idx, face_idxs in get_prototypes(all_embeddings_np, clus_labels, n)
+            for clus_idx, face_idxs in get_prototypes(
+                all_embeddings_np, clus_labels, metric, n
+            )
             for face_idx in face_idxs
         )
     )
@@ -282,15 +285,16 @@ def mk_count_vote(min_samples):
 def expand_clus_labels(
     corpus,
     num_embeddings_total,
-    sampled_embeddings,
+    *sampled_embeddings,
     sampled_labels,
     sample_idxs,
     eps,
     min_samples,
+    metric,
 ):
     all_clus_labels = np.full(num_embeddings_total, -1)
     sampled_labels_it = iter(sampled_labels)
-    index = mk_faiss_index(sampled_embeddings)
+    index = FaissIndex(sampled_embeddings, metric)
     del sampled_embeddings
     sample_indices_peek = peekable(sample_idxs)
     batch: List[np.ndarray] = []
@@ -300,7 +304,6 @@ def expand_clus_labels(
 
     def flush_batch():
         batch_np = np.vstack(batch)
-        batch_np /= np.linalg.norm(batch_np, axis=1)[:, np.newaxis]
         dists, nbrs = index.search(batch_np, k=SAMPLE_KNN)
         # Convert sims -> dists
         dists = 1 - dists
@@ -358,26 +361,32 @@ def process_common_clus_options(args, kwargs, inner):
         seg_pers = read_seg_pers(corpus)
         kwargs["seg_pers"] = seg_pers
         if pool == "med":
-            all_embeddings_np = med_pool_vecs(all_embeddings_np, seg_pers)
+            all_embeddings_np = med_pool_vecs(
+                all_embeddings_np, seg_pers, DEFAULT_METRIC
+            )
         kwargs["all_embeddings_np"] = all_embeddings_np
         clus_labels, eps, min_samples = inner(*args, **kwargs)
         if proto_out:
             with open(proto_out, "w") as protof:
                 write_prototypes(
-                    protof, corpus, all_embeddings_np, clus_labels, num_protos
+                    protof,
+                    corpus,
+                    all_embeddings_np,
+                    clus_labels,
+                    DEFAULT_METRIC,
+                    num_protos,
                 )
         if sample_idxs is not None:
             clus_labels = expand_clus_labels(
                 corpus,
                 num_embeddings,
-                all_embeddings_np,
-                clus_labels,
-                sample_idxs,
-                eps,
-                min_samples,
+                sampled_embeddings=all_embeddings_np,
+                sampled_labels=clus_labels,
+                sample_idxs=sample_idxs,
+                eps=eps,
+                min_samples=min_samples,
+                metric=DEFAULT_METRIC,
             )
-        # XXX: Actually I think it's numpy int32 but can't figure out how to
-        # write that
         if pool == "vote":
             grouped_label_it = get_seg_clusts_vote(seg_pers, iter(clus_labels))
         else:
@@ -411,13 +420,13 @@ def clus():
     pass
 
 
-def get_clus_alg(algorithm: str, knn: Optional[int], pool: str, **kwargs):
+def get_clus_alg(algorithm: str, knn: Optional[int], pool: str, metric: str, **kwargs):
     from sklearn.cluster import DBSCAN, OPTICS
 
     from skelshop.cluster.dbscan import KnnDBSCAN
 
     if knn is None:
-        metric = "precomputed" if pool == "min" else "cosine"
+        metric = "precomputed" if pool == "min" else metric
         if algorithm == "optics-dbscan":
             return OPTICS(
                 metric=metric,
@@ -433,13 +442,13 @@ def get_clus_alg(algorithm: str, knn: Optional[int], pool: str, **kwargs):
         if pool == "min":
             raise NotImplementedError("Min pooling not implemented for KNN DBSCAN")
         return KnnDBSCAN(
-            knn=knn, th_sim=0.0, knn_method="faiss", metric="cosine", **kwargs
+            knn=knn, th_sim=0.0, knn_method="faiss", metric=metric, **kwargs
         )
 
 
-def proc_data(vecs, seg_pers: List[Tuple[str, str, str]], pool: str):
+def proc_data(vecs, seg_pers: List[Tuple[str, str, str]], pool: str, metric: str):
     if pool == "min":
-        dists = squareform(pdist(vecs, metric="cosine"))
+        dists = squareform(pdist(vecs, metric=metric))
         sizes = [ilen(it) for _, it in groupby(seg_pers)]
         return min_pool_dists(dists, sizes, sizes)
     else:
@@ -465,17 +474,25 @@ def fixed(
     Performs dbscan with fixed parameters.
     """
     clus_alg = get_clus_alg(
-        algorithm, knn, pool, eps=eps, min_samples=min_samples, n_jobs=n_jobs
+        algorithm,
+        knn,
+        pool,
+        DEFAULT_METRIC,
+        eps=eps,
+        min_samples=min_samples,
+        n_jobs=n_jobs,
     )
     with maybe_ray():
         return (
-            clus_alg.fit_predict(proc_data(all_embeddings_np, seg_pers, pool)),
+            clus_alg.fit_predict(
+                proc_data(all_embeddings_np, seg_pers, pool, DEFAULT_METRIC)
+            ),
             eps,
             min_samples,
         )
 
 
-def med_pool_vecs(embeddings, seg_pers: List[Tuple[str, str, str]]):
+def med_pool_vecs(embeddings, seg_pers: List[Tuple[str, str, str]], metric: str):
     output_size = ilen(groupby(seg_pers))
     output_arr = np.empty((output_size, embeddings.shape[1]), dtype=embeddings.dtype)
     output_idx = 0
@@ -483,7 +500,7 @@ def med_pool_vecs(embeddings, seg_pers: List[Tuple[str, str, str]]):
     for grp, it in groupby(seg_pers):
         grp_size = ilen(it)
         new_input_idx = input_idx + grp_size
-        output_arr[output_idx] = medoid_vec(embeddings[input_idx:new_input_idx])
+        output_arr[output_idx] = medoid_vec(embeddings[input_idx:new_input_idx], metric)
         input_idx = new_input_idx
         output_idx += 1
     return output_arr
@@ -517,7 +534,7 @@ def search(
     from skelshop.cluster.score import silhouette_scorer, tracks_acc
 
     if pool == "med":
-        all_embeddings_np = med_pool_vecs(all_embeddings_np, seg_pers)
+        all_embeddings_np = med_pool_vecs(all_embeddings_np, seg_pers, DEFAULT_METRIC)
 
     if eps is not None:
         eps_list = [float(x) for x in eps.split(",")]
@@ -531,15 +548,16 @@ def search(
 
     scorer: Any
     refit: Any = True
+    metric_silhouette_scorer = partial(silhouette_scorer, DEFAULT_METRIC)
     if score == "silhouette":
-        scorer = silhouette_scorer
+        scorer = metric_silhouette_scorer
     else:
         if pool != "vote":
             raise click.UsageError(
                 "--score=tracks-acc can only be used with --pool=vote"
             )
         if score == "both":
-            scorer = {"tracks_acc": tracks_acc, "silhouette": silhouette_scorer}
+            scorer = {"tracks_acc": tracks_acc, "silhouette": metric_silhouette_scorer}
             refit = "silhouette"
         else:
             scorer = tracks_acc
@@ -549,7 +567,7 @@ def search(
         logger.debug("Using JOBLIB_CACHE_DIR=%s", os.environ["JOBLIB_CACHE_DIR"])
         clus_kwargs["memory"] = os.environ["JOBLIB_CACHE_DIR"]
 
-    clus_alg = get_clus_alg(algorithm, knn, pool, **clus_kwargs)
+    clus_alg = get_clus_alg(algorithm, knn, pool, DEFAULT_METRIC, **clus_kwargs)
 
     param_grid: Dict[str, List[Any]] = {
         "min_samples": min_samples_list,
@@ -563,7 +581,7 @@ def search(
         refit=refit,
         n_jobs=n_jobs,
     )
-    X = proc_data(all_embeddings_np, seg_pers, pool)
+    X = proc_data(all_embeddings_np, seg_pers, pool, DEFAULT_METRIC)
     with maybe_ray():
         grid_search.fit(
             X, y=None if score == "silhouette" else seg_pers,

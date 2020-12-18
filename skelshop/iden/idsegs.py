@@ -8,14 +8,11 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Any, Dict, Iterator, List, Optional, Tuple
 
 import click
+from scipy.spatial.distance import cdist
 
 from skelshop import lazyimp
 from skelshop.utils.click import PathPath
-from skelshop.utils.numpy import (
-    linear_sum_assignment_penalty,
-    min_pool_dists,
-    normalize,
-)
+from skelshop.utils.numpy import linear_sum_assignment_penalty, min_pool_dists
 
 if TYPE_CHECKING:
     import numpy as np
@@ -51,9 +48,9 @@ def multi_ref_embeddings(ref_dir: Path) -> Iterator[Tuple[str, List[np.ndarray]]
         yield entry.name, ref_embeddings(entry)
 
 
-def min_dist(ref, embed) -> float:
+def min_dist(metric, ref, embed) -> float:
     min_distance = float("inf")
-    face_distances = 1 - np.dot(normalize(ref), normalize(embed))
+    face_distances = cdist(ref, embed, metric)
     for distance in face_distances:
         if distance < min_distance:
             min_distance = distance
@@ -68,14 +65,14 @@ class SingleDirReferenceEmbeddings:
     def labeled_embeddings(self) -> Iterator[Tuple[str, np.ndarray]]:
         return iter([(self.label, self.ref)])
 
-    def dist(self, embedding) -> float:
-        return min_dist(self.ref, embedding)
+    def dist(self, metric: str, embedding) -> float:
+        return min_dist(metric, self.ref, embedding)
 
-    def dist_labels(self, embedding) -> List[Tuple[str, float]]:
-        return [(self.label, self.dist(embedding))]
+    def dist_labels(self, metric: str, embedding) -> List[Tuple[str, float]]:
+        return [(self.label, self.dist(metric, embedding))]
 
-    def nearest_label(self, embedding):
-        return self.label, self.dist(embedding)
+    def nearest_label(self, metric: str, embedding):
+        return self.label, self.dist(metric, embedding)
 
 
 class MultiDirReferenceEmbeddings:
@@ -101,16 +98,16 @@ class MultiDirReferenceEmbeddings:
     def labeled_embeddings(self) -> Iterator[Tuple[str, np.ndarray]]:
         return iter(self.refs.items())
 
-    def dist(self, label: str, embedding):
-        return min_dist(self.refs[label], embedding)
+    def dist(self, metric: str, label: str, embedding):
+        return min_dist(metric, self.refs[label], embedding)
 
-    def dist_labels(self, embedding) -> List[Tuple[str, float]]:
-        return [(label, self.dist(label, embedding)) for label in self.refs]
+    def dist_labels(self, metric: str, embedding) -> List[Tuple[str, float]]:
+        return [(label, self.dist(metric, label, embedding)) for label in self.refs]
 
-    def nearest_label(self, embedding):
+    def nearest_label(self, metric: str, embedding):
         min_label = None
         min_dist = float("inf")
-        for label, dist in self.dist_labels(embedding):
+        for label, dist in self.dist_labels(metric, embedding):
             if dist < min_dist:
                 min_label = label
                 min_dist = dist
@@ -127,19 +124,17 @@ class MultiDirReferenceEmbeddings:
             self.ref_group_sizes.append(len(embeddings))
             self.ref_labels.append(label)
 
-    def cdist(self, cmp_np, cmp_group_sizes=None):
+    def cdist(self, metric: str, cmp_np, cmp_group_sizes=None):
         from scipy.spatial.distance import cdist
 
         self._ensure_cdist()
         if cmp_group_sizes is None:
             cmp_group_sizes = [1] * len(cmp_np)
-        print("self.ref_embeddings", self.ref_embeddings)
-        print("cmp_np", cmp_np)
-        dists = cdist(self.ref_embeddings, cmp_np, metric="cosine")
+        dists = cdist(self.ref_embeddings, cmp_np, metric=metric)
         return min_pool_dists(dists, self.ref_group_sizes, cmp_group_sizes)
 
-    def assignment(self, thresh, cmp_np, cmp_group_sizes=None):
-        dists = self.cdist(cmp_np, cmp_group_sizes=cmp_group_sizes)
+    def assignment(self, metric: str, thresh, cmp_np, cmp_group_sizes=None):
+        dists = self.cdist(metric, cmp_np, cmp_group_sizes=cmp_group_sizes)
         return linear_sum_assignment_penalty(dists, dists > thresh)
 
 
@@ -163,6 +158,7 @@ def ref_arg(func):
 def detect_shot(
     ref,
     pers_arrs: List[List[np.ndarray]],
+    metric: str,
     *,
     min_detected_frames,
     detection_threshold,
@@ -187,8 +183,7 @@ def detect_shot(
         if not embed_stack:
             continue
         # For a given person, the comparison against refs across all frames
-        print("embed_stack", embed_stack)
-        frame_ref_dists = ref.cdist(np.vstack(embed_stack))
+        frame_ref_dists = ref.cdist(metric, np.vstack(embed_stack))
         detected_frames[idx] = np.count_nonzero(
             frame_ref_dists <= detection_threshold, axis=1
         )

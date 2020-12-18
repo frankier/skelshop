@@ -4,6 +4,7 @@ import click
 import h5py
 import numpy as np
 
+from skelshop.face.consts import DEFAULT_METRIC
 from skelshop.face.io import FaceReader
 from skelshop.iden.idsegs import detect_shot, ref_arg
 from skelshop.shotseg.io import group_in_arg
@@ -49,6 +50,7 @@ def idsegsfull(
             detected_pers = detect_shot(
                 ref,
                 pers_arrs,
+                DEFAULT_METRIC,
                 min_detected_frames=min_detected_frames,
                 detection_threshold=detection_threshold,
                 median_threshold=median_threshold,

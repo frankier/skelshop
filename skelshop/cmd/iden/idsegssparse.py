@@ -5,6 +5,7 @@ from typing import TYPE_CHECKING, List
 import click
 import h5py
 
+from skelshop.face.consts import DEFAULT_METRIC
 from skelshop.face.io import SparseFaceReader, shot_pers_group
 from skelshop.iden.idsegs import detect_shot, ref_arg
 from skelshop.shotseg.io import group_in_arg
@@ -42,6 +43,7 @@ def idsegssparse(ref, groupin, segsout, faces, detection_threshold):
             detected_pers = detect_shot(
                 ref,
                 pers_arrs,
+                DEFAULT_METRIC,
                 min_detected_frames=1,
                 detection_threshold=detection_threshold,
                 median_threshold=float("inf"),

@@ -9,6 +9,7 @@ from typing import Any, List, Tuple
 import faiss
 import numpy as np
 
+from skelshop.utils.numpy import normalize
 from skelshop.utils.timer import Timer
 
 from .faiss_utils import faiss_search_knn
@@ -66,27 +67,21 @@ def build_knns(
     k,
     num_process=None,
     feat_create_time=None,
-    metric_str="cosine",
+    metric="cosine",
 ):
     index_path = knn_prefix / f"{knn_method}_k_{k}.index"
     index: KnnBase
-    metric = None
-    if knn_method in ("faiss", "faiss_gpu"):
-        if metric_str == "cosine":
-            metric = faiss.METRIC_INNER_PRODUCT
-        elif metric_str == "euclidean":
-            metric = faiss.METRIC_L2
-        else:
-            raise ValueError("Only cosine and euclidean supported for faiss")
-    else:
-        if metric_str != "cosine":
-            raise ValueError("Only cosine supported for hnsw")
+    if metric not in ("cosine", "euclidean"):
+        raise ValueError("Only 'cosine' and 'euclidean' are supported as metrics")
+    if metric == "cosine":
+        # XXX: Is this always needed e.g. for KnnHnsw?
+        feats = normalize(feats)
     if knn_method == "hnsw":
-        index = KnnHnsw(feats, k, index_path)
+        index = KnnHnsw(feats, metric, k, index_path)
     elif knn_method == "faiss":
-        index = KnnFaiss(feats, k, omp_num_threads=num_process, metric=metric,)
+        index = KnnFaiss(feats, metric, k, omp_num_threads=num_process)
     elif knn_method == "faiss_gpu":
-        index = KnnFaissGpu(feats, k, num_process=num_process, metric=metric)
+        index = KnnFaissGpu(feats, metric, k, num_process=num_process)
     else:
         raise KeyError("Only support hnsw and faiss currently ({}).".format(knn_method))
     knns = index.get_knns()
@@ -131,7 +126,7 @@ class KnnBase(ABC):
 class KnnBruteForce(KnnBase):
     knns: List[Tuple[Any, Any]]
 
-    def __init__(self, feats, k, index_path=""):
+    def __init__(self, feats, metric: str, k, index_path=""):
         with Timer("[brute force] build index"):
             feats = feats.astype("float32")
             sim = feats.dot(feats.T)
@@ -148,8 +143,11 @@ class KnnBruteForce(KnnBase):
 class KnnHnsw(KnnBase):
     knns: List[Tuple[Any, Any]]
 
-    def __init__(self, feats, k, index_path="", **kwargs):
+    def __init__(self, feats, metric: str, k, index_path="", **kwargs):
         import nmslib
+
+        if metric != "cosine":
+            raise NotImplementedError("KnnHnsw is only implemented for cosine distance")
 
         with Timer("[hnsw] build index"):
             """ higher ef leads to better accuracy, but slower search
@@ -175,12 +173,18 @@ class KnnHnsw(KnnBase):
                 self.knns = index.knnQueryBatch(feats, k=k)
 
 
-def mk_faiss_index(feats, metric=faiss.METRIC_INNER_PRODUCT, index_key="", nprobe=128):
+def mk_faiss_index(feats, metric: str, index_key="", nprobe=128):
+    if metric not in ("cosine", "euclidean"):
+        raise ValueError("metric must be either 'cosine' or 'euclidean'")
     feats = feats.astype("float32")
     size, dim = feats.shape
     logger.debug("Building FAISS index: %dx%d", size, dim)
+    if metric == "cosine":
+        inner_metric = faiss.METRIC_INNER_PRODUCT
+    else:
+        inner_metric = faiss.METRIC_L2
     if not index_key:
-        if metric == faiss.METRIC_INNER_PRODUCT:
+        if inner_metric == faiss.METRIC_INNER_PRODUCT:
             index = faiss.IndexFlatIP(dim)
         else:
             index = faiss.IndexFlatL2(dim)
@@ -189,9 +193,9 @@ def mk_faiss_index(feats, metric=faiss.METRIC_INNER_PRODUCT, index_key="", nprob
         nlist = min(4096, 8 * round(math.sqrt(size)))
         if index_key == "IVF":
             quantizer = index
-            index = faiss.IndexIVFFlat(quantizer, dim, nlist, metric)
+            index = faiss.IndexIVFFlat(quantizer, dim, nlist, inner_metric)
         else:
-            index = faiss.index_factory(dim, index_key, metric)
+            index = faiss.index_factory(dim, index_key, inner_metric)
         if index_key.find("Flat") < 0:
             assert not index.is_trained
         index.train(feats)
@@ -202,23 +206,38 @@ def mk_faiss_index(feats, metric=faiss.METRIC_INNER_PRODUCT, index_key="", nprob
     return index
 
 
+class FaissIndex:
+    def __init__(self, feats, metric: str, index_key="", nprobe=128):
+        if metric == "cosine":
+            feats = normalize(feats)
+        self.index = mk_faiss_index(feats, metric, index_key, nprobe)
+        self.metric = metric
+
+    def search(self, batch, k):
+        if self.metric == "cosine":
+            batch = normalize(batch)
+        return self.index.search(batch, k=k)
+
+
 class KnnFaiss(KnnBase):
     knns: List[Tuple[Any, Any]]
 
     def __init__(
         self,
         feats,
+        metric: str,
         k,
         index_key="",
         nprobe=128,
         omp_num_threads=None,
-        metric=faiss.METRIC_INNER_PRODUCT,
         **kwargs,
     ):
         import faiss
 
         if omp_num_threads is not None:
             faiss.omp_set_num_threads(omp_num_threads)
+        if metric == "cosine":
+            feats = normalize(feats)
         with Timer("[faiss] build index"):
             index = mk_faiss_index(feats, metric, index_key, nprobe)
         with Timer("[faiss] query topk {}".format(k)):
@@ -235,24 +254,24 @@ class KnnFaissGpu(KnnBase):
     def __init__(
         self,
         feats,
+        metric: str,
         k,
         index_key="",
         nprobe=128,
         num_process=4,
         is_precise=True,
         sort=True,
-        metric=faiss.METRIC_INNER_PRODUCT,
         **kwargs,
     ):
         with Timer("[faiss_gpu] query topk {}".format(k)):
             dists, nbrs = faiss_search_knn(
                 feats,
                 k=k,
+                metric=metric,
                 nprobe=nprobe,
                 num_process=num_process,
                 is_precise=is_precise,
                 sort=sort,
-                metric=metric,
             )
 
             self.knns = [

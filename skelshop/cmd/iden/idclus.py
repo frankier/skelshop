@@ -8,6 +8,7 @@ import click
 import h5py
 
 from skelshop.corpus import index_corpus_desc
+from skelshop.face.consts import DEFAULT_METRIC
 from skelshop.iden.idsegs import ref_arg
 from skelshop.utils.click import PathPath
 
@@ -62,5 +63,7 @@ def idclus(
     proto_embeddings_np = np.vstack(proto_embeddings)
     assign_out.write("label,clus\n")
     ref_labels = list(ref.labels())
-    for ref_idx, clus in ref.assignment(thresh, proto_embeddings_np, proto_group_sizes):
+    for ref_idx, clus in ref.assignment(
+        DEFAULT_METRIC, thresh, proto_embeddings_np, proto_group_sizes
+    ):
         assign_out.write("{},{}\n".format(ref_labels[ref_idx], clus_idxs[clus]))

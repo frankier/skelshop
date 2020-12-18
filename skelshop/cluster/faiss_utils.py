@@ -82,16 +82,28 @@ def bmm(feat, nbrs, dist, sid, eid, sort=True, process_unit=4000, verbose=False)
 def faiss_search_knn(
     feat,
     k,
+    metric,
     nprobe=128,
     num_process=4,
     is_precise=True,
     sort=True,
     verbose=False,
-    metric=faiss.METRIC_INNER_PRODUCT,
 ):
-
+    if metric == "cosine":
+        faiss_metric = faiss.METRIC_INNER_PRODUCT
+        # TODO: Make sure all vectors are normalised in this case
+        raise NotImplementedError(
+            "Cosine distance is not implemented in faiss_search_knn"
+        )
+    else:
+        faiss_metric = faiss.METRIC_L2
     dists, nbrs = faiss_search_approx_knn(
-        query=feat, target=feat, k=k, nprobe=nprobe, verbose=verbose, metric=metric
+        query=feat,
+        target=feat,
+        k=k,
+        nprobe=nprobe,
+        verbose=verbose,
+        metric=faiss_metric,
     )
 
     if is_precise:

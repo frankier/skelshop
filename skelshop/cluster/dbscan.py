@@ -45,7 +45,7 @@ class KnnDBSCAN(cluster.DBSCAN):
             raise ValueError("Only euclidean and cosine are supported as metrics")
         with TemporaryDirectory(suffix="knns") as knn_prefix:
             knns = build_knns(
-                Path(knn_prefix), X, self.knn_method, self.knn, metric_str=self.metric
+                Path(knn_prefix), X, self.knn_method, self.knn, metric=self.metric
             )
         sparse_affinity = fast_knns2spmat(knns, self.knn, self.th_sim, use_sim=False)
         old_metric = self.metric

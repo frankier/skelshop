@@ -1,20 +1,20 @@
 from operator import itemgetter
 
 
-def silhouette_scorer(estimator, X, y=None):
+def silhouette_scorer(metric, estimator, X, y=None):
     estimator.fit(X)
     labels = estimator.labels_
-    return silhouette_score_labels(labels, X)
+    return silhouette_score_labels(labels, X, metric)
 
 
-def silhouette_score_labels(labels, X):
+def silhouette_score_labels(metric, labels, X):
     from sklearn import metrics
 
     seen_labels = set()
     for label in labels:
         seen_labels.add(label)
         if len(seen_labels) > 1:
-            return metrics.silhouette_score(X, labels, metric="cosine")
+            return metrics.silhouette_score(X, labels, metric)
     return 0
 
 
