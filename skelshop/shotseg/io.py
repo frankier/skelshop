@@ -90,11 +90,16 @@ class IntervalGrouperBase(ShotGrouper):
     ) -> Iterator[Iterator[IterElem]]:
         cuts_iter = iter(self.cuts)
         frame_num = 0
+        early_return = False
 
         def iter_shot():
-            nonlocal frame_num
+            nonlocal frame_num, early_return
             while frame_num < next_shot_break:
-                yield next(other_iter)
+                try:
+                    yield next(other_iter)
+                except StopIteration:
+                    early_return = True
+                    return
                 frame_num += 1
 
         while 1:
@@ -102,6 +107,8 @@ class IntervalGrouperBase(ShotGrouper):
             try:
                 yield iter_shot()
             except StopIteration:
+                break
+            if early_return:
                 break
 
 

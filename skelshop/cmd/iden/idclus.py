@@ -6,12 +6,10 @@ from typing import TextIO
 
 import click
 import h5py
-from scipy.spatial.distance import cdist
 
 from skelshop.corpus import index_corpus_desc
-from skelshop.iden.idsegs import MultiDirReferenceEmbeddings
+from skelshop.iden.idsegs import ref_arg
 from skelshop.utils.click import PathPath
-from skelshop.utils.numpy import min_pool_dists
 
 PENALTY_WEIGHT = 1e6
 
@@ -26,14 +24,14 @@ def get_sparse_reader(face_path: str):
 
 
 @click.command()
-@click.argument("refin", type=PathPath(exists=True))
+@ref_arg
 @click.argument("protos", type=click.File("r"))
 @click.argument("corpus_desc", type=PathPath(exists=True))
 @click.argument("assign_out", type=click.File("w"))
 @click.option("--thresh", type=float, default=float("inf"))
 @click.option("--corpus-base", type=PathPath(exists=True))
 def idclus(
-    refin: Path,
+    ref,
     protos: TextIO,
     corpus_desc: Path,
     assign_out: TextIO,
@@ -44,18 +42,9 @@ def idclus(
     Identifies clusters by comparing against a reference and forcing a match
     """
     import numpy as np
-    from scipy.optimize import linear_sum_assignment
 
     corpus = index_corpus_desc(corpus_desc, corpus_base)
     reader = DictReader(protos)
-    ref = MultiDirReferenceEmbeddings(refin)
-    ref_embeddings = []
-    ref_group_sizes = []
-    ref_labels = []
-    for label, embeddings in ref.refs.items():
-        ref_embeddings.extend(embeddings)
-        ref_group_sizes.append(len(embeddings))
-        ref_labels.append(label)
     proto_embeddings = []
     proto_group_sizes = []
     clus_idxs = []
@@ -71,12 +60,7 @@ def idclus(
         proto_group_sizes.append(num_protos)
         clus_idxs.append("c" + clus_idx)
     proto_embeddings_np = np.vstack(proto_embeddings)
-    dists = cdist(ref_embeddings, proto_embeddings_np, metric="cosine")
-    dists = min_pool_dists(dists, ref_group_sizes, proto_group_sizes)
-    dists[dists > thresh] = PENALTY_WEIGHT
-    assignment = linear_sum_assignment(dists)
     assign_out.write("label,clus\n")
-    for ref_idx, clus in zip(*assignment):
-        if dists[ref_idx, clus] == PENALTY_WEIGHT:
-            continue
+    ref_labels = list(ref.labels())
+    for ref_idx, clus in ref.assignment(thresh, proto_embeddings_np, proto_group_sizes):
         assign_out.write("{},{}\n".format(ref_labels[ref_idx], clus_idxs[clus]))
