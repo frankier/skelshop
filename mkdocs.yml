@@ -14,6 +14,7 @@ nav:
       - 'Face chip detectors/croppers': face-extractors.md
       - Face embedders: face-embedders.md
     - Usage examples: usage-examples.md
+    - Benchmarks: benchmark.md
     - HPC extraction with Snakemake: snakemake.md
   - 'Developer guide (for users of the library & contributors)': 
     - Pipeline internals: pipeline-internals.md
