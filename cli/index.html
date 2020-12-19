@@ -330,6 +330,18 @@
 
 
   <li class="md-nav__item">
+    <a href="../benchmark/" class="md-nav__link">
+      Benchmarks
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
     <a href="../snakemake/" class="md-nav__link">
       HPC extraction with Snakemake
     </a>
@@ -536,9 +548,12 @@
 <pre><code>skelshop [OPTIONS] COMMAND [ARGS]...
 </code></pre>
 <p>Options:</p>
-<pre><code>  -v, --verbosity LVL  Either CRITICAL, ERROR, WARNING, INFO or DEBUG
-  --ffprobe-bin PATH   If you cannot install ffprobe globally, you can provide
-                       the path to the version you want to use here
+<pre><code>  -v, --verbosity LVL  Either CRITICAL, ERROR, WARNING, INFO
+                       or DEBUG
+
+  --ffprobe-bin PATH   If you cannot install ffprobe
+                       globally, you can provide the path to
+                       the version you want to use here
 
 </code></pre>
 <h2 id="bench">bench</h2>
@@ -597,13 +612,14 @@ have to map to make the same transformation.</p>
 single-zip, otherwise it is the base of a directory tree which will be
 created during processing.</p>
 <p>Usage:</p>
-<pre><code>skelshop conv [OPTIONS] [monolithic-tar|single-zip|ordered-tar] LEGACY_DUMP [OUT]
+<pre><code>skelshop conv [OPTIONS] [monolithic-tar|single-zip|ordered-tar]
+ LEGACY_DUMP [OUT]
 </code></pre>
 <p>Options:</p>
 <pre><code>  --mode [BODY_25_ALL|BODY_25_HANDS|BODY_25|BODY_135|FACE|BODY_25_FACE]
                                   [required]
-  --cores INTEGER                 Number of cores to use (only for monolithic-
-                                  tar)
+  --cores INTEGER                 Number of cores to use
+                                  (only for monolithic-tar)
 
   --suppress-end-fail / --no-suppress-end-fail
   --skip-existing / --overwrite-existing
@@ -614,12 +630,13 @@ created during processing.</p>
 <pre><code>skelshop drawsticks [OPTIONS] H5FN VIDEOIN VIDEOOUT
 </code></pre>
 <p>Options:</p>
-<pre><code>  --posetrack / --no-posetrack  Whether to convert BODY_25 keypoints to
-                                PoseTrack-style keypoints
+<pre><code>  --posetrack / --no-posetrack  Whether to convert BODY_25
+                                keypoints to PoseTrack-style
+                                keypoints
 
   --scale INTEGER
-  --overlay / --no-overlay      Whether to draw VIDEOIN below the stick
-                                figures or not
+  --overlay / --no-overlay      Whether to draw VIDEOIN below
+                                the stick figures or not
 
 </code></pre>
 <h2 id="dump">dump</h2>
@@ -658,18 +675,19 @@ pipeline.</p>
 <h3 id="bestcands">bestcands</h3>
 <p>Select the best frame-person pairs to use for face embedding.</p>
 <p>Usage:</p>
-<pre><code>skelshop face bestcands [OPTIONS] [conf-face3|conf-face5|conf-face68|conf-adaptive|clear-face3|clear-
- face5|clear-face68|clear-adaptive] SKELIN SEGSOUT
+<pre><code>skelshop face bestcands [OPTIONS] [conf-face3|conf-face5|conf-face68|conf-
+ adaptive|clear-face3|clear-face5|clear-face68|clear-
+ adaptive] SKELIN SEGSOUT
 </code></pre>
 <p>Options:</p>
 <pre><code>  --video PATH
-  --uncaptured PATH
 </code></pre>
 <h3 id="embedall">embedall</h3>
 <p>Create a HDF5 face dump from a video using dlib.</p>
 <p>Usage:</p>
-<pre><code>skelshop face embedall [OPTIONS] [dlib-hog-face5|dlib-hog-face68|dlib-cnn-face5|dlib-cnn-
- face68|openpose-face68|openpose-face3|openpose-face5] VIDEO H5FN
+<pre><code>skelshop face embedall [OPTIONS] [dlib-hog-face5|dlib-hog-face68|dlib-cnn-
+ face5|dlib-cnn-face68|openpose-face68|openpose-
+ face3|openpose-face5] VIDEO H5FN
 </code></pre>
 <p>Options:</p>
 <pre><code>  --from-skels PATH
@@ -688,7 +706,12 @@ of frame-person pairs.</p>
 </code></pre>
 <p>Options:</p>
 <pre><code>  --from-skels PATH
-  --batch-size INTEGER
+  --batch-size TEXT               The batch size to use.
+                                  Valid values are 'guess' or
+                                  an integer. The default is
+                                  to guess on GPU otherwise
+                                  use 16
+
   --write-bboxes / --no-write-bboxes
   --write-chip / --no-write-chip
 </code></pre>
@@ -720,10 +743,19 @@ of frame-person pairs.</p>
 <p>Usage:</p>
 <pre><code>skelshop iden [OPTIONS] COMMAND [ARGS]...
 </code></pre>
+<h3 id="applymap">applymap</h3>
+<p>Apply a mapping from clusters to known IDs (e.g. Wikidata Q-ids)</p>
+<p>Usage:</p>
+<pre><code>skelshop iden applymap [OPTIONS] SEGS_IN ASSIGN_IN SEGS_OUT
+</code></pre>
+<p>Options:</p>
+<pre><code>  --filter-unlabeled / --keep-unlabeled
+</code></pre>
 <h3 id="buildrefs">buildrefs</h3>
 <p>Build a reference face library from a list of entities or categories.</p>
 <p>Usage:</p>
-<pre><code>skelshop iden buildrefs [OPTIONS] [entities|categories] LISTIN REFOUT [[wikidata|commons]]
+<pre><code>skelshop iden buildrefs [OPTIONS] [entities|categories] LISTIN REFOUT
+ [[wikidata|commons]]
 </code></pre>
 <p>Options:</p>
 <pre><code>  --oauth-creds FILENAME
@@ -731,42 +763,74 @@ of frame-person pairs.</p>
 <h3 id="clus">clus</h3>
 <p>Clusters embeddings from multiple videos descriped in a corpus description file.</p>
 <p>Usage:</p>
-<pre><code>skelshop iden clus [OPTIONS] CORPUS_DESC
+<pre><code>skelshop iden clus [OPTIONS] COMMAND [ARGS]...
+</code></pre>
+<h4 id="fixed">fixed</h4>
+<p>Performs dbscan with fixed parameters.</p>
+<p>Usage:</p>
+<pre><code>skelshop iden clus fixed [OPTIONS] CORPUS_DESC
 </code></pre>
 <p>Options:</p>
-<pre><code>  --corpus-base PATH
-  --proto-out PATH
+<pre><code>  --n-jobs INTEGER
+  --sample-size INTEGER
+  --knn INTEGER
+  --pool [med|min|vote]
+  --algorithm [dbscan|optics-dbscan]
   --num-protos INTEGER
+  --proto-out PATH
+  --corpus-base PATH
+  --eps FLOAT
+  --min-samples INTEGER
+</code></pre>
+<h4 id="search">search</h4>
+<p>Performs grid search to find best clustering parameters.</p>
+<p>Usage:</p>
+<pre><code>skelshop iden clus search [OPTIONS] CORPUS_DESC
+</code></pre>
+<p>Options:</p>
+<pre><code>  --n-jobs INTEGER
+  --sample-size INTEGER
+  --knn INTEGER
+  --pool [med|min|vote]
+  --algorithm [dbscan|optics-dbscan]
+  --num-protos INTEGER
+  --proto-out PATH
+  --corpus-base PATH
+  --eps TEXT
+  --min-samples TEXT
+  --score [both|silhouette|tracks-acc]
 </code></pre>
 <h3 id="idclus">idclus</h3>
 <p>Identifies clusters by comparing against a reference and forcing a match</p>
 <p>Usage:</p>
-<pre><code>skelshop iden idclus [OPTIONS] REFIN PROTOS CORPUS_DESC ASSIGN_OUT
+<pre><code>skelshop iden idclus [OPTIONS] REF_IN PROTOS CORPUS_DESC ASSIGN_OUT
 </code></pre>
 <p>Options:</p>
-<pre><code>  --corpus-base PATH
+<pre><code>  --thresh FLOAT
+  --corpus-base PATH
 </code></pre>
 <h3 id="idsegsfull">idsegsfull</h3>
 <p>Identifies shots with a particular person from reference headshots using
 face dumps which contain all face embeddings in a clip.</p>
 <p>Usage:</p>
-<pre><code>skelshop iden idsegsfull [OPTIONS] REFIN GROUPIN SEGSOUT FACES
+<pre><code>skelshop iden idsegsfull [OPTIONS] REF_IN GROUPIN SEGSOUT FACES
 </code></pre>
 <p>Options:</p>
 <pre><code>  --group-fmt [psd|ffprobe|trackshot]
-  --ref-label TEXT
+  --min-detected-frames INTEGER
+  --detection-threshold FLOAT
+  --median-threshold FLOAT
 </code></pre>
-<h3 id="idsegsmed">idsegsmed</h3>
+<h3 id="idsegssparse">idsegssparse</h3>
 <p>Identifies shots with a particular person from reference headshots using
 face dumps with only a few (fixed number) embeddings per person-shot
 pair.</p>
 <p>Usage:</p>
-<pre><code>skelshop iden idsegsmed [OPTIONS] REFIN GROUPIN SEGSOUT
+<pre><code>skelshop iden idsegssparse [OPTIONS] REF_IN GROUPIN SEGSOUT FACES
 </code></pre>
 <p>Options:</p>
 <pre><code>  --group-fmt [psd|ffprobe|trackshot]
-  --faces PATH
-  --ref-label TEXT
+  --detection-threshold FLOAT
 </code></pre>
 <h3 id="whoisthis">whoisthis</h3>
 <p>Given a directory of prototype images as generated by <code>writeprotos</code>,
@@ -779,7 +843,8 @@ to identify people.</p>
 <pre><code>  --thumbview-cmd TEXT
 </code></pre>
 <h3 id="writeprotos">writeprotos</h3>
-<p>Given prototypes description file as produced by <code>clus</code>, dumps the corresponding images.</p>
+<p>Given prototypes description file as produced by <code>clus</code>, dumps the
+corresponding images.</p>
 <p>Usage:</p>
 <pre><code>skelshop iden writeprotos [OPTIONS] PROTOS CORPUS_DESC PROTOS_DIR
 </code></pre>
@@ -794,8 +859,9 @@ to identify people.</p>
 <p>Options:</p>
 <pre><code>  --skel PATH
   --face PATH
-  --posetrack / --no-posetrack  Whether to convert BODY_25 keypoints to
-                                PoseTrack-style keypoints
+  --posetrack / --no-posetrack  Whether to convert BODY_25
+                                keypoints to PoseTrack-style
+                                keypoints
 
   --seek-time FLOAT
   --seek-frame INTEGER

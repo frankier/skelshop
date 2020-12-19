@@ -16,7 +16,7 @@
     
     
       
-        <title>Contributing - SkelShop Documentation</title>
+        <title>Person identification - SkelShop Documentation</title>
       
     
     
@@ -58,6 +58,11 @@
     <label class="md-overlay" for="__drawer"></label>
     <div data-md-component="skip">
       
+        
+        <a href="#person-identification" class="md-skip">
+          Skip to content
+        </a>
+      
     </div>
     <div data-md-component="announce">
       
@@ -84,7 +89,7 @@
           </span>
           <span class="md-header-nav__topic md-ellipsis">
             
-              Contributing
+              Person identification
             
           </span>
         </div>
@@ -352,12 +357,10 @@
       
       
 
-  
 
-
-  <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+  <li class="md-nav__item md-nav__item--nested">
     
-    <input class="md-nav__toggle md-toggle" data-md-toggle="nav-3" type="checkbox" id="nav-3" checked>
+    <input class="md-nav__toggle md-toggle" data-md-toggle="nav-3" type="checkbox" id="nav-3" >
     <label class="md-nav__link" for="nav-3">
       Developer guide (for users of the library & contributors)
       <span class="md-nav__icon md-icon"></span>
@@ -422,18 +425,11 @@
           
           
 
-  
 
-
-  <li class="md-nav__item md-nav__item--active">
-    
-    <input class="md-nav__toggle md-toggle" data-md-toggle="toc" type="checkbox" id="__toc">
-    
-    
-    <a href="./" class="md-nav__link md-nav__link--active">
+  <li class="md-nav__item">
+    <a href="../development/" class="md-nav__link">
       Contributing
     </a>
-    
   </li>
 
         
@@ -510,34 +506,112 @@
               </div>
             
             
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="toc">
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#construction-a-face-reference-library" class="md-nav__link">
+    Construction a face reference library
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#direct-comparison" class="md-nav__link">
+    Direct comparison
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#clustering" class="md-nav__link">
+    Clustering
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#labelling-clusters" class="md-nav__link">
+    Labelling clusters
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
           
           <div class="md-content">
             <article class="md-content__inner md-typeset">
               
                 
-                  <a href="https://github.com/frankier/skelshop/edit/master/docs/development.md" title="Edit this page" class="md-content__button md-icon">
+                  <a href="https://github.com/frankier/skelshop/edit/master/docs/identification.md" title="Edit this page" class="md-content__button md-icon">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20.71 7.04c.39-.39.39-1.04 0-1.41l-2.34-2.34c-.37-.39-1.02-.39-1.41 0l-1.84 1.83 3.75 3.75M3 17.25V21h3.75L17.81 9.93l-3.75-3.75L3 17.25z"/></svg>
                   </a>
                 
                 
-                  <h1>Contributing</h1>
-                
-                <p>Please install the <a href="https://pre-commit.com/">pre-commit</a> based git hooks to run
-black and some basic code checks before submitting a PR. For example:</p>
-<pre><code>$ pip install --user pre-commit &amp;&amp; pre-commit install
+                <h1 id="person-identification">Person identification</h1>
+<p>There are two major approaches to identification:</p>
+<ol>
+<li>Direct comparison with one or more references. For each identified
+    reference, multiple images may be supplied.</li>
+<li>First performing clustering and then either:</li>
+<li>Identifying clusters by comparison with one or more references.</li>
+<li>Identifying clusters manually by inspection of prototypical images.</li>
+</ol>
+<h2 id="construction-a-face-reference-library">Construction a face reference library</h2>
+<p>A face reference library is simply a directory containing a number of
+directories, each containing photos containing the face of some individual of
+interest. Each directory should have a unique name which will be given used as
+a label for that person. All images should be JPEGs containing exactly one
+face. For example:</p>
+<pre><code>myref
+├── bill
+│   └── billphoto.jpg
+└── ben
+    └── benphoto.jpeg
 </code></pre>
-<p>You can also run them manually at any time:</p>
-<pre><code>$ ./run-checks.sh
+<p>By convention, we can use Wikidata identifiers to identify people:</p>
+<pre><code>myref
+├── Q230739
+│   └── Katie%20Couric%20VF%202012%20Shankbone%202.JPG
+├── Q6271597
+│   └── Jon%20Snow2.jpg
+└── Q929985
+    └── Alex%20Trebek%20%28May%2021%2C%202012%29.jpg.jpg
 </code></pre>
-<p>In case you make changes, but do not have OpenPose installed, don't forget that
-you can easily test your changes using Docker, e.g.</p>
-<pre><code>$ DOCKER_TAG=focal_cpu DOCKERFILE_PATH=Dockerfile IMAGE_NAME=focal_cpu
-  ./hooks/build
-
-$ docker run --mount type=bind,source=/,target=/host/  focal_cpu:latest
-  python -m skelshop calibrate process-dlib-dir /host/to/dlib/examples/faces/
-  /host/to/skelshop/calib.dlib.pqt
+<p>SkelShop can help quickly construct this specific type of reference. For
+example the above reference can be created by first creating a file
+<code>people.txt</code> containing:</p>
+<pre><code>Q230739
+Q6271597
+Q929985
 </code></pre>
+<p>And then simply running:</p>
+<pre><code>$ skelshop iden buildrefs entities people.txt myref wikidata
+</code></pre>
+<h2 id="direct-comparison">Direct comparison</h2>
+<p>Once we have <a href="../face-pipeline-configuration-guide/">obtained either a full or sparse set of face
+embeddings</a>, we can identify people in each shot by direct comparison with our reference.</p>
+<h2 id="clustering">Clustering</h2>
+<h2 id="labelling-clusters">Labelling clusters</h2>
                 
               
               
@@ -552,41 +626,6 @@ $ docker run --mount type=bind,source=/,target=/host/  focal_cpu:latest
       
         
 <footer class="md-footer">
-  
-    <div class="md-footer-nav">
-      <nav class="md-footer-nav__inner md-grid" aria-label="Footer">
-        
-          <a href="../io/" class="md-footer-nav__link md-footer-nav__link--prev" rel="prev">
-            <div class="md-footer-nav__button md-icon">
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12z"/></svg>
-            </div>
-            <div class="md-footer-nav__title">
-              <div class="md-ellipsis">
-                <span class="md-footer-nav__direction">
-                  Previous
-                </span>
-                Reading and writing the formats from your own code
-              </div>
-            </div>
-          </a>
-        
-        
-          <a href="../cli/" class="md-footer-nav__link md-footer-nav__link--next" rel="next">
-            <div class="md-footer-nav__title">
-              <div class="md-ellipsis">
-                <span class="md-footer-nav__direction">
-                  Next
-                </span>
-                CLI reference
-              </div>
-            </div>
-            <div class="md-footer-nav__button md-icon">
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11H4z"/></svg>
-            </div>
-          </a>
-        
-      </nav>
-    </div>
   
   <div class="md-footer-meta md-typeset">
     <div class="md-footer-meta__inner md-grid">

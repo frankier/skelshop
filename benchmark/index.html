@@ -16,7 +16,7 @@
     
     
       
-        <title>Benchmark - SkelShop Documentation</title>
+        <title>Benchmarks - SkelShop Documentation</title>
       
     
     
@@ -58,6 +58,11 @@
     <label class="md-overlay" for="__drawer"></label>
     <div data-md-component="skip">
       
+        
+        <a href="#benchmarks" class="md-skip">
+          Skip to content
+        </a>
+      
     </div>
     <div data-md-component="announce">
       
@@ -84,7 +89,7 @@
           </span>
           <span class="md-header-nav__topic md-ellipsis">
             
-              Benchmark
+              Benchmarks
             
           </span>
         </div>
@@ -194,10 +199,12 @@
       
       
 
+  
 
-  <li class="md-nav__item md-nav__item--nested">
+
+  <li class="md-nav__item md-nav__item--active md-nav__item--nested">
     
-    <input class="md-nav__toggle md-toggle" data-md-toggle="nav-2" type="checkbox" id="nav-2" >
+    <input class="md-nav__toggle md-toggle" data-md-toggle="nav-2" type="checkbox" id="nav-2" checked>
     <label class="md-nav__link" for="nav-2">
       User guide (for users of the command line tools)
       <span class="md-nav__icon md-icon"></span>
@@ -316,6 +323,56 @@
     <a href="../usage-examples/" class="md-nav__link">
       Usage examples
     </a>
+  </li>
+
+        
+          
+          
+          
+
+  
+
+
+  <li class="md-nav__item md-nav__item--active">
+    
+    <input class="md-nav__toggle md-toggle" data-md-toggle="toc" type="checkbox" id="__toc">
+    
+      
+    
+    
+      <label class="md-nav__link md-nav__link--active" for="__toc">
+        Benchmarks
+        <span class="md-nav__icon md-icon"></span>
+      </label>
+    
+    <a href="./" class="md-nav__link md-nav__link--active">
+      Benchmarks
+    </a>
+    
+      
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#accuracy-comparisons" class="md-nav__link">
+    Accuracy comparisons
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+    
   </li>
 
         
@@ -489,6 +546,36 @@
               </div>
             
             
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="toc">
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#accuracy-comparisons" class="md-nav__link">
+    Accuracy comparisons
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
           
           <div class="md-content">
             <article class="md-content__inner md-typeset">
@@ -499,9 +586,120 @@
                   </a>
                 
                 
-                  <h1>Benchmark</h1>
-                
-                
+                <h1 id="benchmarks">Benchmarks</h1>
+<p>Some benchmarks are given here, mainly to help with back of the envelope -type
+calculations of what level of resources might be needed for your own pipeline
+build from these stages on your own video corpus.</p>
+<p>The following benchmarks were run on the following machine:</p>
+<ul>
+<li>7 cores of Intel Xeon Gold 5120 CPU @ 2.20GHz</li>
+<li>1 P100 with 16GB RAM</li>
+<li>32 GB RAM</li>
+</ul>
+<p>They were run on the 480p version of <a href="https://www.youtube.com/watch?v=9U4Ha9HQvMo">a typical talking heads video on
+YouTube</a>. The video is just over
+2 minutes, so use this to get an approximate scaling factor for your own
+corpus. All times include the script/Singularity startup time, so this should
+be taken into account.</p>
+<table>
+<thead>
+<tr>
+<th>System</th>
+<th>Time (m:s)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Shot Segmentors</strong></td>
+<td></td>
+</tr>
+<tr>
+<td>PySceneDetect</td>
+<td>10.4</td>
+</tr>
+<tr>
+<td>ffprobe</td>
+<td>10.7</td>
+</tr>
+<tr>
+<td><strong>Pose estimators</strong></td>
+<td></td>
+</tr>
+<tr>
+<td>OpenPose Body25</td>
+<td>4:23.8</td>
+</tr>
+<tr>
+<td>OpenPose Body25+Face</td>
+<td>8:53.9</td>
+</tr>
+<tr>
+<td>OpenPose Body25+Hands</td>
+<td>10:11.2</td>
+</tr>
+<tr>
+<td>OpenPose Body25+Face+Hands</td>
+<td>14:49.7</td>
+</tr>
+<tr>
+<td><strong>Within-shot pose trackers</strong></td>
+<td>(run on output of Body25)</td>
+</tr>
+<tr>
+<td>lighttrackish</td>
+<td>33.5</td>
+</tr>
+<tr>
+<td>opt_lighttrack</td>
+<td>17.7</td>
+</tr>
+<tr>
+<td>deepsortlike</td>
+<td>21.8</td>
+</tr>
+<tr>
+<td><strong>Face detection + embedding</strong></td>
+<td>(this based upon embedding all faces found)</td>
+</tr>
+<tr>
+<td>dlib-hog-face5</td>
+<td>2:50.1</td>
+</tr>
+<tr>
+<td>dlib-hog-face68</td>
+<td>2:53.1</td>
+</tr>
+<tr>
+<td>dlib-cnn-face5</td>
+<td>0:44.5</td>
+</tr>
+<tr>
+<td>dlib-cnn-face68</td>
+<td>0:43.7</td>
+</tr>
+<tr>
+<td><strong>Embedding faces from existing OpenPose</strong></td>
+<td>(face3 only requires Body25, whereas face68 requires Body25+Face)</td>
+</tr>
+<tr>
+<td>openpose-face68</td>
+<td>17.3</td>
+</tr>
+<tr>
+<td>openpose-face3</td>
+<td>21.0</td>
+</tr>
+</tbody>
+</table>
+<h2 id="accuracy-comparisons">Accuracy comparisons</h2>
+<p>In many cases, accuracy comparisons can be found on the original websites or
+papers of the software providing the different pipeline stages. However, here
+are some extra comparisons available elsewhere. Note that these may refer to
+old versions:</p>
+<ul>
+<li><a href="https://github.com/tahaemara/dlib-model-evaluation">Dlib on LFW</a></li>
+<li><a href="https://github.com/albanie/shot-detection-benchmarks">Shot detection benchmarks</a></li>
+</ul>
                 
               
               
@@ -516,6 +714,41 @@
       
         
 <footer class="md-footer">
+  
+    <div class="md-footer-nav">
+      <nav class="md-footer-nav__inner md-grid" aria-label="Footer">
+        
+          <a href="../usage-examples/" class="md-footer-nav__link md-footer-nav__link--prev" rel="prev">
+            <div class="md-footer-nav__button md-icon">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12z"/></svg>
+            </div>
+            <div class="md-footer-nav__title">
+              <div class="md-ellipsis">
+                <span class="md-footer-nav__direction">
+                  Previous
+                </span>
+                Usage examples
+              </div>
+            </div>
+          </a>
+        
+        
+          <a href="../snakemake/" class="md-footer-nav__link md-footer-nav__link--next" rel="next">
+            <div class="md-footer-nav__title">
+              <div class="md-ellipsis">
+                <span class="md-footer-nav__direction">
+                  Next
+                </span>
+                HPC extraction with Snakemake
+              </div>
+            </div>
+            <div class="md-footer-nav__button md-icon">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11H4z"/></svg>
+            </div>
+          </a>
+        
+      </nav>
+    </div>
   
   <div class="md-footer-meta md-typeset">
     <div class="md-footer-meta__inner md-grid">
