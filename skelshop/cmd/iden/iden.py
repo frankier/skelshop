@@ -1,5 +1,6 @@
 import click
 
+from .applymap import applymap
 from .buildrefs import buildrefs
 from .clus import clus
 from .idclus import idclus
@@ -16,6 +17,7 @@ def iden():
     """
 
 
+iden.add_command(applymap)
 iden.add_command(buildrefs)
 iden.add_command(clus)
 iden.add_command(idclus)
