@@ -5,7 +5,7 @@ import os
 from functools import wraps
 from os.path import join as pjoin
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Dict, Iterator, List, Optional, Tuple
+from typing import TYPE_CHECKING, Dict, Iterator, List, Optional, Tuple
 
 import click
 from scipy.spatial.distance import cdist
@@ -55,24 +55,6 @@ def min_dist(metric, ref, embed) -> float:
         if distance < min_distance:
             min_distance = distance
     return min_distance
-
-
-class SingleDirReferenceEmbeddings:
-    def __init__(self, label: str, ref_dir: Path):
-        self.label = label
-        self.ref = ref_embeddings(ref_dir)
-
-    def labeled_embeddings(self) -> Iterator[Tuple[str, np.ndarray]]:
-        return iter([(self.label, self.ref)])
-
-    def dist(self, metric: str, embedding) -> float:
-        return min_dist(metric, self.ref, embedding)
-
-    def dist_labels(self, metric: str, embedding) -> List[Tuple[str, float]]:
-        return [(self.label, self.dist(metric, embedding))]
-
-    def nearest_label(self, metric: str, embedding):
-        return self.label, self.dist(metric, embedding)
 
 
 class MultiDirReferenceEmbeddings:
@@ -140,16 +122,9 @@ class MultiDirReferenceEmbeddings:
 
 def ref_arg(func):
     @click.argument("ref_in", type=PathPath(exists=True))
-    @click.option("--ref-type", type=click.Choice(["single", "multi"]))
-    @click.option("--single-ref-label", default="detected")
     @wraps(func)
     def make_ref(ref_in, ref_type, single_ref_label, **kwargs):
-        ref: Any
-        if ref_type == "single":
-            ref = SingleDirReferenceEmbeddings(ref_type, ref_in)
-        else:
-            ref = MultiDirReferenceEmbeddings(ref_in)
-        kwargs["ref"] = ref
+        kwargs["ref"] = MultiDirReferenceEmbeddings(ref_in)
         return func(**kwargs)
 
     return make_ref
