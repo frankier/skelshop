@@ -4,14 +4,17 @@ import click
 import h5py
 import numpy as np
 
+from skelshop.face.consts import (
+    DEFAULT_DETECTION_THRESHOLD as DEFAULT_DETECTION_THRESHOLD_DLIB,
+)
 from skelshop.face.consts import DEFAULT_METRIC
 from skelshop.face.io import FaceReader
 from skelshop.iden.idsegs import detect_shot, ref_arg
 from skelshop.shotseg.io import group_in_arg
 
 DEFAULT_MIN_DETECTED_FRAMES = 3
-DEFAULT_DETECTION_THRESHOLD = 0.6
-DEFAULT_MEDIAN_THRESHOLD = 0.6
+DEFAULT_DETECTION_THRESHOLD = DEFAULT_DETECTION_THRESHOLD_DLIB
+DEFAULT_MEDIAN_THRESHOLD = DEFAULT_DETECTION_THRESHOLD_DLIB
 
 
 @click.command()

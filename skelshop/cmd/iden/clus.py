@@ -17,7 +17,7 @@ from sklearn.utils.random import sample_without_replacement
 
 from skelshop.cluster.knn import FaissIndex
 from skelshop.corpus import CorpusReader
-from skelshop.face.consts import DEFAULT_METRIC
+from skelshop.face.consts import DEFAULT_DETECTION_THRESHOLD, DEFAULT_METRIC
 from skelshop.face.io import SparseFaceReader
 from skelshop.utils.click import PathPath, save_options
 from skelshop.utils.numpy import min_pool_dists
@@ -26,11 +26,12 @@ from skelshop.utils.ray import maybe_ray
 logger = logging.getLogger(__name__)
 
 
-DEFAULT_MAX_EPS = 0.2
-DEFAULT_EPS = 0.09
+# XXX: These should be changed for a non-dlib face embedding
+DEFAULT_MAX_EPS = 1
+DEFAULT_EPS = DEFAULT_DETECTION_THRESHOLD
 DEFAULT_MIN_SAMPLES = 3
-DEFAULT_EPS_LIST = [0.02, 0.03, 0.04, 0.05, 0.06, 0.07, 0.08, 0.09, 0.1]
-DEFAULT_MIN_SAMPLES_LIST = [3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
+DEFAULT_EPS_LIST = list(np.linspace(0.5, 0.7, 7))
+DEFAULT_MIN_SAMPLES_LIST = list(range(3, 21, 3))
 SAMPLE_KNN = 128
 SAMPLE_BATCH_SIZE = 1024
 

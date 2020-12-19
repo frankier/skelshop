@@ -5,6 +5,9 @@ from typing import TYPE_CHECKING, List
 import click
 import h5py
 
+from skelshop.face.consts import (
+    DEFAULT_DETECTION_THRESHOLD as DEFAULT_DETECTION_THRESHOLD_DLIB,
+)
 from skelshop.face.consts import DEFAULT_METRIC
 from skelshop.face.io import SparseFaceReader, shot_pers_group
 from skelshop.iden.idsegs import detect_shot, ref_arg
@@ -14,7 +17,7 @@ if TYPE_CHECKING:
     import numpy as np
 
 
-DEFAULT_DETECTION_THRESHOLD = 0.6
+DEFAULT_DETECTION_THRESHOLD = DEFAULT_DETECTION_THRESHOLD_DLIB
 
 
 @click.command()
