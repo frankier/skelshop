@@ -69,5 +69,7 @@ Thanks to the authors of all the useful libraries I have used.
 Some of the black box tracking code is based
 on [this repository](https://github.com/lxy5513/cvToolkit).
 
+Some code to do with clustering and usage of FAISS is based on [this repository](https://github.com/yl-1993/learn-to-cluster/).
+
 [Icon by Adrien Coquet, FR from the Noun Project used under
 CC-BY.](https://thenounproject.com/term/news/2673777)
