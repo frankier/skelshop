@@ -20,8 +20,8 @@ DEFAULT_MEDIAN_THRESHOLD = DEFAULT_DETECTION_THRESHOLD_DLIB
 @click.command()
 @ref_arg
 @group_in_arg
-@click.argument("segsout", type=click.Path())
 @click.argument("faces", type=click.Path(exists=True))
+@click.argument("segsout", type=click.Path())
 @click.option("--min-detected-frames", type=int, default=DEFAULT_MIN_DETECTED_FRAMES)
 @click.option("--detection-threshold", type=float, default=DEFAULT_DETECTION_THRESHOLD)
 @click.option("--median-threshold", type=float, default=DEFAULT_MEDIAN_THRESHOLD)

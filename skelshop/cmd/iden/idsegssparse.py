@@ -23,8 +23,8 @@ DEFAULT_DETECTION_THRESHOLD = DEFAULT_DETECTION_THRESHOLD_DLIB
 @click.command()
 @ref_arg
 @group_in_arg
-@click.argument("segsout", type=click.Path())
 @click.argument("faces", type=click.Path(exists=True))
+@click.argument("segsout", type=click.Path())
 @click.option("--detection-threshold", type=float, default=DEFAULT_DETECTION_THRESHOLD)
 def idsegssparse(ref, groupin, segsout, faces, detection_threshold):
     """
