@@ -152,8 +152,10 @@ def detect_shot(
     import numpy as np
 
     #  1 & 2. For each tracklet, count the number of frames below the threshold for each ref (detected_frames) and find the median distance to each ref (median_dist)
-    detected_frames = np.ndarray((len(pers_arrs), ref.num_refs()), dtype=np.int32)
-    median_dists = np.ndarray((len(pers_arrs), ref.num_refs()), dtype=np.float32)
+    detected_frames = np.zeros((len(pers_arrs), ref.num_refs()), dtype=np.int32)
+    median_dists = np.full(
+        (len(pers_arrs), ref.num_refs()), float("inf"), dtype=np.float32
+    )
     for idx, embed_stack in enumerate(pers_arrs):
         if not embed_stack:
             continue
