@@ -3,6 +3,7 @@ import click
 from .applymap import applymap
 from .buildrefs import buildrefs
 from .clus import clus
+from .embedrefs import embedrefs
 from .idclus import idclus
 from .idsegsfull import idsegsfull
 from .idsegssparse import idsegssparse
@@ -20,6 +21,7 @@ def iden():
 iden.add_command(applymap)
 iden.add_command(buildrefs)
 iden.add_command(clus)
+iden.add_command(embedrefs)
 iden.add_command(idclus)
 iden.add_command(idsegsfull)
 iden.add_command(idsegssparse)

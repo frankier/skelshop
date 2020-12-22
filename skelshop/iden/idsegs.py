@@ -2,10 +2,11 @@ from __future__ import annotations
 
 import logging
 import os
+from contextlib import ExitStack
 from functools import wraps
 from os.path import join as pjoin
 from pathlib import Path
-from typing import TYPE_CHECKING, Dict, Iterator, List, Optional, Tuple
+from typing import TYPE_CHECKING, Dict, Iterable, Iterator, List, Optional, Tuple
 
 import click
 from scipy.spatial.distance import cdist
@@ -21,6 +22,24 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 
+def dlib_face_encodings(face_image):
+    from skelshop.face.pipe import DlibFodsBatch, dlib_detect, get_dlib_pose_predictor
+
+    # Possible TODO: batching
+
+    pose_predictor = get_dlib_pose_predictor("face68")
+    image_batch = [face_image]
+    face_locations = dlib_detect("cnn", image_batch)
+    batch_fods = DlibFodsBatch()
+    frame_shape_predictions = []
+    for image_face_location in face_locations[0]:
+        frame_shape_predictions.append(pose_predictor(face_image, image_face_location))
+    if not frame_shape_predictions:
+        return []
+    batch_fods.append_fods(frame_shape_predictions)
+    return batch_fods.compute_face_descriptor(image_batch)[0]
+
+
 def ref_embeddings(ref_dir: Path, strict=False) -> List[np.ndarray]:
     encodings: List[np.ndarray] = []
 
@@ -31,15 +50,19 @@ def ref_embeddings(ref_dir: Path, strict=False) -> List[np.ndarray]:
                 continue
             image_path = pjoin(root, name)
             face_image = lazyimp.face_recognition.load_image_file(image_path)
-            face_encodings = lazyimp.face_recognition.face_encodings(face_image)
+            face_encodings = dlib_face_encodings(face_image)
             if len(face_encodings) != 1:
                 # TODO: pick biggest?
-                msg = f"Found multiple faces: {image_path}"
+                if len(face_encodings) > 1:
+                    msg = f"Found multiple faces: {image_path}"
+                else:
+                    msg = f"Found no faces: {image_path}"
                 if strict:
                     raise ValueError(msg)
                 else:
                     logger.warn(msg)
-            encodings.append(face_encodings[0])
+            else:
+                encodings.append(face_encodings[0])
     return encodings
 
 
@@ -57,15 +80,15 @@ def min_dist(metric, ref, embed) -> float:
     return min_distance
 
 
-class MultiDirReferenceEmbeddings:
+class ReferenceEmbeddings:
     refs: Dict[str, np.ndarray]
     ref_embeddings: Optional[List[np.ndarray]]
     ref_group_sizes: Optional[List[int]]
     ref_labels: Optional[List[str]]
 
-    def __init__(self, ref_dir: Path):
+    def __init__(self, ref_it: Iterator[Tuple[str, Iterable[np.ndarray]]]):
         self.refs = {}
-        for label, entry in multi_ref_embeddings(ref_dir):
+        for label, entry in ref_it:
             self.refs[label] = entry
         self.ref_embeddings = None
         self.ref_group_sizes = None
@@ -123,9 +146,17 @@ class MultiDirReferenceEmbeddings:
 def ref_arg(func):
     @click.argument("ref_in", type=PathPath(exists=True))
     @wraps(func)
-    def make_ref(ref_in, ref_type, single_ref_label, **kwargs):
-        kwargs["ref"] = MultiDirReferenceEmbeddings(ref_in)
-        return func(**kwargs)
+    def make_ref(ref_in, **kwargs):
+        with ExitStack() as stack:
+            if ref_in.is_dir():
+                ref_it = multi_ref_embeddings(ref_in)
+            else:
+                import h5py
+
+                h5f = stack.enter_context(h5py.File(ref_in, "r"))
+                ref_it = ((name, h5f[name][()]) for name in h5f)
+            kwargs["ref"] = ReferenceEmbeddings(ref_it)
+            return func(**kwargs)
 
     return make_ref
 
