@@ -65,7 +65,7 @@ def read_seg_pers(corpus: CorpusReader):
 
 def corpus_reader_indices(corpus):
     for video_info in corpus:
-        logger.debug("Loading embeddings from", video_info["faces"])
+        logger.debug("Loading embeddings from %s", video_info["faces"])
         with h5py.File(video_info["faces"], "r") as face_h5f:
             face_reader = SparseFaceReader(face_h5f)
             for idx in range(len(face_reader)):
