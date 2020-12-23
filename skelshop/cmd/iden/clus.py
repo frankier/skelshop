@@ -343,7 +343,7 @@ def process_common_clus_options(args, kwargs, inner):
     with CorpusReader(corpus_desc, corpus_base) as corpus:
         kwargs["corpus"] = corpus
         sample_idxs = None
-        if "sample_size" in kwargs:
+        if kwargs.get("sample_size") is not None:
             sample_size = kwargs.pop("sample_size")
             num_embeddings, sample_idxs, all_embeddings_np = collect_embeddings(
                 corpus, sample_size
