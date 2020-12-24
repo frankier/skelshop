@@ -35,7 +35,6 @@ class KnnDBSCAN(cluster.DBSCAN):
             leaf_size=leaf_size,
             p=p,
             n_jobs=n_jobs,
-            knn_method=knn_method,
         )
 
     def fit(self, X, y=None, sample_weight=None):
