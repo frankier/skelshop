@@ -32,7 +32,7 @@ def segment_enum(
     for next_shot_break in cuts_iter:
         yield inner_iter()
     if not end_early:
-        yield from peek
+        yield peek
 
 
 class ShotGrouper(ABC):
