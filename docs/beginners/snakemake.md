@@ -47,7 +47,7 @@
       plus `-n` if you just want to see what this executes.
 * To delete previous (partial) results, do
   ```
-    snakemake tracked_all --cores 8 --config VIDEO_BASE=path/to/your/dataset DUMP_BASE=path/to/your/dump   
+    snakemake tracked_all --cores 8 --config VIDEO_BASE=path/to/your/dataset DUMP_BASE=path/to/your/dump --delete-all-output   
   ```  
   * Also, you may want to `rm *.out && rm -r path/to/your/work && rm -r path/to/your/dump`
 
