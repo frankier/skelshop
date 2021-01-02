@@ -63,9 +63,9 @@ def read_seg_pers(corpus: CorpusReader):
     return seg_pers
 
 
-def corpus_reader_indices(corpus):
+def corpus_reader_indices(corpus, msg="Loading"):
     for video_info in corpus:
-        logger.debug("Loading embeddings from %s", video_info["faces"])
+        logger.debug("%s embeddings from %s", msg, video_info["faces"])
         with h5py.File(video_info["faces"], "r") as face_h5f:
             face_reader = SparseFaceReader(face_h5f)
             for idx in range(len(face_reader)):
@@ -86,7 +86,7 @@ def collect_embeddings(corpus: CorpusReader, sample_size=None):
     os.environ["HDF5_USE_FILE_LOCKING"] = "FALSE"
     shape, dtype = corpus_embedding_fmt(corpus)
     logger.debug("Counting total number of embeddings")
-    total_num_embeddings = ilen(corpus_reader_indices(corpus))
+    total_num_embeddings = ilen(corpus_reader_indices(corpus, msg="Counting"))
     logger.debug("Got %d", total_num_embeddings)
     if sample_size is None:
         logger.debug("Loading all of them...")
