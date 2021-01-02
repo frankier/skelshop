@@ -5,6 +5,7 @@ import os
 from collections import Counter
 from functools import partial
 from itertools import groupby
+from operator import itemgetter
 from typing import Any, Dict, Iterator, List, Optional, Tuple
 
 import click
@@ -45,8 +46,9 @@ SAMPLE_BATCH_SIZE = 1024
 #    all_embeddings.extend(embeddings)
 
 
-def read_seg_pers(corpus: CorpusReader):
-    seg_pers = []
+def read_seg_pers(corpus: CorpusReader, num_embeddings) -> np.ndarray:
+    seg_pers = np.empty((num_embeddings, 3), dtype=np.int32)
+    idx = 0
     for video_idx, video_info in enumerate(corpus):
         with open(video_info["bestcands"], "r") as bestcands:
             next(bestcands)
@@ -58,7 +60,8 @@ def read_seg_pers(corpus: CorpusReader):
                     abs_frame_num,
                     extractor,
                 ) = line.strip().split(",")
-                seg_pers.append((video_idx, seg, pers_id))
+                seg_pers[idx] = (video_idx, int(seg), int(pers_id))
+                idx += 1
     return seg_pers
 
 
@@ -135,9 +138,9 @@ def num_to_clus(num: int):
     return f"c{num}"
 
 
-def get_seg_clusts_vote(seg_pers: List[Tuple[str, str, str]], label_it: Iterator[int]):
-    for grp, seg_pers_label in groupby(zip(seg_pers, label_it), lambda tpl: tpl[0]):
-        label_cnts = Counter((label for _, label in seg_pers_label))
+def get_seg_clusts_vote(seg_pers: np.ndarray, label_it: Iterator[int]):
+    for grp, seg_pers_label in groupby(zip(*seg_pers.T, label_it), itemgetter(0, 1, 2)):
+        label_cnts = Counter((label for _, _, _, label in seg_pers_label))
         clus: str
         if len(label_cnts) == 1:
             clus = num_to_clus(next(iter(label_cnts)))
@@ -335,6 +338,12 @@ def expand_clus_labels(
     return all_clus_labels
 
 
+def regroup_by_pers(all_embeddings_np, seg_pers):
+    indices = np.lexsort(seg_pers.T[::-1])
+    seg_pers[:] = seg_pers[indices]
+    all_embeddings_np[:] = all_embeddings_np[indices]
+
+
 def process_common_clus_options(args, kwargs, inner):
     corpus_desc = kwargs.pop("corpus_desc")
     corpus_base = kwargs.pop("corpus_base")
@@ -351,6 +360,10 @@ def process_common_clus_options(args, kwargs, inner):
             )
         else:
             all_embeddings_np = collect_embeddings(corpus)
+            num_embeddings = len(all_embeddings_np)
+        seg_pers = read_seg_pers(corpus, num_embeddings)
+        regroup_by_pers(all_embeddings_np, seg_pers)
+        kwargs["seg_pers"] = seg_pers
         knn = kwargs.get("knn")
         if knn is not None and knn > len(all_embeddings_np) - 1:
             knn = len(all_embeddings_np) - 1
@@ -360,8 +373,6 @@ def process_common_clus_options(args, kwargs, inner):
                 knn,
             )
             kwargs["knn"] = knn
-        seg_pers = read_seg_pers(corpus)
-        kwargs["seg_pers"] = seg_pers
         if pool == "med":
             if sample_size is not None:
                 raise click.UsageError("Cannot use sampling when --pool=med")
