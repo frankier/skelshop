@@ -363,6 +363,8 @@ def process_common_clus_options(args, kwargs, inner):
         seg_pers = read_seg_pers(corpus)
         kwargs["seg_pers"] = seg_pers
         if pool == "med":
+            if sample_size is not None:
+                raise click.UsageError("Cannot use sampling when --pool=med")
             all_embeddings_np = med_pool_vecs(
                 all_embeddings_np, seg_pers, DEFAULT_METRIC
             )
