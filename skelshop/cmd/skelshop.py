@@ -1,3 +1,4 @@
+import logging
 from importlib.util import find_spec
 
 import click
@@ -16,6 +17,8 @@ from .playsticks import playsticks
 from .stats import stats
 
 click_log.basic_config()
+numba_logger = logging.getLogger("numba")
+numba_logger.setLevel(logging.WARNING)
 
 
 @click.group()
