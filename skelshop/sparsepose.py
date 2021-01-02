@@ -115,8 +115,7 @@ class SparsePose:
         self.indptr = grp["indptr"]
 
     def get_row(self, row_num):
-        row_start = self.indptr[row_num]
-        row_end = self.indptr[row_num + 1]
+        row_start, row_end = self.indptr[row_num : row_num + 2]
         res = np.zeros((self.num_limbs, 3))
         res[self.indices[row_start:row_end]] = self.data[row_start:row_end]
         return res
