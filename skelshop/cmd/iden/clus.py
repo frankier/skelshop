@@ -15,7 +15,6 @@ from more_itertools import ilen, peekable
 from scipy.spatial.distance import pdist, squareform
 from sklearn.utils.random import sample_without_replacement
 
-from skelshop.cluster.knn import FaissIndex
 from skelshop.corpus import CorpusReader
 from skelshop.face.consts import DEFAULT_DETECTION_THRESHOLD, DEFAULT_METRIC
 from skelshop.face.io import SparseFaceReader
@@ -284,6 +283,7 @@ def mk_count_vote(min_samples):
 
 
 def expand_clus_labels(
+    transformer_cls,
     corpus,
     num_embeddings_total,
     *sampled_embeddings,
@@ -295,7 +295,8 @@ def expand_clus_labels(
 ):
     all_clus_labels = np.full(num_embeddings_total, -1)
     sampled_labels_it = iter(sampled_labels)
-    index = FaissIndex(sampled_embeddings, metric)
+    index = transformer_cls(SAMPLE_KNN, metric=metric)
+    index.fit(sampled_embeddings)
     del sampled_embeddings
     sample_indices_peek = peekable(sample_idxs)
     batch: List[np.ndarray] = []
@@ -305,7 +306,7 @@ def expand_clus_labels(
 
     def flush_batch():
         batch_np = np.vstack(batch)
-        dists, nbrs = index.search(batch_np, k=SAMPLE_KNN)
+        dists, nbrs = index.transform(batch_np)
         # Convert sims -> dists
         dists = 1 - dists
         # Mask out those over dist
@@ -378,7 +379,10 @@ def process_common_clus_options(args, kwargs, inner):
                     num_protos,
                 )
         if sample_idxs is not None:
+            ann_lib = kwargs["ann_lib"]
+            transformer_cls = knn_lib_transformer(ann_lib)
             clus_labels = expand_clus_labels(
+                transformer_cls,
                 corpus,
                 num_embeddings,
                 sampled_embeddings=all_embeddings_np,
@@ -401,7 +405,14 @@ common_clus_options = save_options(
         click.option("--corpus-base", type=PathPath(exists=True)),
         click.option("--proto-out", type=PathPath()),
         click.option("--num-protos", type=int, default=1),
-        click.option("--algorithm", type=click.Choice(["dbscan", "optics-dbscan"])),
+        click.option(
+            "--algorithm", type=click.Choice(["dbscan", "optics-dbscan", "rnn-dbscan"])
+        ),
+        click.option(
+            "--ann-lib",
+            type=click.Choice(["pynndescent", "faiss-exact"]),
+            default="pynndescent",
+        ),
         click.option(
             "--pool", type=click.Choice(["med", "min", "vote"]), default="vote"
         ),
@@ -421,10 +432,24 @@ def clus():
     pass
 
 
-def get_clus_alg(algorithm: str, knn: Optional[int], pool: str, metric: str, **kwargs):
-    from sklearn.cluster import DBSCAN, OPTICS
+def knn_lib_transformer(knn_lib):
+    if knn_lib == "faiss-exact":
+        from sklearn_ann.kneighbors.faiss import FAISSTransformer
 
-    from skelshop.cluster.dbscan import KnnDBSCAN
+        return FAISSTransformer
+    else:
+        from sklearn_ann.kneighbors.pynndescent import PyNNDescentTransformer
+
+        return PyNNDescentTransformer
+
+
+def get_clus_alg(
+    algorithm: str, knn_lib: str, knn: Optional[int], pool: str, metric: str, **kwargs
+):
+    from sklearn.cluster import DBSCAN, OPTICS
+    from sklearn_ann.cluster.rnn_dbscan import simple_rnn_dbscan_pipeline
+
+    from skelshop.cluster.dbscan import knn_dbscan_pipeline
 
     if knn is None:
         metric = "precomputed" if pool == "min" else metric
@@ -435,16 +460,20 @@ def get_clus_alg(algorithm: str, knn: Optional[int], pool: str, metric: str, **k
                 cluster_method="dbscan",
                 **kwargs,
             )
-        else:
+        elif algorithm == "dbscan":
             return DBSCAN(metric=metric, **kwargs)
+        else:
+            raise click.UsageError("Must specify knn when algorithm == 'rnn-dbscan'")
     else:
         if algorithm == "optics-dbscan":
             raise NotImplementedError("KNN is not implemented for OPTICS")
         if pool == "min":
-            raise NotImplementedError("Min pooling not implemented for KNN DBSCAN")
-        return KnnDBSCAN(
-            knn=knn, th_sim=0.0, knn_method="faiss", metric=metric, **kwargs
-        )
+            raise NotImplementedError("Min pooling not implemented for KNN DBSCANs")
+        transformer = knn_lib_transformer(knn_lib)
+        if algorithm == "dbscan":
+            return knn_dbscan_pipeline(transformer, knn, metric=metric)
+        else:
+            return simple_rnn_dbscan_pipeline(transformer, knn, metric=metric)
 
 
 def proc_data(vecs, seg_pers: List[Tuple[str, str, str]], pool: str, metric: str):
@@ -465,6 +494,7 @@ def fixed(
     corpus: CorpusReader,
     seg_pers: List[Tuple[str, str, str]],
     algorithm: str,
+    ann_lib: str,
     pool: str,
     knn: Optional[int],
     eps: float,
@@ -476,6 +506,7 @@ def fixed(
     """
     clus_alg = get_clus_alg(
         algorithm,
+        ann_lib,
         knn,
         pool,
         DEFAULT_METRIC,
@@ -521,6 +552,7 @@ def search(
     corpus: CorpusReader,
     seg_pers: List[Tuple[str, str, str]],
     algorithm: str,
+    ann_lib: str,
     pool: str,
     knn: Optional[int],
     eps: Optional[str],
@@ -568,7 +600,9 @@ def search(
         logger.debug("Using JOBLIB_CACHE_DIR=%s", os.environ["JOBLIB_CACHE_DIR"])
         clus_kwargs["memory"] = os.environ["JOBLIB_CACHE_DIR"]
 
-    clus_alg = get_clus_alg(algorithm, knn, pool, DEFAULT_METRIC, **clus_kwargs)
+    clus_alg = get_clus_alg(
+        algorithm, ann_lib, knn, pool, DEFAULT_METRIC, **clus_kwargs
+    )
 
     param_grid: Dict[str, List[Any]] = {
         "min_samples": min_samples_list,
