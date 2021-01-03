@@ -12,31 +12,33 @@
       
       
       <link rel="shortcut icon" href="../assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.1.2, mkdocs-material-6.1.7">
+      <meta name="generator" content="mkdocs-1.1.2, mkdocs-material-6.2.3">
     
     
       
-        <title>HPC extraction with Snakemake - SkelShop Documentation</title>
+        <title>Automation with snakemake - SkelShop Documentation</title>
       
     
     
-      <link rel="stylesheet" href="../assets/stylesheets/main.19753c6b.min.css">
-      
-        
-        <link rel="stylesheet" href="../assets/stylesheets/palette.196e0c26.min.css">
-        
-      
-    
-    
-    
+      <link rel="stylesheet" href="../assets/stylesheets/main.3b61ea93.min.css">
       
         
-        <link href="https://fonts.gstatic.com" rel="preconnect" crossorigin>
+        <link rel="stylesheet" href="../assets/stylesheets/palette.39b8e14a.min.css">
+        
+      
+    
+    
+    
+      
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
         <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,400i,700%7CRoboto+Mono&display=fallback">
         <style>body,input{font-family:"Roboto",-apple-system,BlinkMacSystemFont,Helvetica,Arial,sans-serif}code,kbd,pre{font-family:"Roboto Mono",SFMono-Regular,Consolas,Menlo,monospace}</style>
       
     
     
+    
+      <link rel="stylesheet" href="../extra.css">
     
     
       
@@ -53,13 +55,14 @@
     <body dir="ltr" data-md-color-scheme="" data-md-color-primary="none" data-md-color-accent="none">
       
   
+    
     <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
     <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
     <label class="md-overlay" for="__drawer"></label>
     <div data-md-component="skip">
       
         
-        <a href="#workflow-orchestration-and-extraction-in-a-hpc-environment-using-snakemake" class="md-skip">
+        <a href="#workflow-automation-and-orchestration-on-your-workstation-and-in-hpc-environments-using-snakemake" class="md-skip">
           Skip to content
         </a>
       
@@ -82,18 +85,20 @@
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3V6m0 5h18v2H3v-2m0 5h18v2H3v-2z"/></svg>
     </label>
     <div class="md-header-nav__title" data-md-component="header-title">
-      
-        <div class="md-header-nav__ellipsis">
-          <span class="md-header-nav__topic md-ellipsis">
+      <div class="md-header-nav__ellipsis">
+        <div class="md-header-nav__topic">
+          <span class="md-ellipsis">
             SkelShop Documentation
           </span>
-          <span class="md-header-nav__topic md-ellipsis">
+        </div>
+        <div class="md-header-nav__topic">
+          <span class="md-ellipsis">
             
-              HPC extraction with Snakemake
+              Automation with snakemake
             
           </span>
         </div>
-      
+      </div>
     </div>
     
       <label class="md-header-nav__button md-icon" for="__search">
@@ -147,17 +152,118 @@
       
       
         
+          
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-tabs__inner md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+
+
+  <li class="md-tabs__item">
+    <a href=".." class="md-tabs__link">
+      Getting started
+    </a>
+  </li>
+
+      
+        
+  
+  
+    
+  
+
+
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../user-guide-intro/" class="md-tabs__link md-tabs__link--active">
+        User guide
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+
+
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../pipeline-internals/" class="md-tabs__link">
+        Developer guide
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+
+
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../cli/" class="md-tabs__link">
+        Reference
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+
+
+  <li class="md-tabs__item">
+    <a href="https://github.com/frankier/skelshop/issues" class="md-tabs__link">
+      Issues
+    </a>
+  </li>
+
+      
+        
+  
+  
+
+
+  <li class="md-tabs__item">
+    <a href="https://github.com/frankier/skelshop/discussions" class="md-tabs__link">
+      Discussion & Questions
+    </a>
+  </li>
+
+      
+    </ul>
+  </div>
+</nav>
+        
       
       <main class="md-main" data-md-component="main">
         <div class="md-main__inner md-grid">
           
             
-              <div class="md-sidebar md-sidebar--primary" data-md-component="navigation">
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="navigation" >
                 <div class="md-sidebar__scrollwrap">
                   <div class="md-sidebar__inner">
                     
 
-<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
   <label class="md-nav__title" for="__drawer">
     <a href=".." title="SkelShop Documentation" class="md-nav__button md-logo" aria-label="SkelShop Documentation">
       
@@ -188,6 +294,7 @@
       
 
 
+
   <li class="md-nav__item">
     <a href=".." class="md-nav__link">
       Getting started
@@ -199,20 +306,24 @@
       
       
 
+
   
 
 
+  
   <li class="md-nav__item md-nav__item--active md-nav__item--nested">
     
-    <input class="md-nav__toggle md-toggle" data-md-toggle="nav-2" type="checkbox" id="nav-2" checked>
+    
+      <input class="md-nav__toggle md-toggle" data-md-toggle="nav-2" type="checkbox" id="nav-2" checked>
+    
     <label class="md-nav__link" for="nav-2">
-      User guide (for users of the command line tools)
+      User guide
       <span class="md-nav__icon md-icon"></span>
     </label>
-    <nav class="md-nav" aria-label="User guide (for users of the command line tools)" data-md-level="1">
+    <nav class="md-nav" aria-label="User guide" data-md-level="1">
       <label class="md-nav__title" for="nav-2">
         <span class="md-nav__icon md-icon"></span>
-        User guide (for users of the command line tools)
+        User guide
       </label>
       <ul class="md-nav__list" data-md-scrollfix>
         
@@ -220,6 +331,20 @@
           
           
           
+
+
+
+  <li class="md-nav__item">
+    <a href="../user-guide-intro/" class="md-nav__link">
+      Introduction
+    </a>
+  </li>
+
+        
+          
+          
+          
+
 
 
   <li class="md-nav__item">
@@ -234,15 +359,19 @@
           
 
 
+
+  
   <li class="md-nav__item md-nav__item--nested">
     
-    <input class="md-nav__toggle md-toggle" data-md-toggle="nav-2-2" type="checkbox" id="nav-2-2" >
-    <label class="md-nav__link" for="nav-2-2">
+    
+      <input class="md-nav__toggle md-toggle" data-md-toggle="nav-2-3" type="checkbox" id="nav-2-3" >
+    
+    <label class="md-nav__link" for="nav-2-3">
       Meet the...
       <span class="md-nav__icon md-icon"></span>
     </label>
     <nav class="md-nav" aria-label="Meet the..." data-md-level="2">
-      <label class="md-nav__title" for="nav-2-2">
+      <label class="md-nav__title" for="nav-2-3">
         <span class="md-nav__icon md-icon"></span>
         Meet the...
       </label>
@@ -252,6 +381,7 @@
           
           
           
+
 
 
   <li class="md-nav__item">
@@ -266,6 +396,7 @@
           
 
 
+
   <li class="md-nav__item">
     <a href="../shot-segmentors/" class="md-nav__link">
       Shot segmentors
@@ -276,6 +407,7 @@
           
           
           
+
 
 
   <li class="md-nav__item">
@@ -290,6 +422,7 @@
           
 
 
+
   <li class="md-nav__item">
     <a href="../face-extractors/" class="md-nav__link">
       Face chip detectors/croppers
@@ -300,6 +433,7 @@
           
           
           
+
 
 
   <li class="md-nav__item">
@@ -319,17 +453,6 @@
           
 
 
-  <li class="md-nav__item">
-    <a href="../usage-examples/" class="md-nav__link">
-      Usage examples
-    </a>
-  </li>
-
-        
-          
-          
-          
-
 
   <li class="md-nav__item">
     <a href="../benchmark/" class="md-nav__link">
@@ -342,6 +465,33 @@
           
           
 
+
+
+  <li class="md-nav__item">
+    <a href="../face-pipeline-configuration-guide/" class="md-nav__link">
+      Guide: configuring the face embedding pipeline
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+
+  <li class="md-nav__item">
+    <a href="../identification/" class="md-nav__link">
+      Person identification
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
   
 
 
@@ -353,12 +503,12 @@
     
     
       <label class="md-nav__link md-nav__link--active" for="__toc">
-        HPC extraction with Snakemake
+        Automation with snakemake
         <span class="md-nav__icon md-icon"></span>
       </label>
     
     <a href="./" class="md-nav__link md-nav__link--active">
-      HPC extraction with Snakemake
+      Automation with snakemake
     </a>
     
       
@@ -409,6 +559,19 @@
   </li>
 
         
+          
+          
+          
+
+
+
+  <li class="md-nav__item">
+    <a href="../usage-examples/" class="md-nav__link">
+      Misc. usage examples
+    </a>
+  </li>
+
+        
       </ul>
     </nav>
   </li>
@@ -419,17 +582,21 @@
       
 
 
+
+  
   <li class="md-nav__item md-nav__item--nested">
     
-    <input class="md-nav__toggle md-toggle" data-md-toggle="nav-3" type="checkbox" id="nav-3" >
+    
+      <input class="md-nav__toggle md-toggle" data-md-toggle="nav-3" type="checkbox" id="nav-3" >
+    
     <label class="md-nav__link" for="nav-3">
-      Developer guide (for users of the library & contributors)
+      Developer guide
       <span class="md-nav__icon md-icon"></span>
     </label>
-    <nav class="md-nav" aria-label="Developer guide (for users of the library & contributors)" data-md-level="1">
+    <nav class="md-nav" aria-label="Developer guide" data-md-level="1">
       <label class="md-nav__title" for="nav-3">
         <span class="md-nav__icon md-icon"></span>
-        Developer guide (for users of the library & contributors)
+        Developer guide
       </label>
       <ul class="md-nav__list" data-md-scrollfix>
         
@@ -437,6 +604,7 @@
           
           
           
+
 
 
   <li class="md-nav__item">
@@ -451,6 +619,7 @@
           
 
 
+
   <li class="md-nav__item">
     <a href="../tracking/" class="md-nav__link">
       Tracking
@@ -461,6 +630,7 @@
           
           
           
+
 
 
   <li class="md-nav__item">
@@ -475,6 +645,7 @@
           
 
 
+
   <li class="md-nav__item">
     <a href="../io/" class="md-nav__link">
       Reading and writing the formats from your own code
@@ -485,6 +656,7 @@
           
           
           
+
 
 
   <li class="md-nav__item">
@@ -504,9 +676,13 @@
       
 
 
+
+  
   <li class="md-nav__item md-nav__item--nested">
     
-    <input class="md-nav__toggle md-toggle" data-md-toggle="nav-4" type="checkbox" id="nav-4" >
+    
+      <input class="md-nav__toggle md-toggle" data-md-toggle="nav-4" type="checkbox" id="nav-4" >
+    
     <label class="md-nav__link" for="nav-4">
       Reference
       <span class="md-nav__icon md-icon"></span>
@@ -522,6 +698,7 @@
           
           
           
+
 
 
   <li class="md-nav__item">
@@ -541,6 +718,7 @@
       
 
 
+
   <li class="md-nav__item">
     <a href="https://github.com/frankier/skelshop/issues" class="md-nav__link">
       Issues
@@ -551,6 +729,7 @@
       
       
       
+
 
 
   <li class="md-nav__item">
@@ -567,7 +746,8 @@
               </div>
             
             
-              <div class="md-sidebar md-sidebar--secondary" data-md-component="toc">
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="toc" >
                 <div class="md-sidebar__scrollwrap">
                   <div class="md-sidebar__inner">
                     
@@ -628,7 +808,7 @@
                   </a>
                 
                 
-                <h1 id="workflow-orchestration-and-extraction-in-a-hpc-environment-using-snakemake">Workflow orchestration and extraction in a HPC environment using Snakemake</h1>
+                <h1 id="workflow-automation-and-orchestration-on-your-workstation-and-in-hpc-environments-using-snakemake">Workflow automation and orchestration, on your workstation and in HPC environments using Snakemake<a class="headerlink" href="#workflow-automation-and-orchestration-on-your-workstation-and-in-hpc-environments-using-snakemake" title="Permanent link">#</a></h1>
 <p>SkelShop include tools for running extraction pipelines orchestrated using
 Snakemake. These workflows can be run on a single node, however more typically
 these would be run in a HPC environment, with a heterogeneous mix of GPU and
@@ -642,7 +822,7 @@ configuration file, all from a single Singularity container. This workflow is
 enabled by <a href="https://github.com/frankier/singslurm">singslurm</a> project, which is
 based on the <a href="https://github.com/Snakemake-Profiles/slurm">Snakemake SLURM
 profile</a>.</p>
-<h2 id="running-snakemake-on-a-single-node">Running Snakemake on a single node</h2>
+<h2 id="running-snakemake-on-a-single-node">Running Snakemake on a single node<a class="headerlink" href="#running-snakemake-on-a-single-node" title="Permanent link">#</a></h2>
 <p>Snakemake can be run on a single node, which might be appropriate if you have
 a very small video corpus or a lot of time(!)</p>
 <p>For example assuming you have followed the manual installation instruction and
@@ -654,7 +834,7 @@ $ poetry run snakemake tracked_all \
   VIDEO_BASE=/path/to/my/video/corpus/ \
   DUMP_BASE=/path/to/my/dump/directory
 </code></pre>
-<h2 id="running-snakemake-on-a-slurm-cluster">Running Snakemake on a SLURM cluster</h2>
+<h2 id="running-snakemake-on-a-slurm-cluster">Running Snakemake on a SLURM cluster<a class="headerlink" href="#running-snakemake-on-a-slurm-cluster" title="Permanent link">#</a></h2>
 <p>The coordinator script bootstraps everything needed for containerised Snakemake
 execution:</p>
 <pre><code>$ wget https://raw.githubusercontent.com/frankier/singslurm/master/run_coord.sh
@@ -702,14 +882,14 @@ for information on how to write this file.</p>
 </ol>
 <p>Please see the <a href="https://github.com/frankier/singslurm">singslurm</a> repository
 for more information about the environment variables passed to <code>run_coord.sh</code>.</p>
-<h2 id="integrating-skelshop-into-your-own-pipelines">Integrating SkelShop into your own pipelines</h2>
+<h2 id="integrating-skelshop-into-your-own-pipelines">Integrating SkelShop into your own pipelines<a class="headerlink" href="#integrating-skelshop-into-your-own-pipelines" title="Permanent link">#</a></h2>
 <p>In case you are using SkelShop as part of a larger pipeline or want to further
 customise your workflow, you should write your own Snakefile. See the
 <a href="https://snakemake.readthedocs.io">Snakemake documentation</a>. You may like to
 use the rules and scripts from SkelShop. In this case the current best approach
 is to copy or symlink everything under <code>workflow/rules</code> and <code>workflow/scripts</code>
 into your own <code>workflow</code> directory.</p>
-<h2 id="other-hpc-utilities">Other HPC utilities</h2>
+<h2 id="other-hpc-utilities">Other HPC utilities<a class="headerlink" href="#other-hpc-utilities" title="Permanent link">#</a></h2>
 <p>There are some examples of how to run which are specific to the Case Western
 Reserve University SLURM cluster <a href="https://github.com/frankier/skelshop/tree/master/contrib/slurm">in the contrib/slurm
 directory</a>.</p>
@@ -731,7 +911,7 @@ directory</a>.</p>
     <div class="md-footer-nav">
       <nav class="md-footer-nav__inner md-grid" aria-label="Footer">
         
-          <a href="../benchmark/" class="md-footer-nav__link md-footer-nav__link--prev" rel="prev">
+          <a href="../identification/" class="md-footer-nav__link md-footer-nav__link--prev" rel="prev">
             <div class="md-footer-nav__button md-icon">
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12z"/></svg>
             </div>
@@ -740,19 +920,19 @@ directory</a>.</p>
                 <span class="md-footer-nav__direction">
                   Previous
                 </span>
-                Benchmarks
+                Person identification
               </div>
             </div>
           </a>
         
         
-          <a href="../pipeline-internals/" class="md-footer-nav__link md-footer-nav__link--next" rel="next">
+          <a href="../usage-examples/" class="md-footer-nav__link md-footer-nav__link--next" rel="next">
             <div class="md-footer-nav__title">
               <div class="md-ellipsis">
                 <span class="md-footer-nav__direction">
                   Next
                 </span>
-                Pipeline internals
+                Misc. usage examples
               </div>
             </div>
             <div class="md-footer-nav__button md-icon">
@@ -779,15 +959,15 @@ directory</a>.</p>
       
     </div>
     
-      <script src="../assets/javascripts/vendor.0ac82a11.min.js"></script>
-      <script src="../assets/javascripts/bundle.f81dfb4d.min.js"></script><script id="__lang" type="application/json">{"clipboard.copy": "Copy to clipboard", "clipboard.copied": "Copied to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.placeholder": "Search", "search.result.placeholder": "Type to start searching", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.term.missing": "Missing"}</script>
+      <script src="../assets/javascripts/vendor.08c56446.min.js"></script>
+      <script src="../assets/javascripts/bundle.6ced434e.min.js"></script><script id="__lang" type="application/json">{"clipboard.copy": "Copy to clipboard", "clipboard.copied": "Copied to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.placeholder": "Search", "search.result.placeholder": "Type to start searching", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.term.missing": "Missing"}</script>
       
       <script>
         app = initialize({
           base: "..",
-          features: [],
+          features: ['navigation.tabs'],
           search: Object.assign({
-            worker: "../assets/javascripts/worker/search.4ac00218.min.js"
+            worker: "../assets/javascripts/worker/search.8c7e0a7e.min.js"
           }, typeof search !== "undefined" && search)
         })
       </script>

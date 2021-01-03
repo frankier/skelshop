@@ -12,7 +12,7 @@
       
       
       <link rel="shortcut icon" href="../assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.1.2, mkdocs-material-6.1.7">
+      <meta name="generator" content="mkdocs-1.1.2, mkdocs-material-6.2.3">
     
     
       
@@ -20,10 +20,10 @@
       
     
     
-      <link rel="stylesheet" href="../assets/stylesheets/main.19753c6b.min.css">
+      <link rel="stylesheet" href="../assets/stylesheets/main.3b61ea93.min.css">
       
         
-        <link rel="stylesheet" href="../assets/stylesheets/palette.196e0c26.min.css">
+        <link rel="stylesheet" href="../assets/stylesheets/palette.39b8e14a.min.css">
         
       
     
@@ -31,12 +31,14 @@
     
       
         
-        <link href="https://fonts.gstatic.com" rel="preconnect" crossorigin>
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
         <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,400i,700%7CRoboto+Mono&display=fallback">
         <style>body,input{font-family:"Roboto",-apple-system,BlinkMacSystemFont,Helvetica,Arial,sans-serif}code,kbd,pre{font-family:"Roboto Mono",SFMono-Regular,Consolas,Menlo,monospace}</style>
       
     
     
+    
+      <link rel="stylesheet" href="../extra.css">
     
     
       
@@ -53,6 +55,7 @@
     <body dir="ltr" data-md-color-scheme="" data-md-color-primary="none" data-md-color-accent="none">
       
   
+    
     <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
     <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
     <label class="md-overlay" for="__drawer"></label>
@@ -82,18 +85,20 @@
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3V6m0 5h18v2H3v-2m0 5h18v2H3v-2z"/></svg>
     </label>
     <div class="md-header-nav__title" data-md-component="header-title">
-      
-        <div class="md-header-nav__ellipsis">
-          <span class="md-header-nav__topic md-ellipsis">
+      <div class="md-header-nav__ellipsis">
+        <div class="md-header-nav__topic">
+          <span class="md-ellipsis">
             SkelShop Documentation
           </span>
-          <span class="md-header-nav__topic md-ellipsis">
+        </div>
+        <div class="md-header-nav__topic">
+          <span class="md-ellipsis">
             
               Person identification
             
           </span>
         </div>
-      
+      </div>
     </div>
     
       <label class="md-header-nav__button md-icon" for="__search">
@@ -147,17 +152,118 @@
       
       
         
+          
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-tabs__inner md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+
+
+  <li class="md-tabs__item">
+    <a href=".." class="md-tabs__link">
+      Getting started
+    </a>
+  </li>
+
+      
+        
+  
+  
+    
+  
+
+
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../user-guide-intro/" class="md-tabs__link md-tabs__link--active">
+        User guide
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+
+
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../pipeline-internals/" class="md-tabs__link">
+        Developer guide
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+
+
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../cli/" class="md-tabs__link">
+        Reference
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+
+
+  <li class="md-tabs__item">
+    <a href="https://github.com/frankier/skelshop/issues" class="md-tabs__link">
+      Issues
+    </a>
+  </li>
+
+      
+        
+  
+  
+
+
+  <li class="md-tabs__item">
+    <a href="https://github.com/frankier/skelshop/discussions" class="md-tabs__link">
+      Discussion & Questions
+    </a>
+  </li>
+
+      
+    </ul>
+  </div>
+</nav>
+        
       
       <main class="md-main" data-md-component="main">
         <div class="md-main__inner md-grid">
           
             
-              <div class="md-sidebar md-sidebar--primary" data-md-component="navigation">
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="navigation" >
                 <div class="md-sidebar__scrollwrap">
                   <div class="md-sidebar__inner">
                     
 
-<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
   <label class="md-nav__title" for="__drawer">
     <a href=".." title="SkelShop Documentation" class="md-nav__button md-logo" aria-label="SkelShop Documentation">
       
@@ -188,6 +294,7 @@
       
 
 
+
   <li class="md-nav__item">
     <a href=".." class="md-nav__link">
       Getting started
@@ -200,17 +307,23 @@
       
 
 
-  <li class="md-nav__item md-nav__item--nested">
+  
+
+
+  
+  <li class="md-nav__item md-nav__item--active md-nav__item--nested">
     
-    <input class="md-nav__toggle md-toggle" data-md-toggle="nav-2" type="checkbox" id="nav-2" >
+    
+      <input class="md-nav__toggle md-toggle" data-md-toggle="nav-2" type="checkbox" id="nav-2" checked>
+    
     <label class="md-nav__link" for="nav-2">
-      User guide (for users of the command line tools)
+      User guide
       <span class="md-nav__icon md-icon"></span>
     </label>
-    <nav class="md-nav" aria-label="User guide (for users of the command line tools)" data-md-level="1">
+    <nav class="md-nav" aria-label="User guide" data-md-level="1">
       <label class="md-nav__title" for="nav-2">
         <span class="md-nav__icon md-icon"></span>
-        User guide (for users of the command line tools)
+        User guide
       </label>
       <ul class="md-nav__list" data-md-scrollfix>
         
@@ -218,6 +331,20 @@
           
           
           
+
+
+
+  <li class="md-nav__item">
+    <a href="../user-guide-intro/" class="md-nav__link">
+      Introduction
+    </a>
+  </li>
+
+        
+          
+          
+          
+
 
 
   <li class="md-nav__item">
@@ -232,15 +359,19 @@
           
 
 
+
+  
   <li class="md-nav__item md-nav__item--nested">
     
-    <input class="md-nav__toggle md-toggle" data-md-toggle="nav-2-2" type="checkbox" id="nav-2-2" >
-    <label class="md-nav__link" for="nav-2-2">
+    
+      <input class="md-nav__toggle md-toggle" data-md-toggle="nav-2-3" type="checkbox" id="nav-2-3" >
+    
+    <label class="md-nav__link" for="nav-2-3">
       Meet the...
       <span class="md-nav__icon md-icon"></span>
     </label>
     <nav class="md-nav" aria-label="Meet the..." data-md-level="2">
-      <label class="md-nav__title" for="nav-2-2">
+      <label class="md-nav__title" for="nav-2-3">
         <span class="md-nav__icon md-icon"></span>
         Meet the...
       </label>
@@ -250,6 +381,7 @@
           
           
           
+
 
 
   <li class="md-nav__item">
@@ -264,6 +396,7 @@
           
 
 
+
   <li class="md-nav__item">
     <a href="../shot-segmentors/" class="md-nav__link">
       Shot segmentors
@@ -274,6 +407,7 @@
           
           
           
+
 
 
   <li class="md-nav__item">
@@ -288,6 +422,7 @@
           
 
 
+
   <li class="md-nav__item">
     <a href="../face-extractors/" class="md-nav__link">
       Face chip detectors/croppers
@@ -298,6 +433,7 @@
           
           
           
+
 
 
   <li class="md-nav__item">
@@ -317,17 +453,6 @@
           
 
 
-  <li class="md-nav__item">
-    <a href="../usage-examples/" class="md-nav__link">
-      Usage examples
-    </a>
-  </li>
-
-        
-          
-          
-          
-
 
   <li class="md-nav__item">
     <a href="../benchmark/" class="md-nav__link">
@@ -341,9 +466,122 @@
           
 
 
+
+  <li class="md-nav__item">
+    <a href="../face-pipeline-configuration-guide/" class="md-nav__link">
+      Guide: configuring the face embedding pipeline
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  
+
+
+  <li class="md-nav__item md-nav__item--active">
+    
+    <input class="md-nav__toggle md-toggle" data-md-toggle="toc" type="checkbox" id="__toc">
+    
+      
+    
+    
+      <label class="md-nav__link md-nav__link--active" for="__toc">
+        Person identification
+        <span class="md-nav__icon md-icon"></span>
+      </label>
+    
+    <a href="./" class="md-nav__link md-nav__link--active">
+      Person identification
+    </a>
+    
+      
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#construction-a-face-reference-library" class="md-nav__link">
+    Construction a face reference library
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#embedding-your-face-library-in-advance" class="md-nav__link">
+    Embedding your face library in advance
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#direct-comparison" class="md-nav__link">
+    Direct comparison
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#making-a-corpus-description-file" class="md-nav__link">
+    Making a corpus description file
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#clustering" class="md-nav__link">
+    Clustering
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#labelling-clusters" class="md-nav__link">
+    Labelling clusters
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+    
+  </li>
+
+        
+          
+          
+          
+
+
+
   <li class="md-nav__item">
     <a href="../snakemake/" class="md-nav__link">
-      HPC extraction with Snakemake
+      Automation with snakemake
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+
+  <li class="md-nav__item">
+    <a href="../usage-examples/" class="md-nav__link">
+      Misc. usage examples
     </a>
   </li>
 
@@ -358,17 +596,21 @@
       
 
 
+
+  
   <li class="md-nav__item md-nav__item--nested">
     
-    <input class="md-nav__toggle md-toggle" data-md-toggle="nav-3" type="checkbox" id="nav-3" >
+    
+      <input class="md-nav__toggle md-toggle" data-md-toggle="nav-3" type="checkbox" id="nav-3" >
+    
     <label class="md-nav__link" for="nav-3">
-      Developer guide (for users of the library & contributors)
+      Developer guide
       <span class="md-nav__icon md-icon"></span>
     </label>
-    <nav class="md-nav" aria-label="Developer guide (for users of the library & contributors)" data-md-level="1">
+    <nav class="md-nav" aria-label="Developer guide" data-md-level="1">
       <label class="md-nav__title" for="nav-3">
         <span class="md-nav__icon md-icon"></span>
-        Developer guide (for users of the library & contributors)
+        Developer guide
       </label>
       <ul class="md-nav__list" data-md-scrollfix>
         
@@ -376,6 +618,7 @@
           
           
           
+
 
 
   <li class="md-nav__item">
@@ -390,6 +633,7 @@
           
 
 
+
   <li class="md-nav__item">
     <a href="../tracking/" class="md-nav__link">
       Tracking
@@ -400,6 +644,7 @@
           
           
           
+
 
 
   <li class="md-nav__item">
@@ -414,6 +659,7 @@
           
 
 
+
   <li class="md-nav__item">
     <a href="../io/" class="md-nav__link">
       Reading and writing the formats from your own code
@@ -424,6 +670,7 @@
           
           
           
+
 
 
   <li class="md-nav__item">
@@ -443,9 +690,13 @@
       
 
 
+
+  
   <li class="md-nav__item md-nav__item--nested">
     
-    <input class="md-nav__toggle md-toggle" data-md-toggle="nav-4" type="checkbox" id="nav-4" >
+    
+      <input class="md-nav__toggle md-toggle" data-md-toggle="nav-4" type="checkbox" id="nav-4" >
+    
     <label class="md-nav__link" for="nav-4">
       Reference
       <span class="md-nav__icon md-icon"></span>
@@ -461,6 +712,7 @@
           
           
           
+
 
 
   <li class="md-nav__item">
@@ -480,6 +732,7 @@
       
 
 
+
   <li class="md-nav__item">
     <a href="https://github.com/frankier/skelshop/issues" class="md-nav__link">
       Issues
@@ -490,6 +743,7 @@
       
       
       
+
 
 
   <li class="md-nav__item">
@@ -506,7 +760,8 @@
               </div>
             
             
-              <div class="md-sidebar md-sidebar--secondary" data-md-component="toc">
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="toc" >
                 <div class="md-sidebar__scrollwrap">
                   <div class="md-sidebar__inner">
                     
@@ -530,8 +785,22 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#embedding-your-face-library-in-advance" class="md-nav__link">
+    Embedding your face library in advance
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#direct-comparison" class="md-nav__link">
     Direct comparison
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#making-a-corpus-description-file" class="md-nav__link">
+    Making a corpus description file
   </a>
   
 </li>
@@ -567,7 +836,7 @@
                   </a>
                 
                 
-                <h1 id="person-identification">Person identification</h1>
+                <h1 id="person-identification">Person identification<a class="headerlink" href="#person-identification" title="Permanent link">#</a></h1>
 <p>There are two major approaches to identification:</p>
 <ol>
 <li>Direct comparison with one or more references. For each identified
@@ -576,7 +845,7 @@
 <li>Identifying clusters by comparison with one or more references.</li>
 <li>Identifying clusters manually by inspection of prototypical images.</li>
 </ol>
-<h2 id="construction-a-face-reference-library">Construction a face reference library</h2>
+<h2 id="construction-a-face-reference-library">Construction a face reference library<a class="headerlink" href="#construction-a-face-reference-library" title="Permanent link">#</a></h2>
 <p>A face reference library is simply a directory containing a number of
 directories, each containing photos containing the face of some individual of
 interest. Each directory should have a unique name which will be given used as
@@ -607,11 +876,88 @@ Q929985
 <p>And then simply running:</p>
 <pre><code>$ skelshop iden buildrefs entities people.txt myref wikidata
 </code></pre>
-<h2 id="direct-comparison">Direct comparison</h2>
+<h2 id="embedding-your-face-library-in-advance">Embedding your face library in advance<a class="headerlink" href="#embedding-your-face-library-in-advance" title="Permanent link">#</a></h2>
+<p>At your option, you can embed the reference library using <a href="../cli/#embedrefs"><code>skelshop iden
+embedrefs</code></a><code>myref/ myref.h5</code>. All commands accepting
+a reference can then be given the output HDF5 file instead of the input
+directory.</p>
+<h2 id="direct-comparison">Direct comparison<a class="headerlink" href="#direct-comparison" title="Permanent link">#</a></h2>
 <p>Once we have <a href="../face-pipeline-configuration-guide/">obtained either a full or sparse set of face
-embeddings</a>, we can identify people in each shot by direct comparison with our reference.</p>
-<h2 id="clustering">Clustering</h2>
-<h2 id="labelling-clusters">Labelling clusters</h2>
+embeddings</a>, we can identify people in
+each shot by direct comparison with our reference like so for a sparse
+embedding dump <a href="../cli/#idsegssparse"><code>skelshop iden idsegssparse</code></a><code>myref/
+path/to/scenes.csv path/to/sparsefacedump.h5 outputids.csv</code>. Or like so for
+a full embedding dump: <a href="../cli/#idsegsfull"><code>skelshop iden idsegsfull</code></a><code>myref/ path/to/scenes.csv path/to/sparsefacedump.h5 outputids.csv</code>.</p>
+<h2 id="making-a-corpus-description-file">Making a corpus description file<a class="headerlink" href="#making-a-corpus-description-file" title="Permanent link">#</a></h2>
+<p>Up until now, we have been dealing with commands that process either only
+a single video at a time, or process information associated with a single
+video, such as skeleton dumps, at a time. However, when we perform face
+clustering we would like to deal data from multiple videos. To do this, we need
+to (usually automatically, e.g. in <a href="../snakemake/">Snakemake</a> create a CSV file
+for our corpus. Here is an example:</p>
+<pre><code>video,group,group_typ,faces,segsout,untracked_skels,tracked_skels,bestcands
+/path/to/video.mp4,/path/to/scenes,ffprobe|psd,/path/to/facedump.h5,/path/to/clustering.output.csv,/path/to/untracked.skels.h5,/path/to/tracked.skels.h5,/path/to/bestcands.csv
+</code></pre>
+<p>Paths in the corpus description file can be absolute or relative. If they are
+relative, you must pass in <code>--corpus-base</code> at the same time as passing in the
+CSV file.</p>
+<h2 id="clustering">Clustering<a class="headerlink" href="#clustering" title="Permanent link">#</a></h2>
+<p>The best family of clustering algorithm to use in situations like ours, where
+clusters of high density are separated by areas of areas of low density are
+density-based clustering algorithms. The classic density-based clustering
+algorithm is DBSCAN.</p>
+<p>However, the version of DBSCAN included in sklearn has issues with high memory
+consumption<sup id="fnref:sklearn-dbscan-memory"><a class="footnote-ref" href="#fn:sklearn-dbscan-memory">1</a></sup>. sklearn also contains the OPTICS
+clustering method, which is capable of producing clusterings identical to
+DBSCAN. Sklearn's OPTICS implementation doesn't have memory consumption issues.</p>
+<p>By default sklearn will use its own tree based spacial indexes to accelerate
+the distance queries underlying DBSCAN like algorithms, however, these indices
+are unable to deal well with hundreds of thousands of high dimensional vectors,
+like the face embeddings we are dealing with here. To mitigate this problem, it
+is possible to first use an library with an accelerated index designed for
+dealing with large numbers of high dimensional points to construct a (usually
+approximate) K-nearest-neighbours graph and then run clustering on
+this<sup id="fnref:sklearn-ann"><a class="footnote-ref" href="#fn:sklearn-ann">2</a></sup>.</p>
+<p>Running DBSCAN on a K-nearest-neighbours graph is possible, however DBSCAN is
+based on radius queries, we we must be careful to pick a high enough K that,
+most of the time most of the points within the query radius as in the Knn
+graph. As an added advantage, RNN-DBSCAN<sup id="fnref:rnn-dbscan"><a class="footnote-ref" href="#fn:rnn-dbscan">3</a></sup> only has a single parameter, K, which
+is the theshold of reverse nearest neighbours, but can be though of as the
+similar to DBSCAN's minPts - 1, making tuning easier. In our case if we take
+f faces per segment then we can choose this parameter as K = nf - 1 where n is
+the minimum number of appearances in segments someone should make to be
+assigned a cluster rather than treated as noise. 2 is a reasonable value for n,
+and so K = 5 is a good value for RNN-DBSCAN assuming you leave f at its
+default of 3.</p>
+<p>Currently, RNN-DBSCAN with pynndescent is the recommended approach. So the
+recommended command is: <a href="../cli/#fixed"><code>skelshop iden clus fixed</code></a><code>--proto-out protos --ann-lib pynndescent --algorithm rnn-dbscan --knn
+5 path/to/corpus.description.csv</code>. The <code>--proto-out</code> option gives a path to
+write prototypes/exemplars from each cluster, usable to align the clusters
+after-the-fact.</p>
+<h2 id="labelling-clusters">Labelling clusters<a class="headerlink" href="#labelling-clusters" title="Permanent link">#</a></h2>
+<p>Clusters can be labelled like so: <a href="../cli/#idclus"><code>skelshop iden idclus</code></a><code>myref.h5 protos path/to/corpus.description.csv cluster.identifications.csv</code>.
+This can then be applied to the clustering outputs, to produce a CSV with a mix
+of identities and clusters like so: [``skelshop iden applymap
+clustering.output.csv cluster.identifications.csv outputids.csv"</p>
+<div class="footnote">
+<hr />
+<ol>
+<li id="fn:sklearn-dbscan-memory">
+<p>This is discussed further in <a href="https://stackoverflow.com/questions/16381577/scikit-learn-dbscan-memory-usage">this StackOverflow
+discussion</a>.&#160;<a class="footnote-backref" href="#fnref:sklearn-dbscan-memory" title="Jump back to footnote 1 in the text">&#8617;</a></p>
+</li>
+<li id="fn:sklearn-ann">
+<p>The wrapper code enabling this, as well as the implementation of
+RNN-DBSCAN is found in <a href="https://github.com/frankier/sklearn-ann">sklearn-ann</a>.&#160;<a class="footnote-backref" href="#fnref:sklearn-ann" title="Jump back to footnote 2 in the text">&#8617;</a></p>
+</li>
+<li id="fn:rnn-dbscan">
+<p><a href="https://ieeexplore.ieee.org/document/8240674">A. Bryant and K. Cios, "RNN-DBSCAN: A Density-Based Clustering
+Algorithm Using Reverse Nearest Neighbor Density Estimates," in IEEE
+Transactions on Knowledge and Data Engineering, vol. 30, no. 6, pp. 1109-1121,
+1 June 2018, doi: 10.1109/TKDE.2017.2787640.</a>&#160;<a class="footnote-backref" href="#fnref:rnn-dbscan" title="Jump back to footnote 3 in the text">&#8617;</a></p>
+</li>
+</ol>
+</div>
                 
               
               
@@ -626,6 +972,41 @@ embeddings</a>, we can identify people in each shot by direct comparison with ou
       
         
 <footer class="md-footer">
+  
+    <div class="md-footer-nav">
+      <nav class="md-footer-nav__inner md-grid" aria-label="Footer">
+        
+          <a href="../face-pipeline-configuration-guide/" class="md-footer-nav__link md-footer-nav__link--prev" rel="prev">
+            <div class="md-footer-nav__button md-icon">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12z"/></svg>
+            </div>
+            <div class="md-footer-nav__title">
+              <div class="md-ellipsis">
+                <span class="md-footer-nav__direction">
+                  Previous
+                </span>
+                Guide: configuring the face embedding pipeline
+              </div>
+            </div>
+          </a>
+        
+        
+          <a href="../snakemake/" class="md-footer-nav__link md-footer-nav__link--next" rel="next">
+            <div class="md-footer-nav__title">
+              <div class="md-ellipsis">
+                <span class="md-footer-nav__direction">
+                  Next
+                </span>
+                Automation with snakemake
+              </div>
+            </div>
+            <div class="md-footer-nav__button md-icon">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11H4z"/></svg>
+            </div>
+          </a>
+        
+      </nav>
+    </div>
   
   <div class="md-footer-meta md-typeset">
     <div class="md-footer-meta__inner md-grid">
@@ -643,15 +1024,15 @@ embeddings</a>, we can identify people in each shot by direct comparison with ou
       
     </div>
     
-      <script src="../assets/javascripts/vendor.0ac82a11.min.js"></script>
-      <script src="../assets/javascripts/bundle.f81dfb4d.min.js"></script><script id="__lang" type="application/json">{"clipboard.copy": "Copy to clipboard", "clipboard.copied": "Copied to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.placeholder": "Search", "search.result.placeholder": "Type to start searching", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.term.missing": "Missing"}</script>
+      <script src="../assets/javascripts/vendor.08c56446.min.js"></script>
+      <script src="../assets/javascripts/bundle.6ced434e.min.js"></script><script id="__lang" type="application/json">{"clipboard.copy": "Copy to clipboard", "clipboard.copied": "Copied to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.placeholder": "Search", "search.result.placeholder": "Type to start searching", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.term.missing": "Missing"}</script>
       
       <script>
         app = initialize({
           base: "..",
-          features: [],
+          features: ['navigation.tabs'],
           search: Object.assign({
-            worker: "../assets/javascripts/worker/search.4ac00218.min.js"
+            worker: "../assets/javascripts/worker/search.8c7e0a7e.min.js"
           }, typeof search !== "undefined" && search)
         })
       </script>

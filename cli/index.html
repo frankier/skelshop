@@ -12,7 +12,7 @@
       
       
       <link rel="shortcut icon" href="../assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.1.2, mkdocs-material-6.1.7">
+      <meta name="generator" content="mkdocs-1.1.2, mkdocs-material-6.2.3">
     
     
       
@@ -20,10 +20,10 @@
       
     
     
-      <link rel="stylesheet" href="../assets/stylesheets/main.19753c6b.min.css">
+      <link rel="stylesheet" href="../assets/stylesheets/main.3b61ea93.min.css">
       
         
-        <link rel="stylesheet" href="../assets/stylesheets/palette.196e0c26.min.css">
+        <link rel="stylesheet" href="../assets/stylesheets/palette.39b8e14a.min.css">
         
       
     
@@ -31,12 +31,14 @@
     
       
         
-        <link href="https://fonts.gstatic.com" rel="preconnect" crossorigin>
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
         <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,400i,700%7CRoboto+Mono&display=fallback">
         <style>body,input{font-family:"Roboto",-apple-system,BlinkMacSystemFont,Helvetica,Arial,sans-serif}code,kbd,pre{font-family:"Roboto Mono",SFMono-Regular,Consolas,Menlo,monospace}</style>
       
     
     
+    
+      <link rel="stylesheet" href="../extra.css">
     
     
       
@@ -53,6 +55,7 @@
     <body dir="ltr" data-md-color-scheme="" data-md-color-primary="none" data-md-color-accent="none">
       
   
+    
     <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
     <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
     <label class="md-overlay" for="__drawer"></label>
@@ -82,18 +85,20 @@
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3V6m0 5h18v2H3v-2m0 5h18v2H3v-2z"/></svg>
     </label>
     <div class="md-header-nav__title" data-md-component="header-title">
-      
-        <div class="md-header-nav__ellipsis">
-          <span class="md-header-nav__topic md-ellipsis">
+      <div class="md-header-nav__ellipsis">
+        <div class="md-header-nav__topic">
+          <span class="md-ellipsis">
             SkelShop Documentation
           </span>
-          <span class="md-header-nav__topic md-ellipsis">
+        </div>
+        <div class="md-header-nav__topic">
+          <span class="md-ellipsis">
             
               CLI reference
             
           </span>
         </div>
-      
+      </div>
     </div>
     
       <label class="md-header-nav__button md-icon" for="__search">
@@ -147,17 +152,118 @@
       
       
         
+          
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-tabs__inner md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+
+
+  <li class="md-tabs__item">
+    <a href=".." class="md-tabs__link">
+      Getting started
+    </a>
+  </li>
+
+      
+        
+  
+  
+
+
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../user-guide-intro/" class="md-tabs__link">
+        User guide
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+
+
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../pipeline-internals/" class="md-tabs__link">
+        Developer guide
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+    
+  
+
+
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="./" class="md-tabs__link md-tabs__link--active">
+        Reference
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+
+
+  <li class="md-tabs__item">
+    <a href="https://github.com/frankier/skelshop/issues" class="md-tabs__link">
+      Issues
+    </a>
+  </li>
+
+      
+        
+  
+  
+
+
+  <li class="md-tabs__item">
+    <a href="https://github.com/frankier/skelshop/discussions" class="md-tabs__link">
+      Discussion & Questions
+    </a>
+  </li>
+
+      
+    </ul>
+  </div>
+</nav>
+        
       
       <main class="md-main" data-md-component="main">
         <div class="md-main__inner md-grid">
           
             
-              <div class="md-sidebar md-sidebar--primary" data-md-component="navigation">
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="navigation" >
                 <div class="md-sidebar__scrollwrap">
                   <div class="md-sidebar__inner">
                     
 
-<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
   <label class="md-nav__title" for="__drawer">
     <a href=".." title="SkelShop Documentation" class="md-nav__button md-logo" aria-label="SkelShop Documentation">
       
@@ -188,6 +294,7 @@
       
 
 
+
   <li class="md-nav__item">
     <a href=".." class="md-nav__link">
       Getting started
@@ -200,17 +307,21 @@
       
 
 
+
+  
   <li class="md-nav__item md-nav__item--nested">
     
-    <input class="md-nav__toggle md-toggle" data-md-toggle="nav-2" type="checkbox" id="nav-2" >
+    
+      <input class="md-nav__toggle md-toggle" data-md-toggle="nav-2" type="checkbox" id="nav-2" >
+    
     <label class="md-nav__link" for="nav-2">
-      User guide (for users of the command line tools)
+      User guide
       <span class="md-nav__icon md-icon"></span>
     </label>
-    <nav class="md-nav" aria-label="User guide (for users of the command line tools)" data-md-level="1">
+    <nav class="md-nav" aria-label="User guide" data-md-level="1">
       <label class="md-nav__title" for="nav-2">
         <span class="md-nav__icon md-icon"></span>
-        User guide (for users of the command line tools)
+        User guide
       </label>
       <ul class="md-nav__list" data-md-scrollfix>
         
@@ -218,6 +329,20 @@
           
           
           
+
+
+
+  <li class="md-nav__item">
+    <a href="../user-guide-intro/" class="md-nav__link">
+      Introduction
+    </a>
+  </li>
+
+        
+          
+          
+          
+
 
 
   <li class="md-nav__item">
@@ -232,15 +357,19 @@
           
 
 
+
+  
   <li class="md-nav__item md-nav__item--nested">
     
-    <input class="md-nav__toggle md-toggle" data-md-toggle="nav-2-2" type="checkbox" id="nav-2-2" >
-    <label class="md-nav__link" for="nav-2-2">
+    
+      <input class="md-nav__toggle md-toggle" data-md-toggle="nav-2-3" type="checkbox" id="nav-2-3" >
+    
+    <label class="md-nav__link" for="nav-2-3">
       Meet the...
       <span class="md-nav__icon md-icon"></span>
     </label>
     <nav class="md-nav" aria-label="Meet the..." data-md-level="2">
-      <label class="md-nav__title" for="nav-2-2">
+      <label class="md-nav__title" for="nav-2-3">
         <span class="md-nav__icon md-icon"></span>
         Meet the...
       </label>
@@ -250,6 +379,7 @@
           
           
           
+
 
 
   <li class="md-nav__item">
@@ -264,6 +394,7 @@
           
 
 
+
   <li class="md-nav__item">
     <a href="../shot-segmentors/" class="md-nav__link">
       Shot segmentors
@@ -274,6 +405,7 @@
           
           
           
+
 
 
   <li class="md-nav__item">
@@ -288,6 +420,7 @@
           
 
 
+
   <li class="md-nav__item">
     <a href="../face-extractors/" class="md-nav__link">
       Face chip detectors/croppers
@@ -298,6 +431,7 @@
           
           
           
+
 
 
   <li class="md-nav__item">
@@ -317,17 +451,6 @@
           
 
 
-  <li class="md-nav__item">
-    <a href="../usage-examples/" class="md-nav__link">
-      Usage examples
-    </a>
-  </li>
-
-        
-          
-          
-          
-
 
   <li class="md-nav__item">
     <a href="../benchmark/" class="md-nav__link">
@@ -341,9 +464,49 @@
           
 
 
+
+  <li class="md-nav__item">
+    <a href="../face-pipeline-configuration-guide/" class="md-nav__link">
+      Guide: configuring the face embedding pipeline
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+
+  <li class="md-nav__item">
+    <a href="../identification/" class="md-nav__link">
+      Person identification
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+
   <li class="md-nav__item">
     <a href="../snakemake/" class="md-nav__link">
-      HPC extraction with Snakemake
+      Automation with snakemake
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+
+  <li class="md-nav__item">
+    <a href="../usage-examples/" class="md-nav__link">
+      Misc. usage examples
     </a>
   </li>
 
@@ -358,17 +521,21 @@
       
 
 
+
+  
   <li class="md-nav__item md-nav__item--nested">
     
-    <input class="md-nav__toggle md-toggle" data-md-toggle="nav-3" type="checkbox" id="nav-3" >
+    
+      <input class="md-nav__toggle md-toggle" data-md-toggle="nav-3" type="checkbox" id="nav-3" >
+    
     <label class="md-nav__link" for="nav-3">
-      Developer guide (for users of the library & contributors)
+      Developer guide
       <span class="md-nav__icon md-icon"></span>
     </label>
-    <nav class="md-nav" aria-label="Developer guide (for users of the library & contributors)" data-md-level="1">
+    <nav class="md-nav" aria-label="Developer guide" data-md-level="1">
       <label class="md-nav__title" for="nav-3">
         <span class="md-nav__icon md-icon"></span>
-        Developer guide (for users of the library & contributors)
+        Developer guide
       </label>
       <ul class="md-nav__list" data-md-scrollfix>
         
@@ -376,6 +543,7 @@
           
           
           
+
 
 
   <li class="md-nav__item">
@@ -390,6 +558,7 @@
           
 
 
+
   <li class="md-nav__item">
     <a href="../tracking/" class="md-nav__link">
       Tracking
@@ -400,6 +569,7 @@
           
           
           
+
 
 
   <li class="md-nav__item">
@@ -414,6 +584,7 @@
           
 
 
+
   <li class="md-nav__item">
     <a href="../io/" class="md-nav__link">
       Reading and writing the formats from your own code
@@ -424,6 +595,7 @@
           
           
           
+
 
 
   <li class="md-nav__item">
@@ -442,12 +614,16 @@
       
       
 
+
   
 
 
+  
   <li class="md-nav__item md-nav__item--active md-nav__item--nested">
     
-    <input class="md-nav__toggle md-toggle" data-md-toggle="nav-4" type="checkbox" id="nav-4" checked>
+    
+      <input class="md-nav__toggle md-toggle" data-md-toggle="nav-4" type="checkbox" id="nav-4" checked>
+    
     <label class="md-nav__link" for="nav-4">
       Reference
       <span class="md-nav__icon md-icon"></span>
@@ -463,6 +639,7 @@
           
           
           
+
 
   
 
@@ -491,6 +668,7 @@
       
 
 
+
   <li class="md-nav__item">
     <a href="https://github.com/frankier/skelshop/issues" class="md-nav__link">
       Issues
@@ -501,6 +679,7 @@
       
       
       
+
 
 
   <li class="md-nav__item">
@@ -517,7 +696,8 @@
               </div>
             
             
-              <div class="md-sidebar md-sidebar--secondary" data-md-component="toc">
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="toc" >
                 <div class="md-sidebar__scrollwrap">
                   <div class="md-sidebar__inner">
                     
@@ -542,43 +722,40 @@
                   </a>
                 
                 
-                <h1 id="cli-reference">CLI Reference</h1>
-<h1 id="skelshop">skelshop</h1>
+                <h1 id="cli-reference">CLI Reference<a class="headerlink" href="#cli-reference" title="Permanent link">#</a></h1>
+<h1 id="skelshop">skelshop<a class="headerlink" href="#skelshop" title="Permanent link">#</a></h1>
 <p>Usage:</p>
 <pre><code>skelshop [OPTIONS] COMMAND [ARGS]...
 </code></pre>
 <p>Options:</p>
-<pre><code>  -v, --verbosity LVL  Either CRITICAL, ERROR, WARNING, INFO
-                       or DEBUG
-
-  --ffprobe-bin PATH   If you cannot install ffprobe
-                       globally, you can provide the path to
-                       the version you want to use here
+<pre><code>  -v, --verbosity LVL  Either CRITICAL, ERROR, WARNING, INFO or DEBUG
+  --ffprobe-bin PATH   If you cannot install ffprobe globally, you can provide
+                       the path to the version you want to use here
 
 </code></pre>
-<h2 id="bench">bench</h2>
+<h2 id="bench">bench<a class="headerlink" href="#bench" title="Permanent link">#</a></h2>
 <p>Commands to benchmark SkelShop's I/O speeds.</p>
 <p>Usage:</p>
 <pre><code>skelshop bench [OPTIONS] COMMAND [ARGS]...
 </code></pre>
-<h3 id="read-shot-seg">read-shot-seg</h3>
+<h3 id="read-shot-seg">read-shot-seg<a class="headerlink" href="#read-shot-seg" title="Permanent link">#</a></h3>
 <p>Benchmark reading a shot segmented skeleton file.</p>
 <p>Usage:</p>
 <pre><code>skelshop bench read-shot-seg [OPTIONS] SKELS_FN
 </code></pre>
-<h3 id="write-bench-script">write-bench-script</h3>
+<h3 id="write-bench-script">write-bench-script<a class="headerlink" href="#write-bench-script" title="Permanent link">#</a></h3>
 <p>Usage:</p>
 <pre><code>skelshop bench write-bench-script [OPTIONS] HEADER YOUTUBE_ID OUT_FN
 </code></pre>
 <p>Options:</p>
 <pre><code>  --sif TEXT
 </code></pre>
-<h2 id="calibrate">calibrate</h2>
+<h2 id="calibrate">calibrate<a class="headerlink" href="#calibrate" title="Permanent link">#</a></h2>
 <p>Keypoint calibration tools.</p>
 <p>Usage:</p>
 <pre><code>skelshop calibrate [OPTIONS] COMMAND [ARGS]...
 </code></pre>
-<h3 id="analyse">analyse</h3>
+<h3 id="analyse">analyse<a class="headerlink" href="#analyse" title="Permanent link">#</a></h3>
 <p>Usage:</p>
 <pre><code>skelshop calibrate analyse [OPTIONS] DFIN
 </code></pre>
@@ -589,7 +766,7 @@
   --excl-thresh FLOAT
   --mask TEXT
 </code></pre>
-<h3 id="process-dlib-dir">process-dlib-dir</h3>
+<h3 id="process-dlib-dir">process-dlib-dir<a class="headerlink" href="#process-dlib-dir" title="Permanent link">#</a></h3>
 <p>Give a directory with dlib facepoint XMLs, run OpenPose on all images and
 write out where the keypoints are relative to the chips.</p>
 <p>Usage:</p>
@@ -599,47 +776,45 @@ write out where the keypoints are relative to the chips.</p>
 <pre><code>  --add-symmetries / --no-add-symmetries
   --add-synthetic / --no-add-synthetic
 </code></pre>
-<h3 id="process-video">process-video</h3>
+<h3 id="process-video">process-video<a class="headerlink" href="#process-video" title="Permanent link">#</a></h3>
 <p>Given a video and a skeleton keypoint file, run the dlib keypoint detection
 pipeline for each frame and give points where BODY_25 face keypoints would
 have to map to make the same transformation.</p>
 <p>Usage:</p>
 <pre><code>skelshop calibrate process-video [OPTIONS] VIDEO H5INFN DFOUT
 </code></pre>
-<h2 id="conv">conv</h2>
+<h2 id="conv">conv<a class="headerlink" href="#conv" title="Permanent link">#</a></h2>
 <p>Convert a exiting dump from another format into HDF5 format.</p>
 <p>LEGACY_DUMP is the dump in the old format. OUT is a file path when run with
 single-zip, otherwise it is the base of a directory tree which will be
 created during processing.</p>
 <p>Usage:</p>
-<pre><code>skelshop conv [OPTIONS] [monolithic-tar|single-zip|ordered-tar]
- LEGACY_DUMP [OUT]
+<pre><code>skelshop conv [OPTIONS] [monolithic-tar|single-zip|ordered-tar] LEGACY_DUMP [OUT]
 </code></pre>
 <p>Options:</p>
 <pre><code>  --mode [BODY_25_ALL|BODY_25_HANDS|BODY_25|BODY_135|FACE|BODY_25_FACE]
                                   [required]
-  --cores INTEGER                 Number of cores to use
-                                  (only for monolithic-tar)
+  --cores INTEGER                 Number of cores to use (only for monolithic-
+                                  tar)
 
   --suppress-end-fail / --no-suppress-end-fail
   --skip-existing / --overwrite-existing
 </code></pre>
-<h2 id="drawsticks">drawsticks</h2>
+<h2 id="drawsticks">drawsticks<a class="headerlink" href="#drawsticks" title="Permanent link">#</a></h2>
 <p>Output a video with stick figures from pose dump superimposed.</p>
 <p>Usage:</p>
 <pre><code>skelshop drawsticks [OPTIONS] H5FN VIDEOIN VIDEOOUT
 </code></pre>
 <p>Options:</p>
-<pre><code>  --posetrack / --no-posetrack  Whether to convert BODY_25
-                                keypoints to PoseTrack-style
-                                keypoints
+<pre><code>  --posetrack / --no-posetrack  Whether to convert BODY_25 keypoints to
+                                PoseTrack-style keypoints
 
   --scale INTEGER
-  --overlay / --no-overlay      Whether to draw VIDEOIN below
-                                the stick figures or not
+  --overlay / --no-overlay      Whether to draw VIDEOIN below the stick
+                                figures or not
 
 </code></pre>
-<h2 id="dump">dump</h2>
+<h2 id="dump">dump<a class="headerlink" href="#dump" title="Permanent link">#</a></h2>
 <p>Create a HDF5 pose dump from a video using OpenPose.</p>
 <p>This command optionally applies steps from the tracking/segmentation
 pipeline.</p>
@@ -658,7 +833,7 @@ pipeline.</p>
   --track / --no-track
   --shot-seg [bbskel|psd|ffprobe|none]
 </code></pre>
-<h2 id="dumpimgs">dumpimgs</h2>
+<h2 id="dumpimgs">dumpimgs<a class="headerlink" href="#dumpimgs" title="Permanent link">#</a></h2>
 <p>Dump a directory of images to a HDF5 file using OpenPose.</p>
 <p>Usage:</p>
 <pre><code>skelshop dumpimgs [OPTIONS] INPUT_DIR H5OUT
@@ -667,27 +842,25 @@ pipeline.</p>
 <pre><code>  --mode [BODY_25_ALL|BODY_25_HANDS|BODY_25|BODY_135|FACE|BODY_25_FACE]
   --model-folder TEXT             [required]
 </code></pre>
-<h2 id="face">face</h2>
+<h2 id="face">face<a class="headerlink" href="#face" title="Permanent link">#</a></h2>
 <p>Commands for creating face embedding dumps</p>
 <p>Usage:</p>
 <pre><code>skelshop face [OPTIONS] COMMAND [ARGS]...
 </code></pre>
-<h3 id="bestcands">bestcands</h3>
+<h3 id="bestcands">bestcands<a class="headerlink" href="#bestcands" title="Permanent link">#</a></h3>
 <p>Select the best frame-person pairs to use for face embedding.</p>
 <p>Usage:</p>
-<pre><code>skelshop face bestcands [OPTIONS] [conf-face3|conf-face5|conf-face68|conf-
- adaptive|clear-face3|clear-face5|clear-face68|clear-
- adaptive] SKELIN SEGSOUT
+<pre><code>skelshop face bestcands [OPTIONS] [conf-face3|conf-face5|conf-face68|conf-adaptive|clear-face3|clear-
+ face5|clear-face68|clear-adaptive] SKELIN SEGSOUT
 </code></pre>
 <p>Options:</p>
 <pre><code>  --video PATH
 </code></pre>
-<h3 id="embedall">embedall</h3>
+<h3 id="embedall">embedall<a class="headerlink" href="#embedall" title="Permanent link">#</a></h3>
 <p>Create a HDF5 face dump from a video using dlib.</p>
 <p>Usage:</p>
-<pre><code>skelshop face embedall [OPTIONS] [dlib-hog-face5|dlib-hog-face68|dlib-cnn-
- face5|dlib-cnn-face68|openpose-face68|openpose-
- face3|openpose-face5] VIDEO H5FN
+<pre><code>skelshop face embedall [OPTIONS] [dlib-hog-face5|dlib-hog-face68|dlib-cnn-face5|dlib-cnn-
+ face68|openpose-face68|openpose-face3|openpose-face5] VIDEO H5FN
 </code></pre>
 <p>Options:</p>
 <pre><code>  --from-skels PATH
@@ -698,7 +871,7 @@ pipeline.</p>
   --write-bboxes / --no-write-bboxes
   --write-chip / --no-write-chip
 </code></pre>
-<h3 id="embedselect">embedselect</h3>
+<h3 id="embedselect">embedselect<a class="headerlink" href="#embedselect" title="Permanent link">#</a></h3>
 <p>Embed faces into a sparse face dump according to a predetermined selection
 of frame-person pairs.</p>
 <p>Usage:</p>
@@ -706,16 +879,14 @@ of frame-person pairs.</p>
 </code></pre>
 <p>Options:</p>
 <pre><code>  --from-skels PATH
-  --batch-size TEXT               The batch size to use.
-                                  Valid values are 'guess' or
-                                  an integer. The default is
-                                  to guess on GPU otherwise
-                                  use 16
+  --batch-size TEXT               The batch size to use. Valid values are
+                                  'guess' or an integer. The default is to
+                                  guess on GPU otherwise use 16
 
   --write-bboxes / --no-write-bboxes
   --write-chip / --no-write-chip
 </code></pre>
-<h3 id="savechips">savechips</h3>
+<h3 id="savechips">savechips<a class="headerlink" href="#savechips" title="Permanent link">#</a></h3>
 <p>Extract chips into image files from a face dump with chips embedded inside it.</p>
 <p>Usage:</p>
 <pre><code>skelshop face savechips [OPTIONS] H5FIN GROUPIN IMGOUT
@@ -723,7 +894,7 @@ of frame-person pairs.</p>
 <p>Options:</p>
 <pre><code>  --group-fmt [psd|ffprobe|trackshot]
 </code></pre>
-<h2 id="filter">filter</h2>
+<h2 id="filter">filter<a class="headerlink" href="#filter" title="Permanent link">#</a></h2>
 <p>Apply tracking to an untracked HDF5 pose dump.</p>
 <p>Usage:</p>
 <pre><code>skelshop filter [OPTIONS] H5INFN H5OUTFN
@@ -738,12 +909,12 @@ of frame-person pairs.</p>
   --start-frame INTEGER
   --end-frame INTEGER
 </code></pre>
-<h2 id="iden">iden</h2>
+<h2 id="iden">iden<a class="headerlink" href="#iden" title="Permanent link">#</a></h2>
 <p>Commands to do with identification based on face embedding dumps</p>
 <p>Usage:</p>
 <pre><code>skelshop iden [OPTIONS] COMMAND [ARGS]...
 </code></pre>
-<h3 id="applymap">applymap</h3>
+<h3 id="applymap">applymap<a class="headerlink" href="#applymap" title="Permanent link">#</a></h3>
 <p>Apply a mapping from clusters to known IDs (e.g. Wikidata Q-ids)</p>
 <p>Usage:</p>
 <pre><code>skelshop iden applymap [OPTIONS] SEGS_IN ASSIGN_IN SEGS_OUT
@@ -751,21 +922,20 @@ of frame-person pairs.</p>
 <p>Options:</p>
 <pre><code>  --filter-unlabeled / --keep-unlabeled
 </code></pre>
-<h3 id="buildrefs">buildrefs</h3>
+<h3 id="buildrefs">buildrefs<a class="headerlink" href="#buildrefs" title="Permanent link">#</a></h3>
 <p>Build a reference face library from a list of entities or categories.</p>
 <p>Usage:</p>
-<pre><code>skelshop iden buildrefs [OPTIONS] [entities|categories] LISTIN REFOUT
- [[wikidata|commons]]
+<pre><code>skelshop iden buildrefs [OPTIONS] [entities|categories] LISTIN REFOUT [[wikidata|commons]]
 </code></pre>
 <p>Options:</p>
 <pre><code>  --oauth-creds FILENAME
 </code></pre>
-<h3 id="clus">clus</h3>
+<h3 id="clus">clus<a class="headerlink" href="#clus" title="Permanent link">#</a></h3>
 <p>Clusters embeddings from multiple videos descriped in a corpus description file.</p>
 <p>Usage:</p>
 <pre><code>skelshop iden clus [OPTIONS] COMMAND [ARGS]...
 </code></pre>
-<h4 id="fixed">fixed</h4>
+<h4 id="fixed">fixed<a class="headerlink" href="#fixed" title="Permanent link">#</a></h4>
 <p>Performs dbscan with fixed parameters.</p>
 <p>Usage:</p>
 <pre><code>skelshop iden clus fixed [OPTIONS] CORPUS_DESC
@@ -775,14 +945,15 @@ of frame-person pairs.</p>
   --sample-size INTEGER
   --knn INTEGER
   --pool [med|min|vote]
-  --algorithm [dbscan|optics-dbscan]
+  --ann-lib [pynndescent|faiss-exact]
+  --algorithm [dbscan|optics-dbscan|rnn-dbscan]
   --num-protos INTEGER
   --proto-out PATH
   --corpus-base PATH
   --eps FLOAT
   --min-samples INTEGER
 </code></pre>
-<h4 id="search">search</h4>
+<h4 id="search">search<a class="headerlink" href="#search" title="Permanent link">#</a></h4>
 <p>Performs grid search to find best clustering parameters.</p>
 <p>Usage:</p>
 <pre><code>skelshop iden clus search [OPTIONS] CORPUS_DESC
@@ -792,7 +963,8 @@ of frame-person pairs.</p>
   --sample-size INTEGER
   --knn INTEGER
   --pool [med|min|vote]
-  --algorithm [dbscan|optics-dbscan]
+  --ann-lib [pynndescent|faiss-exact]
+  --algorithm [dbscan|optics-dbscan|rnn-dbscan]
   --num-protos INTEGER
   --proto-out PATH
   --corpus-base PATH
@@ -800,7 +972,12 @@ of frame-person pairs.</p>
   --min-samples TEXT
   --score [both|silhouette|tracks-acc]
 </code></pre>
-<h3 id="idclus">idclus</h3>
+<h3 id="embedrefs">embedrefs<a class="headerlink" href="#embedrefs" title="Permanent link">#</a></h3>
+<p>Pre-embed a face reference directory structure into a HDF5 file.</p>
+<p>Usage:</p>
+<pre><code>skelshop iden embedrefs [OPTIONS] INPUT_DIR H5OUT
+</code></pre>
+<h3 id="idclus">idclus<a class="headerlink" href="#idclus" title="Permanent link">#</a></h3>
 <p>Identifies clusters by comparing against a reference and forcing a match</p>
 <p>Usage:</p>
 <pre><code>skelshop iden idclus [OPTIONS] REF_IN PROTOS CORPUS_DESC ASSIGN_OUT
@@ -809,11 +986,11 @@ of frame-person pairs.</p>
 <pre><code>  --thresh FLOAT
   --corpus-base PATH
 </code></pre>
-<h3 id="idsegsfull">idsegsfull</h3>
+<h3 id="idsegsfull">idsegsfull<a class="headerlink" href="#idsegsfull" title="Permanent link">#</a></h3>
 <p>Identifies shots with a particular person from reference headshots using
 face dumps which contain all face embeddings in a clip.</p>
 <p>Usage:</p>
-<pre><code>skelshop iden idsegsfull [OPTIONS] REF_IN GROUPIN SEGSOUT FACES
+<pre><code>skelshop iden idsegsfull [OPTIONS] REF_IN GROUPIN FACES SEGSOUT
 </code></pre>
 <p>Options:</p>
 <pre><code>  --group-fmt [psd|ffprobe|trackshot]
@@ -821,18 +998,18 @@ face dumps which contain all face embeddings in a clip.</p>
   --detection-threshold FLOAT
   --median-threshold FLOAT
 </code></pre>
-<h3 id="idsegssparse">idsegssparse</h3>
+<h3 id="idsegssparse">idsegssparse<a class="headerlink" href="#idsegssparse" title="Permanent link">#</a></h3>
 <p>Identifies shots with a particular person from reference headshots using
 face dumps with only a few (fixed number) embeddings per person-shot
 pair.</p>
 <p>Usage:</p>
-<pre><code>skelshop iden idsegssparse [OPTIONS] REF_IN GROUPIN SEGSOUT FACES
+<pre><code>skelshop iden idsegssparse [OPTIONS] REF_IN GROUPIN FACES SEGSOUT
 </code></pre>
 <p>Options:</p>
 <pre><code>  --group-fmt [psd|ffprobe|trackshot]
   --detection-threshold FLOAT
 </code></pre>
-<h3 id="whoisthis">whoisthis</h3>
+<h3 id="whoisthis">whoisthis<a class="headerlink" href="#whoisthis" title="Permanent link">#</a></h3>
 <p>Given a directory of prototype images as generated by <code>writeprotos</code>,
 produces a cluster identification mapping by interactively asking the you
 to identify people.</p>
@@ -842,7 +1019,7 @@ to identify people.</p>
 <p>Options:</p>
 <pre><code>  --thumbview-cmd TEXT
 </code></pre>
-<h3 id="writeprotos">writeprotos</h3>
+<h3 id="writeprotos">writeprotos<a class="headerlink" href="#writeprotos" title="Permanent link">#</a></h3>
 <p>Given prototypes description file as produced by <code>clus</code>, dumps the
 corresponding images.</p>
 <p>Usage:</p>
@@ -851,7 +1028,7 @@ corresponding images.</p>
 <p>Options:</p>
 <pre><code>  --corpus-base PATH
 </code></pre>
-<h2 id="playsticks">playsticks</h2>
+<h2 id="playsticks">playsticks<a class="headerlink" href="#playsticks" title="Permanent link">#</a></h2>
 <p>Play a video with stick figures from pose dump superimposed.</p>
 <p>Usage:</p>
 <pre><code>skelshop playsticks [OPTIONS] VIDEOIN
@@ -859,16 +1036,15 @@ corresponding images.</p>
 <p>Options:</p>
 <pre><code>  --skel PATH
   --face PATH
-  --posetrack / --no-posetrack  Whether to convert BODY_25
-                                keypoints to PoseTrack-style
-                                keypoints
+  --posetrack / --no-posetrack  Whether to convert BODY_25 keypoints to
+                                PoseTrack-style keypoints
 
   --seek-time FLOAT
   --seek-frame INTEGER
   --scale INTEGER
   --paused / --playing
 </code></pre>
-<h2 id="stats">stats</h2>
+<h2 id="stats">stats<a class="headerlink" href="#stats" title="Permanent link">#</a></h2>
 <p>Output stats about dumps in INPUT_DIR.</p>
 <p>Usage:</p>
 <pre><code>skelshop stats [OPTIONS] INPUT_DIR
@@ -925,15 +1101,15 @@ corresponding images.</p>
       
     </div>
     
-      <script src="../assets/javascripts/vendor.0ac82a11.min.js"></script>
-      <script src="../assets/javascripts/bundle.f81dfb4d.min.js"></script><script id="__lang" type="application/json">{"clipboard.copy": "Copy to clipboard", "clipboard.copied": "Copied to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.placeholder": "Search", "search.result.placeholder": "Type to start searching", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.term.missing": "Missing"}</script>
+      <script src="../assets/javascripts/vendor.08c56446.min.js"></script>
+      <script src="../assets/javascripts/bundle.6ced434e.min.js"></script><script id="__lang" type="application/json">{"clipboard.copy": "Copy to clipboard", "clipboard.copied": "Copied to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.placeholder": "Search", "search.result.placeholder": "Type to start searching", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.term.missing": "Missing"}</script>
       
       <script>
         app = initialize({
           base: "..",
-          features: [],
+          features: ['navigation.tabs'],
           search: Object.assign({
-            worker: "../assets/javascripts/worker/search.4ac00218.min.js"
+            worker: "../assets/javascripts/worker/search.8c7e0a7e.min.js"
           }, typeof search !== "undefined" && search)
         })
       </script>

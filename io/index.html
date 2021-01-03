@@ -7,13 +7,14 @@
 <meta content="width=device-width,initial-scale=1" name="viewport"/>
 <meta content="Documentation of SkelShop, a toolkit for offline skeleton and face analysis of talking heads videos" name="description"/>
 <link href="../assets/images/favicon.png" rel="shortcut icon"/>
-<meta content="mkdocs-1.1.2, mkdocs-material-6.1.7" name="generator"/>
+<meta content="mkdocs-1.1.2, mkdocs-material-6.2.3" name="generator"/>
 <title>Reading and writing the formats from your own code - SkelShop Documentation</title>
-<link href="../assets/stylesheets/main.19753c6b.min.css" rel="stylesheet"/>
-<link href="../assets/stylesheets/palette.196e0c26.min.css" rel="stylesheet"/>
+<link href="../assets/stylesheets/main.3b61ea93.min.css" rel="stylesheet"/>
+<link href="../assets/stylesheets/palette.39b8e14a.min.css" rel="stylesheet"/>
 <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
 <link href="https://fonts.googleapis.com/css?family=Roboto:300,400,400i,700%7CRoboto+Mono&amp;display=fallback" rel="stylesheet"/>
 <style>body,input{font-family:"Roboto",-apple-system,BlinkMacSystemFont,Helvetica,Arial,sans-serif}code,kbd,pre{font-family:"Roboto Mono",SFMono-Regular,Consolas,Menlo,monospace}</style>
+<link href="../extra.css" rel="stylesheet"/>
 </head>
 <body data-md-color-accent="none" data-md-color-primary="none" data-md-color-scheme="" dir="ltr">
 <input autocomplete="off" class="md-toggle" data-md-toggle="drawer" id="__drawer" type="checkbox"/>
@@ -36,14 +37,18 @@
 </label>
 <div class="md-header-nav__title" data-md-component="header-title">
 <div class="md-header-nav__ellipsis">
-<span class="md-header-nav__topic md-ellipsis">
+<div class="md-header-nav__topic">
+<span class="md-ellipsis">
             SkelShop Documentation
           </span>
-<span class="md-header-nav__topic md-ellipsis">
+</div>
+<div class="md-header-nav__topic">
+<span class="md-ellipsis">
             
               Reading and writing the formats from your own code
             
           </span>
+</div>
 </div>
 </div>
 <label class="md-header-nav__button md-icon" for="__search">
@@ -87,12 +92,48 @@
 </nav>
 </header>
 <div class="md-container" data-md-component="container">
+<nav aria-label="Tabs" class="md-tabs" data-md-component="tabs">
+<div class="md-tabs__inner md-grid">
+<ul class="md-tabs__list">
+<li class="md-tabs__item">
+<a class="md-tabs__link" href="..">
+      Getting started
+    </a>
+</li>
+<li class="md-tabs__item">
+<a class="md-tabs__link" href="../user-guide-intro/">
+        User guide
+      </a>
+</li>
+<li class="md-tabs__item">
+<a class="md-tabs__link md-tabs__link--active" href="../pipeline-internals/">
+        Developer guide
+      </a>
+</li>
+<li class="md-tabs__item">
+<a class="md-tabs__link" href="../cli/">
+        Reference
+      </a>
+</li>
+<li class="md-tabs__item">
+<a class="md-tabs__link" href="https://github.com/frankier/skelshop/issues">
+      Issues
+    </a>
+</li>
+<li class="md-tabs__item">
+<a class="md-tabs__link" href="https://github.com/frankier/skelshop/discussions">
+      Discussion &amp; Questions
+    </a>
+</li>
+</ul>
+</div>
+</nav>
 <main class="md-main" data-md-component="main">
 <div class="md-main__inner md-grid">
 <div class="md-sidebar md-sidebar--primary" data-md-component="navigation">
 <div class="md-sidebar__scrollwrap">
 <div class="md-sidebar__inner">
-<nav aria-label="Navigation" class="md-nav md-nav--primary" data-md-level="0">
+<nav aria-label="Navigation" class="md-nav md-nav--primary md-nav--lifted" data-md-level="0">
 <label class="md-nav__title" for="__drawer">
 <a aria-label="SkelShop Documentation" class="md-nav__button md-logo" href=".." title="SkelShop Documentation">
 <svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 8a3 3 0 003-3 3 3 0 00-3-3 3 3 0 00-3 3 3 3 0 003 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54z"></path></svg>
@@ -118,28 +159,33 @@
 <li class="md-nav__item md-nav__item--nested">
 <input class="md-nav__toggle md-toggle" data-md-toggle="nav-2" id="nav-2" type="checkbox"/>
 <label class="md-nav__link" for="nav-2">
-      User guide (for users of the command line tools)
+      User guide
       <span class="md-nav__icon md-icon"></span>
 </label>
-<nav aria-label="User guide (for users of the command line tools)" class="md-nav" data-md-level="1">
+<nav aria-label="User guide" class="md-nav" data-md-level="1">
 <label class="md-nav__title" for="nav-2">
 <span class="md-nav__icon md-icon"></span>
-        User guide (for users of the command line tools)
+        User guide
       </label>
 <ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="../user-guide-intro/">
+      Introduction
+    </a>
+</li>
 <li class="md-nav__item">
 <a class="md-nav__link" href="../pipelines-overview/">
       Pipelines overview
     </a>
 </li>
 <li class="md-nav__item md-nav__item--nested">
-<input class="md-nav__toggle md-toggle" data-md-toggle="nav-2-2" id="nav-2-2" type="checkbox"/>
-<label class="md-nav__link" for="nav-2-2">
+<input class="md-nav__toggle md-toggle" data-md-toggle="nav-2-3" id="nav-2-3" type="checkbox"/>
+<label class="md-nav__link" for="nav-2-3">
       Meet the...
       <span class="md-nav__icon md-icon"></span>
 </label>
 <nav aria-label="Meet the..." class="md-nav" data-md-level="2">
-<label class="md-nav__title" for="nav-2-2">
+<label class="md-nav__title" for="nav-2-3">
 <span class="md-nav__icon md-icon"></span>
         Meet the...
       </label>
@@ -173,18 +219,28 @@
 </nav>
 </li>
 <li class="md-nav__item">
-<a class="md-nav__link" href="../usage-examples/">
-      Usage examples
-    </a>
-</li>
-<li class="md-nav__item">
 <a class="md-nav__link" href="../benchmark/">
       Benchmarks
     </a>
 </li>
 <li class="md-nav__item">
+<a class="md-nav__link" href="../face-pipeline-configuration-guide/">
+      Guide: configuring the face embedding pipeline
+    </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../identification/">
+      Person identification
+    </a>
+</li>
+<li class="md-nav__item">
 <a class="md-nav__link" href="../snakemake/">
-      HPC extraction with Snakemake
+      Automation with snakemake
+    </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../usage-examples/">
+      Misc. usage examples
     </a>
 </li>
 </ul>
@@ -193,13 +249,13 @@
 <li class="md-nav__item md-nav__item--active md-nav__item--nested">
 <input checked="" class="md-nav__toggle md-toggle" data-md-toggle="nav-3" id="nav-3" type="checkbox"/>
 <label class="md-nav__link" for="nav-3">
-      Developer guide (for users of the library &amp; contributors)
+      Developer guide
       <span class="md-nav__icon md-icon"></span>
 </label>
-<nav aria-label="Developer guide (for users of the library &amp; contributors)" class="md-nav" data-md-level="1">
+<nav aria-label="Developer guide" class="md-nav" data-md-level="1">
 <label class="md-nav__title" for="nav-3">
 <span class="md-nav__icon md-icon"></span>
-        Developer guide (for users of the library &amp; contributors)
+        Developer guide
       </label>
 <ul class="md-nav__list" data-md-scrollfix="">
 <li class="md-nav__item">
@@ -587,7 +643,7 @@
 <a class="md-content__button md-icon" href="https://github.com/frankier/skelshop/edit/master/docs/io.md" title="Edit this page">
 <svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M20.71 7.04c.39-.39.39-1.04 0-1.41l-2.34-2.34c-.37-.39-1.02-.39-1.41 0l-1.84 1.83 3.75 3.75M3 17.25V21h3.75L17.81 9.93l-3.75-3.75L3 17.25z"></path></svg>
 </a>
-<h1 id="reading-and-writing-the-formats-from-your-own-code">Reading and writing the formats from your own code</h1>
+<h1 id="reading-and-writing-the-formats-from-your-own-code">Reading and writing the formats from your own code<a class="headerlink" href="#reading-and-writing-the-formats-from-your-own-code" title="Permanent link">#</a></h1>
 <p>There are tools to read skeletons and face embeddings from your own code. Here
 is an example of reading from a tracked skeleton file:</p>
 <pre><code>import h5py
@@ -598,11 +654,11 @@ with h5py.File("/path/to/my/skels.h5", "r") as skels_f:
         for skel_id, skel in shot:
             print(skel_id, skel)
 </code></pre>
-<h2 id="reference">Reference</h2>
+<h2 id="reference">Reference<a class="headerlink" href="#reference" title="Permanent link">#</a></h2>
 <div class="doc doc-object doc-class">
 <h2 class="doc doc-heading" id="skelshop.io.UnsegmentedWriter">
 <code>skelshop.io.UnsegmentedWriter</code>
-</h2>
+<a class="headerlink" href="#skelshop.io.UnsegmentedWriter" title="Permanent link">#</a></h2>
 <div class="doc doc-contents first">
 <p>Write a skeleton dump without any shot segmentation. This typically implies
 that poses are not tracked.</p>
@@ -614,7 +670,7 @@ __init__<span class="p">(</span><span class="bp">self</span><span class="p">,</s
 <span class="doc doc-properties">
 <small class="doc doc-property doc-property-special"><code>special</code></small>
 </span>
-</h3>
+<a class="headerlink" href="#skelshop.io.UnsegmentedWriter.__init__" title="Permanent link">#</a></h3>
 <div class="doc doc-contents">
 <p>Constructs an unsegmented pose writer</p>
 <details class="quote">
@@ -639,7 +695,7 @@ __init__<span class="p">(</span><span class="bp">self</span><span class="p">,</s
 <h3 class="doc doc-heading" id="skelshop.io.UnsegmentedWriter.add_pose">
 <code class="highlight language-python">
 add_pose<span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">frame_num</span><span class="p">,</span> <span class="n">pose_id</span><span class="p">,</span> <span class="n">pose</span><span class="p">)</span> </code>
-</h3>
+<a class="headerlink" href="#skelshop.io.UnsegmentedWriter.add_pose" title="Permanent link">#</a></h3>
 <div class="doc doc-contents">
 <p>Add a pose</p>
 <details class="quote">
@@ -674,7 +730,7 @@ add_pose<span class="p">(</span><span class="bp">self</span><span class="p">,</s
 <h3 class="doc doc-heading" id="skelshop.io.UnsegmentedWriter.end_shot">
 <code class="highlight language-python">
 end_shot<span class="p">(</span><span class="bp">self</span><span class="p">)</span> </code>
-</h3>
+<a class="headerlink" href="#skelshop.io.UnsegmentedWriter.end_shot" title="Permanent link">#</a></h3>
 <div class="doc doc-contents">
 <p>Ends a shot. This should only be called once at the end of writing.</p>
 <details class="quote">
@@ -700,7 +756,7 @@ end_shot<span class="p">(</span><span class="bp">self</span><span class="p">)</s
 <h3 class="doc doc-heading" id="skelshop.io.UnsegmentedWriter.start_shot">
 <code class="highlight language-python">
 start_shot<span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">start_frame</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span> </code>
-</h3>
+<a class="headerlink" href="#skelshop.io.UnsegmentedWriter.start_shot" title="Permanent link">#</a></h3>
 <div class="doc doc-contents">
 <p>Start a shot. This should only be called once at the beginning of writing.</p>
 <details class="quote">
@@ -722,7 +778,7 @@ start_shot<span class="p">(</span><span class="bp">self</span><span class="p">,<
 <div class="doc doc-object doc-class">
 <h2 class="doc doc-heading" id="skelshop.io.ShotSegmentedWriter">
 <code>skelshop.io.ShotSegmentedWriter</code>
-</h2>
+<a class="headerlink" href="#skelshop.io.ShotSegmentedWriter" title="Permanent link">#</a></h2>
 <div class="doc doc-contents first">
 <p>Write a skeleton dump with any shot segmentation. This typically implies
 that poses are are tracked.</p>
@@ -734,7 +790,7 @@ __init__<span class="p">(</span><span class="bp">self</span><span class="p">,</s
 <span class="doc doc-properties">
 <small class="doc doc-property doc-property-special"><code>special</code></small>
 </span>
-</h3>
+<a class="headerlink" href="#skelshop.io.ShotSegmentedWriter.__init__" title="Permanent link">#</a></h3>
 <div class="doc doc-contents">
 <p>Constructs a shot segmented writer</p>
 <details class="quote">
@@ -764,7 +820,7 @@ __init__<span class="p">(</span><span class="bp">self</span><span class="p">,</s
 <h3 class="doc doc-heading" id="skelshop.io.ShotSegmentedWriter.add_pose">
 <code class="highlight language-python">
 add_pose<span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">frame_num</span><span class="p">,</span> <span class="n">pose_id</span><span class="p">,</span> <span class="n">pose</span><span class="p">)</span> </code>
-</h3>
+<a class="headerlink" href="#skelshop.io.ShotSegmentedWriter.add_pose" title="Permanent link">#</a></h3>
 <div class="doc doc-contents">
 <p>Add a pose</p>
 <details class="quote">
@@ -789,7 +845,7 @@ add_pose<span class="p">(</span><span class="bp">self</span><span class="p">,</s
 <h3 class="doc doc-heading" id="skelshop.io.ShotSegmentedWriter.end_shot">
 <code class="highlight language-python">
 end_shot<span class="p">(</span><span class="bp">self</span><span class="p">)</span> </code>
-</h3>
+<a class="headerlink" href="#skelshop.io.ShotSegmentedWriter.end_shot" title="Permanent link">#</a></h3>
 <div class="doc doc-contents">
 <p>End the current shot</p>
 <details class="quote">
@@ -848,7 +904,7 @@ end_shot<span class="p">(</span><span class="bp">self</span><span class="p">)</s
 <h3 class="doc doc-heading" id="skelshop.io.ShotSegmentedWriter.register_frame">
 <code class="highlight language-python">
 register_frame<span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">frame_num</span><span class="p">)</span> </code>
-</h3>
+<a class="headerlink" href="#skelshop.io.ShotSegmentedWriter.register_frame" title="Permanent link">#</a></h3>
 <div class="doc doc-contents">
 <p>Register frame_num as existing within the current shot</p>
 <details class="quote">
@@ -868,7 +924,7 @@ register_frame<span class="p">(</span><span class="bp">self</span><span class="p
 <h3 class="doc doc-heading" id="skelshop.io.ShotSegmentedWriter.start_shot">
 <code class="highlight language-python">
 start_shot<span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">start_frame</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> </code>
-</h3>
+<a class="headerlink" href="#skelshop.io.ShotSegmentedWriter.start_shot" title="Permanent link">#</a></h3>
 <div class="doc doc-contents">
 <p>Start a new shot</p>
 <details class="quote">
@@ -891,7 +947,7 @@ start_shot<span class="p">(</span><span class="bp">self</span><span class="p">,<
 <div class="doc doc-object doc-class">
 <h2 class="doc doc-heading" id="skelshop.io.ShotSegmentedReader">
 <code>skelshop.io.ShotSegmentedReader</code>
-</h2>
+<a class="headerlink" href="#skelshop.io.ShotSegmentedReader" title="Permanent link">#</a></h2>
 <div class="doc doc-contents first">
 <p>Reads a shot segmented skeleton dump.</p>
 <div class="doc doc-children">
@@ -902,7 +958,7 @@ __init__<span class="p">(</span><span class="bp">self</span><span class="p">,</s
 <span class="doc doc-properties">
 <small class="doc doc-property doc-property-special"><code>special</code></small>
 </span>
-</h3>
+<a class="headerlink" href="#skelshop.io.ShotSegmentedReader.__init__" title="Permanent link">#</a></h3>
 <div class="doc doc-contents">
 <p>Constructs the reader from a HDF5 file and. If <code>infinite</code> is True, all
 shot iterators will terminate with a final empty shot which infintely
@@ -934,7 +990,7 @@ __iter__<span class="p">(</span><span class="bp">self</span><span class="p">)</s
 <span class="doc doc-properties">
 <small class="doc doc-property doc-property-special"><code>special</code></small>
 </span>
-</h3>
+<a class="headerlink" href="#skelshop.io.ShotSegmentedReader.__iter__" title="Permanent link">#</a></h3>
 <div class="doc doc-contents">
 <p>Returns a shot iterator of all shots</p>
 <details class="quote">
@@ -955,7 +1011,7 @@ __iter__<span class="p">(</span><span class="bp">self</span><span class="p">)</s
 <h3 class="doc doc-heading" id="skelshop.io.ShotSegmentedReader.iter_from_frame">
 <code class="highlight language-python">
 iter_from_frame<span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">start_frame</span><span class="p">)</span> </code>
-</h3>
+<a class="headerlink" href="#skelshop.io.ShotSegmentedReader.iter_from_frame" title="Permanent link">#</a></h3>
 <div class="doc doc-contents">
 <p>Returns a shot iterator starting from frame 0-index <code>start_frame</code>.</p>
 <details class="quote">
@@ -989,7 +1045,7 @@ iter_from_frame<span class="p">(</span><span class="bp">self</span><span class="
 <h3 class="doc doc-heading" id="skelshop.io.ShotSegmentedReader.iter_from_shot">
 <code class="highlight language-python">
 iter_from_shot<span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">start_shot</span><span class="p">)</span> </code>
-</h3>
+<a class="headerlink" href="#skelshop.io.ShotSegmentedReader.iter_from_shot" title="Permanent link">#</a></h3>
 <div class="doc doc-contents">
 <p>Returns a shot iterator starting from shot 0-index <code>start_shot</code>.</p>
 <details class="quote">
@@ -1013,7 +1069,7 @@ iter_from_shot<span class="p">(</span><span class="bp">self</span><span class="p
 <div class="doc doc-object doc-class">
 <h2 class="doc doc-heading" id="skelshop.io.UnsegmentedReader">
 <code>skelshop.io.UnsegmentedReader</code>
-</h2>
+<a class="headerlink" href="#skelshop.io.UnsegmentedReader" title="Permanent link">#</a></h2>
 <div class="doc doc-contents first">
 <p>Reads a non-shot segmented skeleton dump.</p>
 <div class="doc doc-children">
@@ -1024,7 +1080,7 @@ __iter__<span class="p">(</span><span class="bp">self</span><span class="p">)</s
 <span class="doc doc-properties">
 <small class="doc doc-property doc-property-special"><code>special</code></small>
 </span>
-</h3>
+<a class="headerlink" href="#skelshop.io.UnsegmentedReader.__iter__" title="Permanent link">#</a></h3>
 <div class="doc doc-contents">
 <p>Returns a pose bundle iterator of all frames.</p>
 <details class="quote">
@@ -1044,7 +1100,7 @@ __iter__<span class="p">(</span><span class="bp">self</span><span class="p">)</s
 <h3 class="doc doc-heading" id="skelshop.io.UnsegmentedReader.iter_from">
 <code class="highlight language-python">
 iter_from<span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">start_frame</span><span class="p">)</span> </code>
-</h3>
+<a class="headerlink" href="#skelshop.io.UnsegmentedReader.iter_from" title="Permanent link">#</a></h3>
 <div class="doc doc-contents">
 <p>Returns a pose bundle iterator starting at frame <code>start_frame</code>.</p>
 <details class="quote">
@@ -1066,7 +1122,7 @@ iter_from<span class="p">(</span><span class="bp">self</span><span class="p">,</
 <div class="doc doc-object doc-class">
 <h2 class="doc doc-heading" id="skelshop.io.ShotReader">
 <code>skelshop.io.ShotReader</code>
-</h2>
+<a class="headerlink" href="#skelshop.io.ShotReader" title="Permanent link">#</a></h2>
 <div class="doc doc-contents first">
 <p>A reader for a single shot. Typically this is returned from ShotSegmentedReader.</p>
 <div class="doc doc-children">
@@ -1077,7 +1133,7 @@ __iter__<span class="p">(</span><span class="bp">self</span><span class="p">)</s
 <span class="doc doc-properties">
 <small class="doc doc-property doc-property-special"><code>special</code></small>
 </span>
-</h3>
+<a class="headerlink" href="#skelshop.io.ShotReader.__iter__" title="Permanent link">#</a></h3>
 <div class="doc doc-contents">
 <p>Returns a pose bundle iterator of all frames.</p>
 <details class="quote">
@@ -1097,7 +1153,7 @@ __iter__<span class="p">(</span><span class="bp">self</span><span class="p">)</s
 <h3 class="doc doc-heading" id="skelshop.io.ShotReader.iter_from">
 <code class="highlight language-python">
 iter_from<span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">start_frame</span><span class="p">)</span> </code>
-</h3>
+<a class="headerlink" href="#skelshop.io.ShotReader.iter_from" title="Permanent link">#</a></h3>
 <div class="doc doc-contents">
 <p>Returns a pose bundle iterator starting at frame <code>start_frame</code>.</p>
 <details class="quote">
@@ -1125,7 +1181,7 @@ iter_from<span class="p">(</span><span class="bp">self</span><span class="p">,</
 <div class="doc doc-object doc-class">
 <h2 class="doc doc-heading" id="skelshop.io.AsIfTracked">
 <code>skelshop.io.AsIfTracked</code>
-</h2>
+<a class="headerlink" href="#skelshop.io.AsIfTracked" title="Permanent link">#</a></h2>
 <div class="doc doc-contents first">
 <p>Adapter wrapper for readers producing UntrackedDumpReaderPoseBundle such as
 UnsegmentedReader by default that makes them appear to produce bundles like
@@ -1137,7 +1193,7 @@ TrackedDumpReaderPoseBundle.</p>
 <div class="doc doc-object doc-class">
 <h2 class="doc doc-heading" id="skelshop.io.AsIfSingleShot">
 <code>skelshop.io.AsIfSingleShot</code>
-</h2>
+<a class="headerlink" href="#skelshop.io.AsIfSingleShot" title="Permanent link">#</a></h2>
 <div class="doc doc-contents first">
 <p>Adapter wrapper for ShotSegmentedReader to make it act more like an
 UnsegmentedReader.</p>
@@ -1193,14 +1249,14 @@ UnsegmentedReader.</p>
 </div>
 </footer>
 </div>
-<script src="../assets/javascripts/vendor.0ac82a11.min.js"></script>
-<script src="../assets/javascripts/bundle.f81dfb4d.min.js"></script><script id="__lang" type="application/json">{"clipboard.copy": "Copy to clipboard", "clipboard.copied": "Copied to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.placeholder": "Search", "search.result.placeholder": "Type to start searching", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.term.missing": "Missing"}</script>
+<script src="../assets/javascripts/vendor.08c56446.min.js"></script>
+<script src="../assets/javascripts/bundle.6ced434e.min.js"></script><script id="__lang" type="application/json">{"clipboard.copy": "Copy to clipboard", "clipboard.copied": "Copied to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.placeholder": "Search", "search.result.placeholder": "Type to start searching", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.term.missing": "Missing"}</script>
 <script>
         app = initialize({
           base: "..",
-          features: [],
+          features: ['navigation.tabs'],
           search: Object.assign({
-            worker: "../assets/javascripts/worker/search.4ac00218.min.js"
+            worker: "../assets/javascripts/worker/search.8c7e0a7e.min.js"
           }, typeof search !== "undefined" && search)
         })
       </script>
