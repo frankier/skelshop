@@ -1,4 +1,4 @@
-# Workflow orchestration and extraction in a HPC environment using Snakemake
+# Workflow automation and orchestration, on your workstation and in HPC environments using Snakemake
 
 SkelShop include tools for running extraction pipelines orchestrated using
 Snakemake. These workflows can be run on a single node, however more typically

@@ -48,3 +48,4 @@ old versions:
 
  * [Dlib on LFW](https://github.com/tahaemara/dlib-model-evaluation)
  * [Shot detection benchmarks](https://github.com/albanie/shot-detection-benchmarks)
+ * [Master's thesis analysing failure modes of different face embeddings including dlib's](https://matheo.uliege.be/handle/2268.2/4650)

@@ -5,7 +5,8 @@ repo_name: "frankier/skelshop"
 
 nav:
   - Getting started: index.md
-  - 'User guide (for users of the command line tools)':
+  - User guide:
+    - Introduction: user-guide-intro.md
     - Pipelines overview: pipelines-overview.md
     - 'Meet the...':
       - Pose estimators: pose-estimators.md
@@ -13,10 +14,12 @@ nav:
       - Within-shot pose trackers: pose-trackers.md
       - 'Face chip detectors/croppers': face-extractors.md
       - Face embedders: face-embedders.md
-    - Usage examples: usage-examples.md
     - Benchmarks: benchmark.md
-    - HPC extraction with Snakemake: snakemake.md
-  - 'Developer guide (for users of the library & contributors)': 
+    - 'Guide: configuring the face embedding pipeline': face-pipeline-configuration-guide.md
+    - Person identification: identification.md
+    - Automation with snakemake: snakemake.md
+    - Misc. usage examples: usage-examples.md
+  - Developer guide:
     - Pipeline internals: pipeline-internals.md
     - Tracking: tracking.md
     - Formats: formats.md
@@ -29,12 +32,16 @@ nav:
 
 theme:
   name: "material"
+  features:
+    - navigation.tabs
 
 markdown_extensions:
   - admonition
   - mkdocs-click
   - footnotes
   - markdown_inline_graphviz
+  - toc:
+      permalink: "#"
 
 plugins:
   - search
@@ -46,3 +53,6 @@ plugins:
             show_root_heading: true
       watch:
         - skelshop
+
+extra_css:
+  - extra.css
