@@ -11,7 +11,7 @@ environment in a Singularity container. You can run Snakemake on one node
 (typically a login node, since no heavy computation is performed by this node)
 and the actual steps will run on different nodes chosen according to a JSON
 configuration file, all from a single Singularity container. This workflow is
-enabled by [singslurm](https://github.com/frankier/singslurm) project, which is
+enabled by [singslurm2](https://github.com/frankier/singslurm2) project, which is
 based on the [Snakemake SLURM
 profile](https://github.com/Snakemake-Profiles/slurm).
 
@@ -32,11 +32,11 @@ that you want to use 8 cores:
 
 ## Running Snakemake on a SLURM cluster
 
-The coordinator script bootstraps everything needed for containerised Snakemake
-execution:
+First set up singslurm2:
 
-    $ wget https://raw.githubusercontent.com/frankier/singslurm/master/run_coord.sh
-    $ chmod +x run_coord.sh
+    $ cd ~
+    $ git clone --recursive https://github.com/frankier/singslurm2.git
+
 
 Now you can download the Docker image with Singularity:
 
@@ -72,7 +72,7 @@ So for example you might:
           CLUSC_CONF=$(pwd)/skels.tracked.clusc.json \
           NUM_JOBS=42 \
           SING_EXTRA_ARGS="--bind /path/to/my/extra/bind" \
-          ./run_coord.sh \
+          ~/singslurm2/run.sh \
           tracked_all \
           --config \
           VIDEO_BASE=/path/to/my/video/corpus/ \
@@ -80,7 +80,7 @@ So for example you might:
 
 
 Please see the [singslurm](https://github.com/frankier/singslurm) repository
-for more information about the environment variables passed to `run_coord.sh`.
+for more information about the environment variables passed to `singslurm2/run.sh`.
 
 ## Integrating SkelShop into your own pipelines
 
