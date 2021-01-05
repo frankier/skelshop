@@ -7,7 +7,7 @@ from functools import wraps
 from math import sqrt
 from os.path import join as pjoin
 from pathlib import Path
-from typing import TYPE_CHECKING, Dict, Iterable, Iterator, List, Optional, Tuple
+from typing import TYPE_CHECKING, Dict, Iterable, Iterator, List, Tuple
 
 import click
 from scipy.spatial.distance import cdist
@@ -124,17 +124,22 @@ def min_dist(metric, ref, embed) -> float:
 
 class ReferenceEmbeddings:
     refs: Dict[str, np.ndarray]
-    ref_embeddings: Optional[List[np.ndarray]]
-    ref_group_sizes: Optional[List[int]]
-    ref_labels: Optional[List[str]]
+    ref_embeddings: List[np.ndarray]
+    ref_group_sizes: List[int]
+    ref_labels: List[str]
 
     def __init__(self, ref_it: Iterator[Tuple[str, Iterable[np.ndarray]]]):
         self.refs = {}
+        self.ref_embeddings = []
+        self.ref_group_sizes = []
+        self.ref_labels = []
         for label, entry in ref_it:
             self.refs[label] = entry
-        self.ref_embeddings = None
-        self.ref_group_sizes = None
-        self.ref_labels = None
+            old_ref_embeddings_len = len(self.ref_embeddings)
+            self.ref_embeddings.extend(entry)
+            entry_len = len(self.ref_embeddings) - old_ref_embeddings_len
+            self.ref_group_sizes.append(entry_len)
+            self.ref_labels.append(label)
 
     def num_refs(self) -> int:
         return len(self.refs)
@@ -160,21 +165,9 @@ class ReferenceEmbeddings:
                 min_dist = dist
         return min_label, min_dist
 
-    def _ensure_cdist(self):
-        if self.ref_embeddings is not None:
-            return
-        self.ref_embeddings = []
-        self.ref_group_sizes = []
-        self.ref_labels = []
-        for label, embeddings in self.refs.items():
-            self.ref_embeddings.extend(embeddings)
-            self.ref_group_sizes.append(len(embeddings))
-            self.ref_labels.append(label)
-
     def cdist(self, metric: str, cmp_np, cmp_group_sizes=None):
         from scipy.spatial.distance import cdist
 
-        self._ensure_cdist()
         if cmp_group_sizes is None:
             cmp_group_sizes = [1] * len(cmp_np)
         dists = cdist(self.ref_embeddings, cmp_np, metric=metric)

@@ -5,6 +5,7 @@ from .buildrefs import buildrefs
 from .clus import clus
 from .embedrefs import embedrefs
 from .idclus import idclus
+from .idrnnclus import idrnnclus
 from .idsegsfull import idsegsfull
 from .idsegssparse import idsegssparse
 from .whoisthis import whoisthis
@@ -23,6 +24,7 @@ iden.add_command(buildrefs)
 iden.add_command(clus)
 iden.add_command(embedrefs)
 iden.add_command(idclus)
+iden.add_command(idrnnclus)
 iden.add_command(idsegsfull)
 iden.add_command(idsegssparse)
 iden.add_command(whoisthis)

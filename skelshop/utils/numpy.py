@@ -1,5 +1,7 @@
 from typing import Any
 
+from scipy.sparse import csr_matrix
+
 DEFAULT_PENALTY_WEIGHT = 1e6
 
 
@@ -25,6 +27,38 @@ def min_pool_dists(distances, dim1_sizes, dim2_sizes):
     )
     np.minimum.at(pooled_dists, indices, distances)
     return pooled_dists
+
+
+def get_sparse_row(mat, idx):
+    start_idx = mat.indptr[idx]
+    end_idx = mat.indptr[idx + 1]
+    return zip(mat.indices[start_idx:end_idx], mat.data[start_idx:end_idx])
+
+
+def min_pool_sparse(distances, sizes):
+    import heapq
+    from itertools import groupby
+    from operator import itemgetter
+
+    data = []
+    indices = []
+    indptr = [0]
+    idx = 0
+    for size in sizes:
+        for row_idx, vals in groupby(
+            heapq.merge(
+                *(
+                    get_sparse_row(distances, row_idx)
+                    for row_idx in range(idx, idx + size)
+                )
+            ),
+            key=itemgetter(0),
+        ):
+            indices.append(row_idx)
+            min_val = min((val for _, val in vals))
+            data.append(min_val)
+        indptr.append(len(indices))
+    return csr_matrix((data, indices, indptr), shape=(len(sizes), distances.shape[1]))
 
 
 def normalize(arr):
