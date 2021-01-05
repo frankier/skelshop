@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import logging
 import os
+import pickle
 from collections import Counter
 from functools import partial
 from itertools import groupby
@@ -180,7 +181,7 @@ def medoid_vecs(vecs, metric, n=1):
     return np.argsort(dists.sum(axis=0))[:n]
 
 
-def get_prototypes(all_embeddings_np, clus_labels, metric, n):
+def get_medioid_prototypes(all_embeddings_np, clus_labels, metric, n):
     idx = 0
     while 1:
         clus_idxs = np.nonzero(clus_labels == idx)[0]
@@ -192,14 +193,24 @@ def get_prototypes(all_embeddings_np, clus_labels, metric, n):
         idx += 1
 
 
-def write_prototypes(protof, corpus, all_embeddings_np, clus_labels, metric, n):
+def get_rnn_prototypes(rev_knns, clus_labels, n):
+    idx = 0
+    while 1:
+        clus_idxs = np.nonzero(clus_labels == idx)[0]
+        if not len(clus_idxs):
+            break
+        subgraph = rev_knns[clus_idxs][:, clus_idxs]
+        max_rnn_idxs = np.flip(np.argsort(subgraph.getnnz(1)))[:n]
+        yield idx, (clus_idxs[idx] for idx in max_rnn_idxs)
+        idx += 1
+
+
+def write_prototypes(protof, corpus, prototypes):
     protof.write("clus_idx,video_idx,frame_num,pers_id\n")
     face_sorted = sorted(
         (
             (face_idx, clus_idx)
-            for clus_idx, face_idxs in get_prototypes(
-                all_embeddings_np, clus_labels, metric, n
-            )
+            for clus_idx, face_idxs in prototypes
             for face_idx in face_idxs
         )
     )
@@ -348,8 +359,13 @@ def process_common_clus_options(args, kwargs, inner):
     corpus_desc = kwargs.pop("corpus_desc")
     corpus_base = kwargs.pop("corpus_base")
     proto_out = kwargs.pop("proto_out")
+    model_out = kwargs.pop("model_out")
     num_protos = kwargs.pop("num_protos")
     pool = kwargs["pool"]
+    ann_lib = kwargs["ann_lib"]
+    knn = kwargs.get("knn")
+    if model_out is not None and ann_lib != "pynndescent" and knn is not None:
+        raise click.UsageError("Model saving is only supported for pynndescent")
     with CorpusReader(corpus_desc, corpus_base) as corpus:
         kwargs["corpus"] = corpus
         sample_idxs = None
@@ -364,7 +380,6 @@ def process_common_clus_options(args, kwargs, inner):
         seg_pers = read_seg_pers(corpus, num_embeddings)
         regroup_by_pers(all_embeddings_np, seg_pers)
         kwargs["seg_pers"] = seg_pers
-        knn = kwargs.get("knn")
         if knn is not None and knn > len(all_embeddings_np) - 1:
             knn = len(all_embeddings_np) - 1
             logging.info(
@@ -380,19 +395,23 @@ def process_common_clus_options(args, kwargs, inner):
                 all_embeddings_np, seg_pers, DEFAULT_METRIC
             )
         kwargs["all_embeddings_np"] = all_embeddings_np
-        clus_labels, eps, min_samples = inner(*args, **kwargs)
+        estimator, clus_labels, eps, min_samples = inner(*args, **kwargs)
         if proto_out:
             with open(proto_out, "w") as protof:
+                if knn is not None and ann_lib == "pynndescent":
+                    rev_knns = estimator.named_steps["rnndbscan"].rev_knns_
+                    prototypes = get_rnn_prototypes(rev_knns, clus_labels, num_protos)
+                else:
+                    prototypes = get_medioid_prototypes(
+                        all_embeddings_np, clus_labels, DEFAULT_METRIC, num_protos
+                    )
                 write_prototypes(
-                    protof,
-                    corpus,
-                    all_embeddings_np,
-                    clus_labels,
-                    DEFAULT_METRIC,
-                    num_protos,
+                    protof, corpus, prototypes,
                 )
+        if model_out:
+            with open(model_out, "wb") as modelf:
+                pickle.dump(estimator, modelf)
         if sample_idxs is not None:
-            ann_lib = kwargs["ann_lib"]
             transformer_cls = knn_lib_transformer(ann_lib)
             clus_labels = expand_clus_labels(
                 transformer_cls,
@@ -417,6 +436,7 @@ common_clus_options = save_options(
         click.argument("corpus_desc", type=PathPath(exists=True)),
         click.option("--corpus-base", type=PathPath(exists=True)),
         click.option("--proto-out", type=PathPath()),
+        click.option("--model-out", type=PathPath()),
         click.option("--num-protos", type=int, default=1),
         click.option(
             "--algorithm", type=click.Choice(["dbscan", "optics-dbscan", "rnn-dbscan"])
@@ -486,7 +506,9 @@ def get_clus_alg(
         if algorithm == "dbscan":
             return knn_dbscan_pipeline(transformer, knn, metric=metric)
         else:
-            return simple_rnn_dbscan_pipeline(transformer, knn, metric=metric)
+            return simple_rnn_dbscan_pipeline(
+                transformer, knn, metric=metric, keep_knns=True
+            )
 
 
 def proc_data(vecs, seg_pers: List[Tuple[str, str, str]], pool: str, metric: str):
@@ -527,11 +549,13 @@ def fixed(
         min_samples=min_samples,
         n_jobs=n_jobs,
     )
+    labels = clus_alg.fit_predict(
+        proc_data(all_embeddings_np, seg_pers, pool, DEFAULT_METRIC)
+    )
     with maybe_ray():
         return (
-            clus_alg.fit_predict(
-                proc_data(all_embeddings_np, seg_pers, pool, DEFAULT_METRIC)
-            ),
+            clus_alg,
+            labels,
             eps,
             min_samples,
         )
@@ -660,6 +684,7 @@ def search(
     predicted_labels = grid_search.best_estimator_.labels_
 
     return (
+        grid_search.best_estimator_,
         predicted_labels,
         grid_search.best_params_["eps"],
         grid_search.best_params_["min_samples"],
