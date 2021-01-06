@@ -58,8 +58,8 @@ command](https://user-images.githubusercontent.com/299380/87277551-2d9f6180-c4eb
 
 ## Contributions & Questions
 
-Contributions are welcome! Feel free to use the issues to ask any questions.
-[See also the contributing section of the
+Contributions are welcome! Feel free to use GitHub discussions to ask any
+questions. [See also the contributing section of the
 documentation.](https://frankier.github.io/skelshop/development/)
 
 ## Acknowledgments
