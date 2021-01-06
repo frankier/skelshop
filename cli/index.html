@@ -948,6 +948,7 @@ of frame-person pairs.</p>
   --ann-lib [pynndescent|faiss-exact]
   --algorithm [dbscan|optics-dbscan|rnn-dbscan]
   --num-protos INTEGER
+  --model-out PATH
   --proto-out PATH
   --corpus-base PATH
   --eps FLOAT
@@ -966,6 +967,7 @@ of frame-person pairs.</p>
   --ann-lib [pynndescent|faiss-exact]
   --algorithm [dbscan|optics-dbscan|rnn-dbscan]
   --num-protos INTEGER
+  --model-out PATH
   --proto-out PATH
   --corpus-base PATH
   --eps TEXT
@@ -985,6 +987,14 @@ of frame-person pairs.</p>
 <p>Options:</p>
 <pre><code>  --thresh FLOAT
   --corpus-base PATH
+</code></pre>
+<h3 id="idrnnclus">idrnnclus<a class="headerlink" href="#idrnnclus" title="Permanent link">#</a></h3>
+<p>Identifies clusters by comparing against a reference and forcing a match</p>
+<p>Usage:</p>
+<pre><code>skelshop iden idrnnclus [OPTIONS] REF_IN MODELIN ASSIGN_OUT
+</code></pre>
+<p>Options:</p>
+<pre><code>  --thresh FLOAT
 </code></pre>
 <h3 id="idsegsfull">idsegsfull<a class="headerlink" href="#idsegsfull" title="Permanent link">#</a></h3>
 <p>Identifies shots with a particular person from reference headshots using

@@ -930,15 +930,39 @@ assigned a cluster rather than treated as noise. 2 is a reasonable value for n,
 and so K = 5 is a good value for RNN-DBSCAN assuming you leave f at its
 default of 3.</p>
 <p>Currently, RNN-DBSCAN with pynndescent is the recommended approach. So the
-recommended command is: <a href="../cli/#fixed"><code>skelshop iden clus fixed</code></a><code>--proto-out protos --ann-lib pynndescent --algorithm rnn-dbscan --knn
-5 path/to/corpus.description.csv</code>. The <code>--proto-out</code> option gives a path to
-write prototypes/exemplars from each cluster, usable to align the clusters
-after-the-fact.</p>
+recommended command is: <a href="../cli/#fixed"><code>skelshop iden clus fixed</code></a><code>--proto-out protos --model-out model.pkl --ann-lib pynndescent --algorithm
+rnn-dbscan --knn 5 path/to/corpus.description.csv</code>. The <code>--proto-out</code> option
+gives a path to write prototypes/exemplars from each cluster, usable to align
+the clusters after-the-fact, while the <code>--model-out</code> option shows where to
+dump the model, which provides an alternative way of achieving the same thing,
+as explained in the next section.</p>
 <h2 id="labelling-clusters">Labelling clusters<a class="headerlink" href="#labelling-clusters" title="Permanent link">#</a></h2>
-<p>Clusters can be labelled like so: <a href="../cli/#idclus"><code>skelshop iden idclus</code></a><code>myref.h5 protos path/to/corpus.description.csv cluster.identifications.csv</code>.
-This can then be applied to the clustering outputs, to produce a CSV with a mix
-of identities and clusters like so: [``skelshop iden applymap
-clustering.output.csv cluster.identifications.csv outputids.csv"</p>
+<p>There are a three approaches to labelling clusters:</p>
+<ol>
+<li>Manual labelling based on saved prototypes</li>
+<li>Labelling by comparing a reference to saved prototypes</li>
+<li>Labelling by comparing a reference to a saved kNN+clustering model (only
+    supported for pynndescent+RNN-DBSCAN)</li>
+</ol>
+<p>In the first case of manual labelling, we usually want to dump the images of
+the prototypes for each cluster like so: <a href="../cli/#writeprotos"><code>skelshop iden
+writeprotos</code></a><code>protos path/to/corpus.description.csv
+path/to/proto/images</code>. You can either install
+<a href="https://github.com/muennich/sxiv">sxiv</a> and use <a href="../cli/#whoisthis"><code>skelshop iden
+whoisthis</code></a><code>path/to/proto/images
+cluster.identifications.csv</code> to interactively labels the clusters, or manually
+then use an image viewer to view the cluster prototypes and then create a CSV
+file <code>cluster.identifications.csv</code> in the following format:</p>
+<pre><code>label,clus
+Q42,c0
+</code></pre>
+<p>In the second case of prototype-based automatic labelling, we can use:
+<a href="../cli/#idclus"><code>skelshop iden idclus</code></a><code>myref.h5 protos
+path/to/corpus.description.csv cluster.identifications.csv</code>. Finally, to use
+a saved RNN-DBSCAN model <a href="../cli/#idrnnclus"><code>skelshop iden idrnnclus</code></a><code>myref.h5 model.pkl cluster.identifications.csv</code>.</p>
+<p>After completing any of these three approaches, the labelled clusters can then
+be applied to the clustering outputs to produce a CSV with a mix of identities
+and clusters like so: <a href="../cli/#applymap"><code>skelshop iden applymap</code></a><code>clustering.output.csv cluster.identifications.csv outputids.csv</code>.</p>
 <div class="footnote">
 <hr />
 <ol>

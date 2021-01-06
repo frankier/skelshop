@@ -819,7 +819,7 @@ environment in a Singularity container. You can run Snakemake on one node
 (typically a login node, since no heavy computation is performed by this node)
 and the actual steps will run on different nodes chosen according to a JSON
 configuration file, all from a single Singularity container. This workflow is
-enabled by <a href="https://github.com/frankier/singslurm">singslurm</a> project, which is
+enabled by <a href="https://github.com/frankier/singslurm2">singslurm2</a> project, which is
 based on the <a href="https://github.com/Snakemake-Profiles/slurm">Snakemake SLURM
 profile</a>.</p>
 <h2 id="running-snakemake-on-a-single-node">Running Snakemake on a single node<a class="headerlink" href="#running-snakemake-on-a-single-node" title="Permanent link">#</a></h2>
@@ -835,10 +835,9 @@ $ poetry run snakemake tracked_all \
   DUMP_BASE=/path/to/my/dump/directory
 </code></pre>
 <h2 id="running-snakemake-on-a-slurm-cluster">Running Snakemake on a SLURM cluster<a class="headerlink" href="#running-snakemake-on-a-slurm-cluster" title="Permanent link">#</a></h2>
-<p>The coordinator script bootstraps everything needed for containerised Snakemake
-execution:</p>
-<pre><code>$ wget https://raw.githubusercontent.com/frankier/singslurm/master/run_coord.sh
-$ chmod +x run_coord.sh
+<p>First set up singslurm2:</p>
+<pre><code>$ cd ~
+$ git clone --recursive https://github.com/frankier/singslurm2.git
 </code></pre>
 <p>Now you can download the Docker image with Singularity:</p>
 <pre><code>$ singularity pull skelshop.sif docker://frankierr/skelshop:focal_nvcaffe
@@ -872,7 +871,7 @@ for information on how to write this file.</p>
   CLUSC_CONF=$(pwd)/skels.tracked.clusc.json \
   NUM_JOBS=42 \
   SING_EXTRA_ARGS="--bind /path/to/my/extra/bind" \
-  ./run_coord.sh \
+  ~/singslurm2/run.sh \
   tracked_all \
   --config \
   VIDEO_BASE=/path/to/my/video/corpus/ \
@@ -881,7 +880,7 @@ for information on how to write this file.</p>
 </li>
 </ol>
 <p>Please see the <a href="https://github.com/frankier/singslurm">singslurm</a> repository
-for more information about the environment variables passed to <code>run_coord.sh</code>.</p>
+for more information about the environment variables passed to <code>singslurm2/run.sh</code>.</p>
 <h2 id="integrating-skelshop-into-your-own-pipelines">Integrating SkelShop into your own pipelines<a class="headerlink" href="#integrating-skelshop-into-your-own-pipelines" title="Permanent link">#</a></h2>
 <p>In case you are using SkelShop as part of a larger pipeline or want to further
 customise your workflow, you should write your own Snakefile. See the
