@@ -41,7 +41,7 @@ SPARQLWrapper = { version = "^1.8.5", optional = true }
 certifi = { version = "^2020.12.5", optional = true }
 ray = {version = "^1.0.1", optional = true}
 joblib = {version = "^1.0.0", optional = true}
-sklearn-ann = {git = "https://github.com/frankier/sklearn-ann.git", rev = "8a5d1fcf8fee16ea94997d6510e1d3936bc7e981"}
+sklearn-ann = {git = "https://github.com/frankier/sklearn-ann.git", rev = "7e0a0cf852240a21b0c5fd23d8ddf0c8b85d7d8e"}
 pynndescent = {version = "^0.5.1", optional = true}
 
 [tool.poetry.extras]
