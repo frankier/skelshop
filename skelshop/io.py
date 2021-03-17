@@ -237,7 +237,7 @@ class ShotSegmentedReader:
     def __init__(self, h5f: h5py.File, bundle_cls=DumpReaderPoseBundle, infinite=False):
         """
         Constructs the reader from a HDF5 file and. If `infinite` is True, all
-        shot iterators will terminate with a final empty shot which infintely
+        shot iterators will terminate with a final empty shot which infinitely
         yields empty pose bundles.
         """
         self.h5f = h5f

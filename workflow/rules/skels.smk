@@ -30,7 +30,7 @@ rule skel_untracked:
     output:
         pjoin(DUMP_BASE, "{base}.untracked.h5")
     shell:
-        "python -m skelshop dump " +
+        "python -m skelshop --ffprobe-bin {FFPROBE_BIN} dump " +
         "--mode BODY_25_ALL " + 
         "{input.video} " + 
         "{output}"
@@ -44,7 +44,7 @@ rule skel_filter_csvshotseg_opt_lighttrack:
     output:
         pjoin(DUMP_BASE, "{base}.opt_lighttrack.h5")
     shell:
-        "python -m skelshop filter " +
+        "python -m skelshop --ffprobe-bin {FFPROBE_BIN} filter " +
         "--track " +
         "--track-conf opt_lighttrack " +
         "--pose-matcher-config {input.gcn_config} " +

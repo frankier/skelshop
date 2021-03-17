@@ -31,7 +31,7 @@ rule dumpimgs_dlib_examples:
     output:
         skels = pjoin(CALIB_WORK, "dlib.examples.h5")
     shell:
-        "python -m skelshop dumpimgs " +
+        "python -m skelshop --ffprobe-bin {FFPROBE_BIN} dumpimgs " +
         "--mode BODY_25 " +
         "{input.faces} {output.skels}"
 
@@ -43,7 +43,7 @@ rule calibrate_process:
     output:
         calib_df = pjoin(CALIB_WORK, "dlib.examples.calib.pqt")
     shell:
-        "python -m skelshop calibrate process-dlib-dir " +
+        "python -m skelshop --ffprobe-bin {FFPROBE_BIN} calibrate process-dlib-dir " +
         "--add-symmetries {input.faces} {input.skels} {output.calib_df}"
 
 
@@ -54,5 +54,5 @@ rule calibrate_analyse:
         chart_out = pjoin(CALIB_WORK, "chart.pdf"),
         means = pjoin(CALIB_WORK, "means.txt")
     shell:
-        "python -m skelshop calibrate analyse " +
+        "python -m skelshop --ffprobe-bin {FFPROBE_BIN} calibrate analyse " +
         "{input.calib_df} --chart-out {output.chart_out} > {output.means}"

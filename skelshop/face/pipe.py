@@ -502,9 +502,10 @@ def all_chips_from_skel_batched(
         batch_fods = get_openpose_fods_batch(mode)
         used_frames_idxs = []
         mask = []
+        skel_iter = iter(skel_read)
         for _ in range(batch_size):
             try:
-                skel_bundle = next(skel_read)
+                skel_bundle = next(skel_iter)
             except StopIteration:
                 break
             if not list(skel_bundle) or not add_frame_detections(

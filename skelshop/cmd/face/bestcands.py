@@ -44,7 +44,9 @@ def bestcands(skelin, segsout, strategy, video):
     strat_fn, const_face_name = STRATEGIES[strategy]
     with h5py.File(skelin, "r") as skel_h5f:
         segsout.write("seg,pers_id,seg_frame_num,abs_frame_num,extractor\n")
-        assert skel_h5f.attrs["fmt_type"] == "trackshots"
+        assert (
+            skel_h5f.attrs.get("fmt_type") == "trackshots"
+        ), "This step of the pipeline requires a trackedshots-h5 input"
         skel_read = ShotSegmentedReader(skel_h5f, infinite=False)
         for seg_idx, shot in enumerate(skel_read):
             frame_pers_iter = strat_fn(shot.start_frame, shot, vid_read)

@@ -8,7 +8,7 @@ There are two major approaches to identification:
    1. Identifying clusters by comparison with one or more references.
    2. Identifying clusters manually by inspection of prototypical images.
 
-## Construction a face reference library
+## Construction of a face reference library
 
 A face reference library is simply a directory containing a number of
 directories, each containing photos containing the face of some individual of
@@ -65,7 +65,7 @@ each shot by direct comparison with our reference like so for a sparse
 embedding dump [``skelshop iden idsegssparse``](cli.md#idsegssparse)`` myref/
 path/to/scenes.csv path/to/sparsefacedump.h5 outputids.csv``. Or like so for
 a full embedding dump: [``skelshop iden idsegsfull``](cli.md#idsegsfull)``
-myref/ path/to/scenes.csv path/to/sparsefacedump.h5 outputids.csv``.
+myref/ path/to/scenes.csv path/to/fullfacedump.h5 outputids.csv``.
 
 ## Making a corpus description file
 
@@ -73,7 +73,7 @@ Up until now, we have been dealing with commands that process either only
 a single video at a time, or process information associated with a single
 video, such as skeleton dumps, at a time. However, when we perform face
 clustering we would like to deal data from multiple videos. To do this, we need
-to (usually automatically, e.g. in [Snakemake](snakemake.md) create a CSV file
+to (usually automatically, e.g. in [Snakemake](snakemake.md)) create a CSV file
 for our corpus. Here is an example:
 
 ```
