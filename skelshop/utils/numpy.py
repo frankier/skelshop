@@ -58,6 +58,7 @@ def min_pool_sparse(distances, sizes):
             min_val = min((val for _, val in vals))
             data.append(min_val)
         indptr.append(len(indices))
+        idx += size
     return csr_matrix((data, indices, indptr), shape=(len(sizes), distances.shape[1]))
 
 
