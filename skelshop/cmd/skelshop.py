@@ -1,10 +1,10 @@
+import logging
 from importlib.util import find_spec
 
 import click
 import click_log
 
-from skelshop.drawsticks import set_ffprobe_bin
-
+from ..utils.vidreadwrapper import set_ffprobe_bin
 from .bench import bench
 from .calibrate import calibrate
 from .conv import conv
@@ -16,6 +16,8 @@ from .playsticks import playsticks
 from .stats import stats
 
 click_log.basic_config()
+numba_logger = logging.getLogger("numba")
+numba_logger.setLevel(logging.WARNING)
 
 
 @click.group()
@@ -34,8 +36,10 @@ skelshop.add_command(dump)
 face_recognition_loader = find_spec("face_recognition")
 if face_recognition_loader is not None:
     from .face import face
+    from .iden import iden
 
     skelshop.add_command(face)
+    skelshop.add_command(iden)
 skelshop.add_command(drawsticks)
 skelshop.add_command(playsticks)
 skelshop.add_command(filter)

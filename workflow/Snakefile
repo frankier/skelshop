@@ -1,6 +1,7 @@
 ## Environment variables
 import os
 from os.path import join as pjoin
+from shutil import which
 
 
 def cnf(name, val):
@@ -10,8 +11,9 @@ def cnf(name, val):
 cnf("WORK", "work")
 cnf("VIDEO_BASE", ".")
 cnf("DUMP_BASE", ".")
-cnf("GCN_WEIGHTS", WORK + "/gcn_weights")
-cnf("GCN_CONFIG", WORK + "/gcn_config.yaml")
+cnf("GCN_WEIGHTS", pjoin(WORK, "gcn_weights"))
+cnf("GCN_CONFIG", pjoin(WORK, "gcn_config.yaml"))
+cnf("FFPROBE_BIN", which("ffprobe"))
 
 ## Configs
 
@@ -36,6 +38,7 @@ device: [0]
 
 include: "rules/skels.smk"
 include: "rules/calibrate.smk"
+include: "rules/faces.smk"
 
 rule setup:
     "Perform setup actions"
@@ -51,7 +54,7 @@ rule tracked_all:
     input:
         [pjoin(DUMP_BASE, fn) for fn in all(".opt_lighttrack.h5")]
     output:
-        touch(".tracked_all")
+        touch(".tracked_all.done")
 
 rule get_gcn_weights:
     output:
@@ -82,5 +85,5 @@ rule drawsticks:
     output:
         pjoin(DUMP_BASE, "{base}.{var}.sticks.mp4")
     shell:
-        "python -m skelshop drawsticks " +
+        "python -m skelshop --ffprobe-bin {FFPROBE_BIN} drawsticks " +
         "{input.skels} {input.video} {output}"

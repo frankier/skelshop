@@ -1,7 +1,7 @@
 ## Usage examples
 
 Here are some usage examples. There is more help available through the `--help'
-flag.
+flag and on the [CLI reference page](cli.md).
 
 ### Dumping/tracking
 
@@ -17,13 +17,15 @@ ourselves like so:
       --mode BODY_25 \
       video_in.mp4 pose_data.h5
 
-We could also use the Singularity image. OpenPose is installed in the image and
+We could also use the Singularity or Docker. OpenPose is installed in the image and
 everything is setup up for us so we can just run:
 
+    $ singularity pull skelshop.sif docker://frankierr/skelshop:focal_nvcaffe
     $ singularity exec --nv skelshop.sif python /opt/skelshop/skelshop dump video_in.mp4 pose_data.h5
 
-If the host machine does not have CUDA, then `--nv` can be omitted and the
-container will automatically select the CPU version of OpenPose instead.
+**OR**
+
+    $ docker run --nv frankierr/skelshop:focal_nvcaffe python /opt/skelshop/skelshop dump video_in.mp4 pose_data.h5
 
 You can track an existing dump using the `filter` command with the `--track`
 flag or apply tracking at the same time as dumping. Currently scene

@@ -18,6 +18,7 @@ class ZipJsonDumpSource(PipelineStageBase):
         self.basename = None
         self.version = None
         self._check_basename()
+        self.total_frames = len(zipin.filelist)
 
     def _check_basename(self):
         self.expected_frames = 0

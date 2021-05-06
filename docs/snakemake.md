@@ -1,4 +1,4 @@
-# Workflow orchestration and extraction in a HPC environment using Snakemake
+# Workflow automation and orchestration, on your workstation and in HPC environments using Snakemake
 
 SkelShop include tools for running extraction pipelines orchestrated using
 Snakemake. These workflows can be run on a single node, however more typically
@@ -11,7 +11,7 @@ environment in a Singularity container. You can run Snakemake on one node
 (typically a login node, since no heavy computation is performed by this node)
 and the actual steps will run on different nodes chosen according to a JSON
 configuration file, all from a single Singularity container. This workflow is
-enabled by [singslurm](https://github.com/frankier/singslurm) project, which is
+enabled by [singslurm2](https://github.com/frankier/singslurm2) project, which is
 based on the [Snakemake SLURM
 profile](https://github.com/Snakemake-Profiles/slurm).
 
@@ -32,15 +32,15 @@ that you want to use 8 cores:
 
 ## Running Snakemake on a SLURM cluster
 
-The coordinator script bootstraps everything needed for containerised Snakemake
-execution:
+First set up singslurm2:
 
-    $ wget https://raw.githubusercontent.com/frankier/singslurm/master/run_coord.sh
-    $ chmod +x run_coord.sh
+    $ cd ~
+    $ git clone --recursive https://github.com/frankier/singslurm2.git
 
-Now you can download the Singularity image:
 
-    $ singularity pull shub://frankier/skelshop:latest skelshop.sif
+Now you can download the Docker image with Singularity:
+
+    $ singularity pull skelshop.sif docker://frankierr/skelshop:focal_nvcaffe
 
 Next, you need to create a JSON file specifying which type of nodes you would
 like to assign to different rules (steps in the workflow). [There is an example
@@ -59,27 +59,28 @@ So for example you might:
 
 1. Download the example cluster configuration.
 
-    $ wget https://github.com/frankier/skelshop/blob/master/contrib/slurm/skels.tracked.clusc.json
+        $ wget https://github.com/frankier/skelshop/blob/master/contrib/slurm/skels.tracked.clusc.json
 
 2. Edit it if need be.
 
 3. Then run the following command after editing the placeholders (at least
    `NUM_JOBS`, `SING_EXTRA_ARGS`, `VIDEO_BASE` and `DUMP_BASE`:
 
-    $ SIF_PATH=$(pwd)/skelshop.sif \
-      SNAKEFILE=/opt/skelshop/workflow/Snakefile \
-      CLUSC_CONF=$(pwd)/skels.tracked.clusc.json \
-      NUM_JOBS=42 \
-      SING_EXTRA_ARGS="--bind /path/to/my/extra/bind" \
-      ./run_coord.sh \
-      tracked_all \
-      --config \
-      VIDEO_BASE=/path/to/my/video/corpus/ \
-      DUMP_BASE=/path/to/my/dump/directory
+
+        $ SIF_PATH=$(pwd)/skelshop.sif \
+          SNAKEFILE=/opt/skelshop/workflow/Snakefile \
+          CLUSC_CONF=$(pwd)/skels.tracked.clusc.json \
+          NUM_JOBS=42 \
+          SING_EXTRA_ARGS="--bind /path/to/my/extra/bind" \
+          ~/singslurm2/run.sh \
+          tracked_all \
+          --config \
+          VIDEO_BASE=/path/to/my/video/corpus/ \
+          DUMP_BASE=/path/to/my/dump/directory
 
 
 Please see the [singslurm](https://github.com/frankier/singslurm) repository
-for more information about the environment variables passed to `run_coord.sh`.
+for more information about the environment variables passed to `singslurm2/run.sh`.
 
 ## Integrating SkelShop into your own pipelines
 

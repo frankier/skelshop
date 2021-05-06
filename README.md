@@ -7,9 +7,6 @@
 <a href="https://hub.docker.com/r/frankierr/skelshop/builds">
   <img alt="DockerHub hosted images" src="https://img.shields.io/docker/pulls/frankierr/skelshop?style=flat" />
 </a>
-<a href="https://singularity-hub.org/collections/4494">
-  <img alt="SingularityHub hosted images" src="https://www.singularity-hub.org/static/img/hosted-singularity--hub-%23e32929.svg" />
-</a>
 <a href="https://frankier.github.io/skelshop/">
   <img alt="Documentation on GitHub pages" src="https://img.shields.io/badge/Docs-MkDocs-informational" />
 </a>
@@ -47,7 +44,13 @@ main attributes of this type of material is:
  * Embed faces using dlib
    * Using OpenPose's face detection and keypoint estimation
    * Or using dlib's own face detection/keypoint estimation
+   * Select best frames for best quality embeddings
  * Dump across heterogeneous HPC environments including GPU and CPU nodes.
+ * Identify faces based on embeddings
+   * Identify by direct comparison with references
+   * Or cluster faces with no reference (also useful re-identitication)
+   * Identify faces based on clusters, either with a reference or interactively
+   * Quickly build up libraries of references using data from WikiData/WikiMedia commons
 
 Here's a screenshot of the playsticks command:
 
@@ -58,8 +61,8 @@ command](https://user-images.githubusercontent.com/299380/87277551-2d9f6180-c4eb
 
 ## Contributions & Questions
 
-Contributions are welcome! Feel free to use the issues to ask any questions.
-[See also the contributing section of the
+Contributions are welcome! Feel free to use GitHub discussions to ask any
+questions. [See also the contributing section of the
 documentation.](https://frankier.github.io/skelshop/development/)
 
 ## Acknowledgments
@@ -68,6 +71,8 @@ Thanks to the authors of all the useful libraries I have used.
 
 Some of the black box tracking code is based
 on [this repository](https://github.com/lxy5513/cvToolkit).
+
+Some code to do with clustering and usage of FAISS is based on [this repository](https://github.com/yl-1993/learn-to-cluster/).
 
 [Icon by Adrien Coquet, FR from the Noun Project used under
 CC-BY.](https://thenounproject.com/term/news/2673777)

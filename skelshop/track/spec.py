@@ -142,9 +142,9 @@ class OptAssignMetThresh(ProcedureNode, AssignMetMixin):
         # Solve
         cand_idxs, ref_idxs = linear_sum_assignment(cost_mat)
         for cand_idx, ref_idx in zip(cand_idxs, ref_idxs):
-            cand = candidates_as_tracked_list[cand_idx]
             if cost_mat[cand_idx, ref_idx] == PENALTY_WEIGHT:
                 continue
+            cand = candidates_as_tracked_list[cand_idx]
             cand.track_as(references_list[ref_idx].track_id)
             tracking_state.track(cand)
 

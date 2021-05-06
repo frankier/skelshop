@@ -3,6 +3,7 @@ from itertools import repeat
 from typing import Any, Dict, Iterator, List, Tuple
 
 import h5py
+import hdf5plugin
 from numpy import ndarray
 
 from .openpose import POSE_CLASSES
@@ -27,7 +28,7 @@ def add_empty_rows_grp(indptr, data, new_rows):
 
 
 class NullWriter:
-    def __init__(self, h5f):
+    def __init__(self, h5f, *args, **kwargs):
         pass
 
     def add_pose(self, frame_num, pose_id, pose):
@@ -49,20 +50,24 @@ class UnsegmentedWriter:
     that poses are not tracked.
     """
 
-    def __init__(self, h5f: h5py.File):
+    def __init__(self, h5f: h5py.File, num_kps=None, **create_kwargs):
         """
         Constructs an unsegmented pose writer
         """
         self.h5f = h5f
+        self.num_kps = num_kps
         self.timeline_grp = self.h5f.create_group("/timeline", track_order=True)
         self.pose_grps: Dict[int, List[Any]] = {}
         self.start_frame = 0
+        self.create_kwargs = create_kwargs
 
     def _pose_grp(self, pose_id: int, frame_num: int):
         if pose_id in self.pose_grps:
             return self.pose_grps[pose_id]
         path = f"/timeline/pose{pose_id}"
-        pose_grp = create_growable_csr(self.h5f, path)
+        pose_grp = create_growable_csr(
+            self.h5f, path, self.num_kps, **self.create_kwargs
+        )
         pose_grp.attrs["start_frame"] = frame_num
         last_frame_num = frame_num - 1
         self.pose_grps[pose_id] = [
@@ -123,11 +128,12 @@ class ShotSegmentedWriter:
     that poses are are tracked.
     """
 
-    def __init__(self, h5f: h5py.File):
+    def __init__(self, h5f: h5py.File, num_kps=None, **create_kwargs):
         """
         Constructs a shot segmented writer
         """
         self.h5f = h5f
+        self.num_kps = num_kps
         self.h5f.create_group("/timeline", track_order=True)
 
         self.pose_data: Dict[int, Dict[int, ndarray]] = {}
@@ -136,6 +142,7 @@ class ShotSegmentedWriter:
         self.shot_idx = 0
         self.shot_start = 0
         self.last_frame = 0
+        self.create_kwargs = create_kwargs
 
     def start_shot(self, start_frame=None):
         """
@@ -194,9 +201,11 @@ class ShotSegmentedWriter:
             pose_group = create_csr(
                 self.h5f,
                 f"/timeline/shot{self.shot_idx}/pose{pose_id}",
-                data,
-                indices,
-                indptr,
+                self.num_kps,
+                data=data,
+                indices=indices,
+                indptr=indptr,
+                **self.create_kwargs,
             )
             pose_group.attrs["start_frame"] = pose_first_frame
             pose_group.attrs["end_frame"] = pose_last_frame
@@ -228,7 +237,7 @@ class ShotSegmentedReader:
     def __init__(self, h5f: h5py.File, bundle_cls=DumpReaderPoseBundle, infinite=False):
         """
         Constructs the reader from a HDF5 file and. If `infinite` is True, all
-        shot iterators will terminate with a final empty shot which infintely
+        shot iterators will terminate with a final empty shot which infinitely
         yields empty pose bundles.
         """
         self.h5f = h5f
@@ -240,6 +249,12 @@ class ShotSegmentedReader:
 
     def _mk_reader(self, start_frame, end_frame, bundles):
         return ShotReader(start_frame, end_frame, bundles, self.limbs, self.mk_bundle)
+
+    def __getitem__(self, idx):
+        shot_name = f"shot{idx}"
+        shot_grp = self.h5f[f"/timeline/{shot_name}"]
+        start_frame, end_frame, bundles = read_grp(shot_grp)
+        return self._mk_reader(start_frame, end_frame, bundles)
 
     def _iter(self, req_start=0):
         end_frame = req_start
@@ -367,6 +382,23 @@ class ShotReader:
             sparse_pose = SparsePose(pose_grp, num_limbs)
             self.poses.append((pose_num, start_frame, end_frame, sparse_pose))
 
+    def __getitem__(self, tpl):
+        if isinstance(tpl, int):
+            frame_num = tpl
+            pose_nums = None
+        else:
+            frame_num, pose_nums = tpl
+        abs_frame_num = frame_num + self.start_frame
+        bundle = {}
+        for pose_num, start_frame, end_frame, sparse_pose in self.poses:
+            if pose_nums is not None and pose_num not in pose_nums:
+                continue
+            if abs_frame_num < start_frame or abs_frame_num >= end_frame:
+                continue
+            row_num = abs_frame_num - start_frame
+            bundle[pose_num] = sparse_pose.get_row(row_num)
+        return self.mk_bundle(bundle)
+
     def __iter__(self):
         """
         Returns a pose bundle iterator of all frames.
@@ -417,6 +449,10 @@ class AsIfTracked:
             EnumerateIterable(frame) for frame in self.wrapped.iter_from(start_frame)
         )
 
+    @property
+    def total_frames(self):
+        return self.wrapped.total_frames  # TODO not everything has this..
+
 
 class AsIfSingleShot:
     """
@@ -434,3 +470,22 @@ class AsIfSingleShot:
         for shot in self.wrapped.iter_from_frame(start_frame):
             for payload in shot:
                 yield payload
+
+
+NO_COMPRESSION: Tuple[Dict[str, Any], Dict[str, Any]] = ({}, {})
+
+BLOSC_ZSTD_5 = hdf5plugin.Blosc(
+    cname="zstd", clevel=5, shuffle=hdf5plugin.Blosc.BITSHUFFLE
+)
+BLOSC_ZSTD_9 = hdf5plugin.Blosc(
+    cname="zstd", clevel=9, shuffle=hdf5plugin.Blosc.BITSHUFFLE
+)
+
+
+COMPRESSIONS = {
+    "none": NO_COMPRESSION,
+    "lossless": ({"compression": BLOSC_ZSTD_5}, {}),
+    "lossless9": ({"compression": BLOSC_ZSTD_9}, {}),
+    "lossy": ({"compression": BLOSC_ZSTD_5}, {"scaleoffset": 2}),
+    "lossy9": ({"compression": BLOSC_ZSTD_9}, {"scaleoffset": 2}),
+}

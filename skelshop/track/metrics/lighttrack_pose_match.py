@@ -4,17 +4,12 @@ from typing import TYPE_CHECKING, Any, Optional
 import numpy as np
 
 from ...pose import PoseBody25
+from ...utils.geom import lazy_euclidean
 from . import posetrack_gcn_match
 from .base import Metric
 
 if TYPE_CHECKING:
     from ..models import TrackedPose
-
-
-def lazy_euclidean(x, y):
-    from scipy.spatial.distance import euclidean
-
-    return euclidean(x, y)
 
 
 @dataclass

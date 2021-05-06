@@ -5,7 +5,13 @@ import click
 from imutils.video.count_frames import count_frames
 
 from skelshop.dump import add_fmt_metadata, add_metadata, write_shots
-from skelshop.io import AsIfTracked, NullWriter, ShotSegmentedWriter, UnsegmentedWriter
+from skelshop.io import (
+    COMPRESSIONS,
+    AsIfTracked,
+    NullWriter,
+    ShotSegmentedWriter,
+    UnsegmentedWriter,
+)
 from skelshop.openpose import LIMBS, MODES, OpenPoseStage
 from skelshop.pipeline import pipeline_options
 
@@ -24,12 +30,13 @@ def maybe_h5out(h5fn, dry_run):
 @click.command()
 @click.argument("video", type=click.Path())
 @click.argument("h5fn", type=click.Path())
+@click.option("--compression", type=click.Choice(COMPRESSIONS.keys()), default="none")
 @click.option("--mode", type=click.Choice(MODES), default="BODY_25_ALL")
 @click.option("--model-folder", envvar="MODEL_FOLDER", required=True)
 @click.option("--debug/--no-debug")
 @click.option("--dry-run/--write")
 @pipeline_options(allow_empty=True)
-def dump(video, h5fn, mode, model_folder, pipeline, debug, dry_run):
+def dump(video, h5fn, compression, mode, model_folder, pipeline, debug, dry_run):
     """
     Create a HDF5 pose dump from a video using OpenPose.
 
@@ -57,4 +64,12 @@ def dump(video, h5fn, mode, model_folder, pipeline, debug, dry_run):
             pipeline.apply_metadata(h5f)
         else:
             writer_cls = NullWriter
-        write_shots(h5f, limbs, frame_iter, writer_cls=writer_cls)
+        lossless_kwargs, lossy_kwargs = COMPRESSIONS[compression]
+        write_shots(
+            h5f,
+            limbs,
+            frame_iter,
+            writer_cls=writer_cls,
+            lossless_kwargs=lossless_kwargs,
+            lossy_kwargs=lossy_kwargs,
+        )
