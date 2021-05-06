@@ -79,7 +79,7 @@ class ResultMerger:
             idxs[next_mergable_idx] += 1
             pers_id = next_pers_ids[next_mergable_idx]
             merged_pers_ids.append(pers_id)
-            face = to_merge[next_mergable_idx].result.peek()
+            face = to_merge[next_mergable_idx].result.peek()  # SIGTERM here
             for key, arr in face.items():
                 merged_face.setdefault(key, []).append(arr[inner_idx])
 
@@ -170,9 +170,9 @@ def embedselect(
         targets = [
             (abs_frame_num, *frame_info) for abs_frame_num, frame_info in frames.items()
         ]
-        merged.add_results(
-            ((frame_num, pers_ids) for frame_num, _, _, pers_ids in targets),
-            select_faces_from_skel_batched(
+        try:
+            a = ((frame_num, pers_ids) for frame_num, _, _, pers_ids in targets)
+            b = select_faces_from_skel_batched(
                 iter(targets),
                 vid_read,
                 skel_read,
@@ -180,8 +180,17 @@ def embedselect(
                 mode=mode,
                 include_bboxes=write_bboxes,
                 include_chip=write_chip,
-            ),
-        )
+            )
+            merged.add_results(a, b)
+        except Exception as e:
+            # so, in next of the ResultMerger (-> `to_merge[next_mergable_idx].result.peek()` -> select_faces_from_skel_batched
+            # -> `vid_read.get_batch(used_frames_idxs).asnumpy()`) we get a SIGTERM on CPU if we use original decord.video_reader
+            # --> as specified in the Dockerfile, it is installed with DUSE_CUDA!
+            print(
+                "If you're getting a sigterm due to vid_read.get_batch(used_frames_idxs), it may be because your `decord.video_reader` relies on CUDA!"
+            )
+            print("To resolve it, try `pip remove decord && pip install decord`!")
+            raise e
     num_frames = count_frames(video)
     with h5out(h5fn) as h5f:
         add_basic_metadata(h5f, video, num_frames)
