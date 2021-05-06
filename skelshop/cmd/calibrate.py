@@ -6,7 +6,6 @@ from xml.etree import ElementTree
 import click
 import h5py
 import numpy as np
-import opencv_wrapper as cvw
 
 from skelshop import lazyimp
 from skelshop.face.pipe import (
@@ -18,6 +17,7 @@ from skelshop.skelgraphs.openpose import BODY_25_JOINTS
 from skelshop.skelgraphs.utils import flip_joint_name
 from skelshop.utils.dlib import rect_to_x1y1x2y2, to_full_object_detections
 from skelshop.utils.geom import rnd, rot
+from skelshop.utils.vidreadwrapper import VidReadWrapper as cvw
 
 if TYPE_CHECKING:
     import dlib

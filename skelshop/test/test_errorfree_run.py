@@ -6,7 +6,7 @@ import requests
 from pytest import fixture
 
 import skelshop.config as config
-from skelshop.cmd.playsticks import playsticks as playsticks_fn
+from skelshop.cmd.playsticks import playsticks_fn
 from skelshop.test.testing_conf import TestingConf as testconf
 
 

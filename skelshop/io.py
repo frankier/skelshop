@@ -449,6 +449,10 @@ class AsIfTracked:
             EnumerateIterable(frame) for frame in self.wrapped.iter_from(start_frame)
         )
 
+    @property
+    def total_frames(self):
+        return self.wrapped.total_frames  # TODO not everything has this..
+
 
 class AsIfSingleShot:
     """

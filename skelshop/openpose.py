@@ -2,6 +2,7 @@ import logging
 import os
 
 from skelshop import lazyimp
+from skelshop.utils.vidreadwrapper import VidReadWrapper as cvw
 
 from .pipebase import PipelineStageBase
 from .pose import (
@@ -73,6 +74,10 @@ class OpenPoseStage(PipelineStageBase):
     def __init__(self, model_folder, mode, video=None, image_dir=None, debug=False):
         assert (video is not None) + (image_dir is not None) == 1
 
+        if video:
+            self.total_frames = cvw.load_video(video).num_frames
+        else:
+            self.total_frames = len(os.listdir(image_dir))
         self.op_wrap = lazyimp.pyopenpose.WrapperPython(
             lazyimp.pyopenpose.ThreadManagerMode.AsynchronousOut
         )
