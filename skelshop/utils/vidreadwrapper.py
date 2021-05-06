@@ -8,7 +8,6 @@ import opencv_wrapper as cvw
 
 logger = logging.getLogger(__name__)
 
-
 _ffprobe_bin = "ffprobe"
 
 
@@ -22,10 +21,14 @@ class VidReadWrapper:
     def load_video(vid_file):
         if which(_ffprobe_bin) is None:
             logger.error(
-                "You don't have ffmpeg installed on your system or provided a wrong executable-Path! It thus not be used to get the video's FPS!"
+                "You don't have ffmpeg installed on your system or provided a wrong executable-Path! It can thus not be used to get the video's FPS!"
             )
             return LoadedVidWrapper(vid_file, None)
         return LoadedVidWrapper(vid_file, _ffprobe_bin)
+
+    @staticmethod
+    def put_text(*args, **kwargs):
+        return cvw.put_text(*args, **kwargs)
 
 
 def execute(cmd, **kwargs):  # type: (Sequence[Text], Any) -> Iterator[Text]
@@ -107,3 +110,29 @@ class LoadedVidWrapper:
     def __getattr__(self, attr):
         # pass everything that isn't implemented here to the original cvw
         return self.cvw_ref.__getattribute__(attr)
+
+
+# def get_fps(vid_file, video_capture):
+#     if which(_ffprobe_bin) is None:
+#         logger.error(
+#             "You don't have ffmpeg installed on your system or provided a wrong executable-Path! It thus not be used to get the video's FPS!"
+#         )
+#         return video_capture.fps
+#     fps_string = (
+#         subprocess.Popen(
+#             f"{_ffprobe_bin} -v 0 -of csv=p=0 -select_streams v:0 -show_entries stream=r_frame_rate".split(
+#                 " "
+#             )
+#             + [vid_file],
+#             stdout=subprocess.PIPE,
+#             stderr=subprocess.STDOUT,
+#         )
+#         .communicate()[0]
+#         .decode("UTF-8")[:-1]
+#     )
+#     if fps_string != "0/0":
+#         num, denom = fps_string.split("/", 1)
+#         fps = float(num) / float(denom)
+#     else:
+#         fps = video_capture.fps  # .get(cv2.CAP_PROP_FPS)
+#     return fps

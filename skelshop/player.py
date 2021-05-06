@@ -7,9 +7,10 @@ from abc import ABC, abstractmethod
 from itertools import repeat
 
 import cv2
-import opencv_wrapper as cvw
 import pygame as pg
 from more_itertools import peekable
+
+from skelshop.utils.vidreadwrapper import VidReadWrapper as cvw
 
 from .io import ShotSegmentedReader
 from .utils.iter import RewindableIter

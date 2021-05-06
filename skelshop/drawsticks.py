@@ -4,7 +4,7 @@ from typing import Iterator
 
 import cv2
 import numpy as np
-import opencv_wrapper as cvw
+import opencv_wrapper as orig_cvw
 from more_itertools.recipes import grouper
 from tqdm import tqdm
 
@@ -13,6 +13,7 @@ from skelshop.skelgraphs.openpose import MODE_SKELS
 from skelshop.skelgraphs.posetrack import POSETRACK18_SKEL
 from skelshop.utils.bbox import points_bbox_x1y1x2y2
 from skelshop.utils.geom import rnd, rot
+from skelshop.utils.vidreadwrapper import VidReadWrapper as cvw
 
 logger = logging.getLogger(__name__)
 
@@ -212,7 +213,7 @@ class VideoSticksWriter:
         ann_ids=True,
         scale=1,
     ):
-        self.out = cvw.VideoWriter(out, fps=fps, fourcc="mp4v")
+        self.out = orig_cvw.VideoWriter(out, fps=fps, fourcc="mp4v")
         self.width = width
         self.height = height
         self.fps = fps
