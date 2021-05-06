@@ -79,7 +79,7 @@ class ResultMerger:
             idxs[next_mergable_idx] += 1
             pers_id = next_pers_ids[next_mergable_idx]
             merged_pers_ids.append(pers_id)
-            face = to_merge[next_mergable_idx].result.peek()  # SIGKILL here
+            face = to_merge[next_mergable_idx].result.peek()  # SIGTERM here
             for key, arr in face.items():
                 merged_face.setdefault(key, []).append(arr[inner_idx])
 
@@ -170,30 +170,27 @@ def embedselect(
         targets = [
             (abs_frame_num, *frame_info) for abs_frame_num, frame_info in frames.items()
         ]
-        # so, in next of the ResultMerger (`to_merge[next_mergable_idx].result.peek()` to be precise), we're getting a SIGTERM.
-        # ...and the problem is b, the select_faces_from_skel_batched...
-        a = ((frame_num, pers_ids) for frame_num, _, _, pers_ids in targets)
-        b = select_faces_from_skel_batched(
-            iter(targets),
-            vid_read,
-            skel_read,
-            batch_size=batch_size_num,
-            mode=mode,
-            include_bboxes=write_bboxes,
-            include_chip=write_chip,
-        )
-        # used_frames_idxs = [195, 214]
-        # vid_read.get_batch(used_frames_idxs).asnumpy()
-        # print("through1")
-        # import time; time.sleep(10)
-        #
-        # used_frames_idxs = [195, 214, 224, 272, 280, 293, 324, 331, 337, 362, 387, 401, 431, 441, 447, 483, 501, 530, 539, 550, 556, 612, 618, 627, 687, 700, 708, 745, 752, 760, 780, 786, 792, 990, 999, 1012, 1066, 1086, 1092, 1203, 1209, 1212, 1224, 1225, 1828, 1836, 1852, 2179, 2186, 2204, 2541, 2552, 2776, 3126, 3420, 3429, 3555, 3562, 3578, 3587, 3595, 3601, 3726, 3736, 3750, 4650, 4878, 4895, 5781, 5787, 5798, 5804, 5812, 5818, 6606, 6622, 6626, 6633, 6634, 6669, 6919, 7113, 7119, 7779, 7785, 7805, 7887, 7935, 7944, 8144, 8146, 8150, 8153, 8156, 8157, 8170, 8172, 8182, 8198, 8307]
-        # vid_read.get_batch(used_frames_idxs).asnumpy()
-        # print("through2")
-        # import time; time.sleep(10)
-        # #..dies anyway. TODO: stackoverflow why vid_read.get_batch() dies and figure out if eg. giving it less samples helps
-        # next(iter(b))
-        merged.add_results(a, b)
+        try:
+            a = ((frame_num, pers_ids) for frame_num, _, _, pers_ids in targets)
+            b = select_faces_from_skel_batched(
+                iter(targets),
+                vid_read,
+                skel_read,
+                batch_size=batch_size_num,
+                mode=mode,
+                include_bboxes=write_bboxes,
+                include_chip=write_chip,
+            )
+            merged.add_results(a, b)
+        except Exception as e:
+            # so, in next of the ResultMerger (-> `to_merge[next_mergable_idx].result.peek()` -> select_faces_from_skel_batched
+            # -> `vid_read.get_batch(used_frames_idxs).asnumpy()`) we get a SIGTERM on CPU if we use original decord.video_reader
+            # --> as specified in the Dockerfile, it is installed with DUSE_CUDA!
+            print(
+                "If you're getting a sigterm due to vid_read.get_batch(used_frames_idxs), it may be because your `decord.video_reader` relies on CUDA!"
+            )
+            print("To resolve it, try `pip remove decord && pip install decord`!")
+            raise e
     num_frames = count_frames(video)
     with h5out(h5fn) as h5f:
         add_basic_metadata(h5f, video, num_frames)
