@@ -5,7 +5,6 @@ from typing import Iterator, Optional
 
 import click
 import h5py
-import opencv_wrapper as cvw
 from numpy import ndarray
 
 from skelshop.drawsticks import (
@@ -16,6 +15,7 @@ from skelshop.drawsticks import (
     get_skel,
 )
 from skelshop.io import AsIfTracked, ShotSegmentedReader, UnsegmentedReader
+from skelshop.utils.vidreadwrapper import VidReadWrapper as cvw
 
 logger = logging.getLogger(__name__)
 

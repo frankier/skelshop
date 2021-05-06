@@ -276,8 +276,10 @@ class UnsegPlayer(PlayerBase):
 
     def draw_cur(self, img):
         bundles = self.cur_skels()
-        for skel_draw, bundle in zip(self.skel_draws, bundles):
-            skel_draw.draw_bundle(img, bundle)
+        for skel_draw, bundle, skel_iter in zip(
+            self.skel_draws, bundles, self.skel_iters
+        ):  # TODO why could there be more than one skel_draw?
+            skel_draw.draw_bundle(img, bundle, skel_iter)
 
     def cur_skels(self):
         return (skel_iter.peek() for skel_iter in self.skel_iters)

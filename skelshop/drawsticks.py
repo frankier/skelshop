@@ -1,54 +1,20 @@
 import logging
-import subprocess
 from itertools import zip_longest
-from shutil import which
 from typing import Iterator
 
 import cv2
 import numpy as np
 import opencv_wrapper as cvw
 from more_itertools.recipes import grouper
+from tqdm import tqdm
 
+from skelshop.config import conf as config
 from skelshop.skelgraphs.openpose import MODE_SKELS
 from skelshop.skelgraphs.posetrack import POSETRACK18_SKEL
 from skelshop.utils.bbox import points_bbox_x1y1x2y2
 from skelshop.utils.geom import rnd, rot
 
 logger = logging.getLogger(__name__)
-
-
-_ffprobe_bin = "ffprobe"
-
-
-def set_ffprobe_bin(ffprobe_bin):
-    global _ffprobe_bin
-    _ffprobe_bin = ffprobe_bin
-
-
-def get_fps(vid_file, video_capture):
-    if which(_ffprobe_bin) is None:
-        logger.error(
-            "You don't have ffmpeg installed on your system or provided a wrong executable-Path! It thus not be used to get the video's FPS!"
-        )
-        return video_capture.fps
-    fps_string = (
-        subprocess.Popen(
-            f"{_ffprobe_bin} -v 0 -of csv=p=0 -select_streams v:0 -show_entries stream=r_frame_rate".split(
-                " "
-            )
-            + [vid_file],
-            stdout=subprocess.PIPE,
-            stderr=subprocess.STDOUT,
-        )
-        .communicate()[0]
-        .decode("UTF-8")[:-1]
-    )
-    if fps_string != "0/0":
-        num, denom = fps_string.split("/", 1)
-        fps = float(num) / float(denom)
-    else:
-        fps = video_capture.fps  # .get(cv2.CAP_PROP_FPS)
-    return fps
 
 
 def scale_video(vid_read, dim) -> Iterator[np.ndarray]:
@@ -63,7 +29,7 @@ class ScaledVideo:
         self.scale = scale
         self.width = int(vid_read.width) * scale
         self.height = int(vid_read.height) * scale
-        self.fps = get_fps(vid_path, vid_read)
+        self.fps = vid_read.fps
 
     def reset(self):
         # XXX: In general CAP_PROP_POS_FRAMES will cause problems with
@@ -78,6 +44,13 @@ class ScaledVideo:
             return scale_video(frame_iter, (self.width, self.height))
 
 
+def limb_invisible(confidence, subskel):
+    # TODO when interpolating limbs, have special confidence-values reserved for that
+    return confidence == 0 or (
+        config.THRESHOLDS[subskel] and confidence < config.THRESHOLDS[subskel]
+    )
+
+
 class SkelDraw:
     def __init__(
         self, skel, conv_to_posetrack=False, ann_ids=True, scale=1,
@@ -88,16 +61,23 @@ class SkelDraw:
         self.scale = scale
 
     def draw_skel(self, frame, numarr):
-        for (x1, y1, c1), (x2, y2, c2) in self.skel.iter_limbs(numarr):
+        for (x1, y1, c1), (x2, y2, c2), subskel in self.skel.iter_limbs(numarr):
+            interpolated = False
+            if c1 > 1:
+                interpolated = True
+                c1 -= 1
+            if c2 > 1:
+                interpolated = True
+                c2 -= 1
             c = min(c1, c2)
-            if c == 0:
+            if limb_invisible(c, subskel):
                 continue
+            if interpolated:
+                color = (rnd(128 * (1 - c)), rnd(128 * (1 - c)), 255)
+            else:
+                color = (255, rnd(255 * (1 - c)), rnd(255 * (1 - c)))
             cv2.line(
-                frame,
-                (rnd(x1), rnd(y1)),
-                (rnd(x2), rnd(y2)),
-                (255, rnd(255 * (1 - c)), rnd(255 * (1 - c))),
-                1,
+                frame, (rnd(x1), rnd(y1)), (rnd(x2), rnd(y2)), color, 1,
             )
 
     def draw_ann(self, frame, pers_id, numarr):
@@ -125,7 +105,7 @@ class SkelDraw:
             frame, str(pers_id), (rnd(x + 2), rnd(y + 2)), (0, 0, 255), scale=0.5
         )
 
-    def draw_bundle(self, frame, bundle):
+    def draw_bundle(self, frame, bundle, iter=None):
         numarrs = []
         for pers_id, person in bundle:
             if self.conv_to_posetrack:
@@ -135,7 +115,7 @@ class SkelDraw:
             numarr = []
             for point in grouper(flat, 3):
                 numarr.append([point[0] * self.scale, point[1] * self.scale, point[2]])
-            numarrs.append(numarr)
+            numarrs.append(numarr)  # TODO why is numarr 138 long and the skeleton 137?
         for numarr in numarrs:
             self.draw_skel(frame, numarr)
         for (pers_id, person), numarr in zip(bundle, numarrs):
@@ -290,7 +270,9 @@ def drawsticks_shots(vid_read, stick_read, vid_write):
 
 
 def drawsticks_unseg(vid_read, stick_read, vid_write):
-    for frame, bundle in zip_longest(vid_read, stick_read):
+    for frame, bundle in tqdm(
+        zip_longest(vid_read, stick_read), total=stick_read.total_frames
+    ):
         vid_write.draw(frame, bundle)
 
 
