@@ -1,12 +1,12 @@
 ARG VAR
 
-FROM frankierr/openpose_containers:focal_cpu AS focal_cpu_base
+FROM ghcr.io/frankier/openpose_focal_cpu:latest AS focal_cpu_base
 
 RUN ln -sf /usr/bin/python3 /usr/bin/python
 
 RUN apt-get install -y --no-install-recommends unzip libjpeg62-dev
 
-FROM frankierr/openpose_containers:focal_nvcaffe AS focal_nvcaffe_base
+FROM ghcr.io/frankier/openpose_focal_nvcaffe:latest AS focal_nvcaffe_base
 
 RUN ln -sf /usr/bin/python3 /usr/bin/python
 
