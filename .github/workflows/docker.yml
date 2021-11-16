@@ -1,0 +1,44 @@
+name: Docker
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  skelshop_cpu:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v2
+
+      - name: Checkout submodules
+        uses: textbook/git-checkout-submodule-action@master
+
+      - name: Build/push
+        uses: whoan/docker-build-with-cache-action@v5
+        with:
+          registry: ghcr.io
+          image_name: frankier/skelshop_cpu
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+          build_extra_args: "--build-arg=VAR=cpu"
+
+  skelshop_nvcaffe:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v2
+
+      - name: Checkout submodules
+        uses: textbook/git-checkout-submodule-action@master
+
+      - name: Build/push
+        uses: whoan/docker-build-with-cache-action@v5
+        with:
+          registry: ghcr.io
+          image_name: frankier/skelshop_nvcaffe
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+          build_extra_args: "--build-arg=VAR=nvcaffe"
