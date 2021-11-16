@@ -4,8 +4,8 @@
 <a href="https://gitlab.com/frankier/skelshop/-/commits/master">
   <img alt="pipeline status" src="https://gitlab.com/frankier/skelshop/badges/master/pipeline.svg" />
 </a>
-<a href="https://hub.docker.com/r/frankierr/skelshop/builds">
-  <img alt="DockerHub hosted images" src="https://img.shields.io/docker/pulls/frankierr/skelshop?style=flat" />
+<a href="https://github.com/frankier?tab=packages&repo_name=skelshop">
+  ghcr.io
 </a>
 <a href="https://frankier.github.io/skelshop/">
   <img alt="Documentation on GitHub pages" src="https://img.shields.io/badge/Docs-MkDocs-informational" />

@@ -40,7 +40,7 @@ First set up singslurm2:
 
 Now you can download the Docker image with Singularity:
 
-    $ singularity pull skelshop.sif docker://frankierr/skelshop:focal_nvcaffe
+    $ singularity pull skelshop.sif docker://ghcr.io/frankier/skelshop_nvcaffe
 
 Next, you need to create a JSON file specifying which type of nodes you would
 like to assign to different rules (steps in the workflow). [There is an example

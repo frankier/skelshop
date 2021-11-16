@@ -28,14 +28,14 @@ There are two Docker containers, one based on CUDA and one able to run
 CUDA 10 and [nvidia-docker](https://github.com/NVIDIA/nvidia-docker) on the
 host and then run:
 
-    $ docker run --nv frankierr/skelshop:focal_nvcaffe python -m skelshop --help
+    $ docker run --nv ghcr.io/frankier/skelshop_nvcaffe python -m skelshop --help
 
 For the CPU version:
 
-    $ docker run frankierr/skelshop:focal_cpu python -m skelshop --help
+    $ docker run ghcr.io/frankier/skelshop_cpu python -m skelshop --help
 
-For more information about the Docker containers see [their page on Docker
-Hub](https://hub.docker.com/r/frankierr/skelshop) and [the
+For more information about the Docker containers see [the GHCR
+packages](https://github.com/frankier?tab=packages&repo_name=skelshop) and [the
 openpose_containers repository where the bases are
 built](https://github.com/frankier/openpose_containers).
 
@@ -43,7 +43,7 @@ built](https://github.com/frankier/openpose_containers).
 
 You can also run the container with Singularity, which is convenient in HPC environments.
 
-    $ singularity pull skelshop.sif docker://frankierr/skelshop:focal_nvcaffe
+    $ singularity pull skelshop.sif docker://ghcr.io/frankier/skelshop_nvcaffe
     $ singularity run --nv skelshop.sif python -m skelshop --help
 
 ### Manual setup

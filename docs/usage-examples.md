@@ -20,12 +20,12 @@ ourselves like so:
 We could also use the Singularity or Docker. OpenPose is installed in the image and
 everything is setup up for us so we can just run:
 
-    $ singularity pull skelshop.sif docker://frankierr/skelshop:focal_nvcaffe
+    $ singularity pull skelshop.sif docker://ghcr.io/frankier/skelshop_nvcaffe
     $ singularity exec --nv skelshop.sif python /opt/skelshop/skelshop dump video_in.mp4 pose_data.h5
 
 **OR**
 
-    $ docker run --nv frankierr/skelshop:focal_nvcaffe python /opt/skelshop/skelshop dump video_in.mp4 pose_data.h5
+    $ docker run --nv ghcr.io/frankier/skelshop_nvcaffe python /opt/skelshop/skelshop dump video_in.mp4 pose_data.h5
 
 You can track an existing dump using the `filter` command with the `--track`
 flag or apply tracking at the same time as dumping. Currently scene
