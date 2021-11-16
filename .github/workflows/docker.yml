@@ -11,9 +11,8 @@ jobs:
     steps:
       - name: Checkout repo
         uses: actions/checkout@v2
-
-      - name: Checkout submodules
-        uses: textbook/git-checkout-submodule-action@master
+        with:
+          submodules: recursive
 
       - name: Build/push
         uses: whoan/docker-build-with-cache-action@v5
@@ -30,9 +29,8 @@ jobs:
     steps:
       - name: Checkout repo
         uses: actions/checkout@v2
-
-      - name: Checkout submodules
-        uses: textbook/git-checkout-submodule-action@master
+        with:
+          submodules: recursive
 
       - name: Build/push
         uses: whoan/docker-build-with-cache-action@v5
