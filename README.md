@@ -6,7 +6,7 @@
 </a>
 |
 <a href="https://frankier.github.io/skelshop/">
-  Documentation on GitHub pages
+  Documentation
 </a>
 </p>
 
