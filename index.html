@@ -844,18 +844,18 @@ container, while only running <code>playsticks</code> with the manual installati
 (slowly...) using only a CPU. For the CUDA (10.2) version, make sure you have
 CUDA 10 and <a href="https://github.com/NVIDIA/nvidia-docker">nvidia-docker</a> on the
 host and then run:</p>
-<pre><code>$ docker run --nv frankierr/skelshop:focal_nvcaffe python -m skelshop --help
+<pre><code>$ docker run --nv ghcr.io/frankier/skelshop_nvcaffe python -m skelshop --help
 </code></pre>
 <p>For the CPU version:</p>
-<pre><code>$ docker run frankierr/skelshop:focal_cpu python -m skelshop --help
+<pre><code>$ docker run ghcr.io/frankier/skelshop_cpu python -m skelshop --help
 </code></pre>
-<p>For more information about the Docker containers see <a href="https://hub.docker.com/r/frankierr/skelshop">their page on Docker
-Hub</a> and <a href="https://github.com/frankier/openpose_containers">the
+<p>For more information about the Docker containers see <a href="https://github.com/frankier?tab=packages&amp;repo_name=skelshop">the GHCR
+packages</a> and <a href="https://github.com/frankier/openpose_containers">the
 openpose_containers repository where the bases are
 built</a>.</p>
 <h3 id="running-the-docker-container-with-singularity">Running the Docker container with Singularity<a class="headerlink" href="#running-the-docker-container-with-singularity" title="Permanent link">#</a></h3>
 <p>You can also run the container with Singularity, which is convenient in HPC environments.</p>
-<pre><code>$ singularity pull skelshop.sif docker://frankierr/skelshop:focal_nvcaffe
+<pre><code>$ singularity pull skelshop.sif docker://ghcr.io/frankier/skelshop_nvcaffe
 $ singularity run --nv skelshop.sif python -m skelshop --help
 </code></pre>
 <h3 id="manual-setup">Manual setup<a class="headerlink" href="#manual-setup" title="Permanent link">#</a></h3>

@@ -512,8 +512,8 @@
     <ul class="md-nav__list" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#construction-a-face-reference-library" class="md-nav__link">
-    Construction a face reference library
+  <a href="#construction-of-a-face-reference-library" class="md-nav__link">
+    Construction of a face reference library
   </a>
   
 </li>
@@ -778,8 +778,8 @@
     <ul class="md-nav__list" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#construction-a-face-reference-library" class="md-nav__link">
-    Construction a face reference library
+  <a href="#construction-of-a-face-reference-library" class="md-nav__link">
+    Construction of a face reference library
   </a>
   
 </li>
@@ -845,7 +845,7 @@
 <li>Identifying clusters by comparison with one or more references.</li>
 <li>Identifying clusters manually by inspection of prototypical images.</li>
 </ol>
-<h2 id="construction-a-face-reference-library">Construction a face reference library<a class="headerlink" href="#construction-a-face-reference-library" title="Permanent link">#</a></h2>
+<h2 id="construction-of-a-face-reference-library">Construction of a face reference library<a class="headerlink" href="#construction-of-a-face-reference-library" title="Permanent link">#</a></h2>
 <p>A face reference library is simply a directory containing a number of
 directories, each containing photos containing the face of some individual of
 interest. Each directory should have a unique name which will be given used as
@@ -887,13 +887,13 @@ embeddings</a>, we can identify people in
 each shot by direct comparison with our reference like so for a sparse
 embedding dump <a href="../cli/#idsegssparse"><code>skelshop iden idsegssparse</code></a><code>myref/
 path/to/scenes.csv path/to/sparsefacedump.h5 outputids.csv</code>. Or like so for
-a full embedding dump: <a href="../cli/#idsegsfull"><code>skelshop iden idsegsfull</code></a><code>myref/ path/to/scenes.csv path/to/sparsefacedump.h5 outputids.csv</code>.</p>
+a full embedding dump: <a href="../cli/#idsegsfull"><code>skelshop iden idsegsfull</code></a><code>myref/ path/to/scenes.csv path/to/fullfacedump.h5 outputids.csv</code>.</p>
 <h2 id="making-a-corpus-description-file">Making a corpus description file<a class="headerlink" href="#making-a-corpus-description-file" title="Permanent link">#</a></h2>
 <p>Up until now, we have been dealing with commands that process either only
 a single video at a time, or process information associated with a single
 video, such as skeleton dumps, at a time. However, when we perform face
 clustering we would like to deal data from multiple videos. To do this, we need
-to (usually automatically, e.g. in <a href="../snakemake/">Snakemake</a> create a CSV file
+to (usually automatically, e.g. in <a href="../snakemake/">Snakemake</a>) create a CSV file
 for our corpus. Here is an example:</p>
 <pre><code>video,group,group_typ,faces,segsout,untracked_skels,tracked_skels,bestcands
 /path/to/video.mp4,/path/to/scenes,ffprobe|psd,/path/to/facedump.h5,/path/to/clustering.output.csv,/path/to/untracked.skels.h5,/path/to/tracked.skels.h5,/path/to/bestcands.csv

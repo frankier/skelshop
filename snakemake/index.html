@@ -840,7 +840,7 @@ $ poetry run snakemake tracked_all \
 $ git clone --recursive https://github.com/frankier/singslurm2.git
 </code></pre>
 <p>Now you can download the Docker image with Singularity:</p>
-<pre><code>$ singularity pull skelshop.sif docker://frankierr/skelshop:focal_nvcaffe
+<pre><code>$ singularity pull skelshop.sif docker://ghcr.io/frankier/skelshop_nvcaffe
 </code></pre>
 <p>Next, you need to create a JSON file specifying which type of nodes you would
 like to assign to different rules (steps in the workflow). <a href="https://github.com/frankier/skelshop/blob/master/contrib/slurm/skels.tracked.clusc.json">There is an example
