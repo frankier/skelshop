@@ -1,14 +1,12 @@
 <h1><img src="https://github.com/frankier/skelshop/blob/master/skelshop/news.png" /> SkelShop</h1>
 
 <p align="center">
-<a href="https://gitlab.com/frankier/skelshop/-/commits/master">
-  <img alt="pipeline status" src="https://gitlab.com/frankier/skelshop/badges/master/pipeline.svg" />
-</a>
 <a href="https://github.com/frankier?tab=packages&repo_name=skelshop">
-  ghcr.io
+  Docker/Singularity containers
 </a>
+|
 <a href="https://frankier.github.io/skelshop/">
-  <img alt="Documentation on GitHub pages" src="https://img.shields.io/badge/Docs-MkDocs-informational" />
+  Documentation on GitHub pages
 </a>
 </p>
 
