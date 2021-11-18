@@ -9,10 +9,11 @@ def cnf(name, val):
 
 # Intermediate dirs
 cnf("WORK", "work")
+SETUP_WORK = os.environ.get("SETUP_WORK", WORK)
 cnf("VIDEO_BASE", ".")
 cnf("DUMP_BASE", ".")
-cnf("GCN_WEIGHTS", pjoin(WORK, "gcn_weights"))
-cnf("GCN_CONFIG", pjoin(WORK, "gcn_config.yaml"))
+cnf("GCN_WEIGHTS", pjoin(SETUP_WORK, "gcn_weights"))
+cnf("GCN_CONFIG", pjoin(SETUP_WORK, "gcn_config.yaml"))
 cnf("FFPROBE_BIN", which("ffprobe"))
 
 ## Configs
