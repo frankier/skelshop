@@ -8,7 +8,7 @@ from .skelgraphs.conv import BODY_25_TO_POSETRACK, keypoints_to_posetrack
 
 class EmptyPoseBundle:
     def __iter__(self):
-        return
+        yield from ()
 
 
 class PoseBundle:
