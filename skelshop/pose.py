@@ -6,6 +6,11 @@ import numpy as np
 from .skelgraphs.conv import BODY_25_TO_POSETRACK, keypoints_to_posetrack
 
 
+class EmptyPoseBundle:
+    def __iter__(self):
+        return
+
+
 class PoseBundle:
     def __init__(self, datum, cls):
         self.datum = datum

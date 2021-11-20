@@ -5,6 +5,7 @@ from skelshop import lazyimp
 
 from .pipebase import PipelineStageBase
 from .pose import (
+    EmptyPoseBundle,
     PoseBody25,
     PoseBody25All,
     PoseBody25Face,
@@ -104,6 +105,8 @@ class OpenPoseStage(PipelineStageBase):
         res = self.op_wrap.waitAndPop(vec_datum)
         if not res:
             raise StopIteration()
+        if not len(vec_datum):
+            return EmptyPoseBundle()
         datum = vec_datum[0]
         if logger.isEnabledFor(logging.DEBUG):
             print_all(datum, logger.debug)
