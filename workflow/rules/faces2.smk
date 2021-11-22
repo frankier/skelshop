@@ -12,7 +12,7 @@ FILTER_VRT_PATH = pjoin(workflow.basedir, "../filter_vrt.py")
 if "OVERRIDE_BASES" in os.environ:
     bases = os.environ["OVERRIDE_BASES"].split(",")
 else:
-    bases = [line.strip() for line in open(pjoin(workflow.basedir, "../pravo_golosa.txt")) if line.strip()]
+    bases = [line.strip() for line in open(pjoin(workflow.basedir, "../bases.txt")) if line.strip()]
 partial_bases, = glob_wildcards(pjoin(DUMP_BASE, "{base}.untracked.h5"))
 
 ## Environment variables
