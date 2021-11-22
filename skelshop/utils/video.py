@@ -76,9 +76,20 @@ def decord_video_reader(path):
 def read_numpy_chunks(
     video_reader, frame_idxs, batch_size=DEFAULT_FRAME_BATCH_SIZE, offset=0
 ):
+    from decord import DECORDError
+
     for frame_idx_batch in chunked(frame_idxs, batch_size):
-        batch_frames = video_reader.get_batch(
-            [frame_idx + offset for frame_idx in frame_idx_batch]
-        )
-        for frame_idx, frame in zip(frame_idx_batch, batch_frames.asnumpy()):
-            yield frame_idx, frame
+        frame_nums = [frame_idx + offset for frame_idx in frame_idx_batch]
+        try:
+            batch_frames = video_reader.get_batch(frame_nums)
+        except DECORDError:
+            video_reader.seek(0)
+            for frame_idx, frame_num in zip(frame_idx_batch, frame_nums):
+                try:
+                    yield frame_idx, video_reader[frame_num].asnumpy()
+                except DECORDError:
+                    yield frame_idx, None
+                    video_reader.seek(0)
+        else:
+            for frame_idx, frame in zip(frame_idx_batch, batch_frames.asnumpy()):
+                yield frame_idx, frame

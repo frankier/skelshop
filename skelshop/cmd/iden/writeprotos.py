@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import sys
 from csv import DictReader
 from functools import lru_cache
 from itertools import groupby
@@ -85,7 +86,14 @@ def writeprotos(protos: TextIO, corpus_desc: Path, protos_dir: Path, corpus_base
     for video_idx, frames in frame_grouped.items():
         video = corpus[video_idx]["video"]
         vid_read = decord_video_reader(str(video))
-        for frame_num, frame in read_numpy_chunks(vid_read, frames.keys()):
+        numpy_chunks = read_numpy_chunks(vid_read, frames.keys())
+        for frame_num, frame in numpy_chunks:
+            if frame is None:
+                print(
+                    f"Skipping {video}, frame {frame_num: 5d} due to error",
+                    file=sys.stderr,
+                )
+                continue
             for clus_dir, skel, extractor in frames[frame_num]:
                 PREFIX = "openpose-"
                 assert extractor.startswith(PREFIX)
