@@ -198,7 +198,3 @@ def dist_ratio(df_in):
     sns.displot(data=df[["eye_angle", "shoulder_angle"]], kde=True, ax=axes[0])
     sns.displot(data=df[["eye_ratio", "shoulder_ratio"]], kde=True, ax=axes[1])
     pyplot.show()
-
-
-if __name__ == "__main__":
-    aplot()

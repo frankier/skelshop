@@ -127,7 +127,7 @@ def vrt_list(lst):
 @click.argument("inp_vrt", type=click.File("r"))
 @click.argument("out_vrt", type=click.File("w"))
 @click.option("--timestamp-col-start", type=int, default=20)
-def main(id_segs, video, skelin, inp_vrt, out_vrt, timestamp_col_start):
+def filter_vrt(id_segs, video, skelin, inp_vrt, out_vrt, timestamp_col_start):
     """
     Takes a VRT with the 21st-24th columns containing the cue times in `start
     secs, start cents, end secs, end cents` and appends 3 columns `shot
@@ -173,7 +173,3 @@ def main(id_segs, video, skelin, inp_vrt, out_vrt, timestamp_col_start):
             out_vrt.write("\t".join(line_bits))
             out_vrt.write("\n")
             prev_end_frame = end_frame
-
-
-if __name__ == "__main__":
-    main()
