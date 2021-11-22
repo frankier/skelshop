@@ -29,8 +29,8 @@ class CorpusReader:
         "faces",
         "segsout",
         "video",
-        "skels_untracked",
-        "skels_tracked",
+        "untracked_skels",
+        "tracked_skels",
         "bestcands",
     }
 

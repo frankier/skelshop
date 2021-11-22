@@ -76,7 +76,7 @@ def writeprotos(protos: TextIO, corpus_desc: Path, protos_dir: Path, corpus_base
             frame_num = int(proto["frame_num"])
             pers_id = int(proto["pers_id"])
             seg, seg_frame_num, extractor = cand[(frame_num, pers_id)]
-            with h5py.File(video_info["skels_tracked"], "r") as tracked:
+            with h5py.File(video_info["tracked_skels"], "r") as tracked:
                 skel_read = ShotSegmentedReader(tracked)
                 skel = skel_read[seg][seg_frame_num, (pers_id,)]
                 frame_grouped.setdefault(video_idx, {}).setdefault(
