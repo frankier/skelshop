@@ -145,6 +145,14 @@ test = ["mock", "pyyaml", "pytest"]
 yaml = ["pyyaml"]
 
 [[package]]
+name = "connection-pool"
+version = "0.0.3"
+description = "thread safe connection pool"
+category = "main"
+optional = true
+python-versions = "*"
+
+[[package]]
 name = "cycler"
 version = "0.11.0"
 description = "Composable style cycles"
@@ -1081,7 +1089,7 @@ tests = ["html5lib", "networkx", "nose (==1.3.7)", "nose-timer", "coverage", "bl
 
 [[package]]
 name = "redis"
-version = "4.0.1"
+version = "4.0.2"
 description = "Python client for Redis database and key-value store"
 category = "main"
 optional = true
@@ -1230,6 +1238,23 @@ reference = "7e0a0cf852240a21b0c5fd23d8ddf0c8b85d7d8e"
 resolved_reference = "7e0a0cf852240a21b0c5fd23d8ddf0c8b85d7d8e"
 
 [[package]]
+name = "smart-open"
+version = "5.2.1"
+description = "Utils for streaming large files (S3, HDFS, GCS, Azure Blob Storage, gzip, bz2...)"
+category = "main"
+optional = true
+python-versions = ">=3.6,<4.0"
+
+[package.extras]
+all = ["boto3", "google-cloud-storage", "azure-storage-blob", "azure-common", "azure-core", "requests"]
+azure = ["azure-storage-blob", "azure-common", "azure-core"]
+gcs = ["google-cloud-storage"]
+http = ["requests"]
+s3 = ["boto3"]
+test = ["boto3", "google-cloud-storage", "azure-storage-blob", "azure-common", "azure-core", "requests", "moto[server] (==1.3.14)", "pathlib2", "responses", "paramiko", "parameterizedtestcase", "pytest", "pytest-rerunfailures"]
+webhdfs = ["requests"]
+
+[[package]]
 name = "smmap"
 version = "5.0.0"
 description = "A pure Python implementation of a sliding window memory map manager"
@@ -1239,7 +1264,7 @@ python-versions = ">=3.6"
 
 [[package]]
 name = "snakemake"
-version = "5.32.2"
+version = "6.10.0"
 description = "Snakemake is a workflow management system that aims to reduce the complexity of creating workflows by providing a fast and comfortable execution environment, together with a clean and modern specification language in python style. Snakemake workflows are essentially Python scripts extended by declarative code to define rules. Rules describe how to create output files from input files."
 category = "main"
 optional = true
@@ -1248,8 +1273,10 @@ python-versions = "*"
 [package.dependencies]
 appdirs = "*"
 configargparse = "*"
+connection_pool = ">=0.0.3"
 datrie = "*"
 docutils = "*"
+filelock = "*"
 gitpython = "*"
 jsonschema = "*"
 nbformat = "*"
@@ -1258,6 +1285,9 @@ pulp = ">=2.0"
 pyyaml = "*"
 ratelimiter = "*"
 requests = "*"
+smart_open = ">=3.0"
+stopit = "*"
+tabulate = "*"
 toposort = "*"
 wrapt = "*"
 
@@ -1288,6 +1318,25 @@ rdflib = ">=4.0"
 
 [package.extras]
 keepalive = ["keepalive (>=0.5)"]
+
+[[package]]
+name = "stopit"
+version = "1.1.2"
+description = "Timeout control decorator and context managers, raise any exception in another thread"
+category = "main"
+optional = true
+python-versions = "*"
+
+[[package]]
+name = "tabulate"
+version = "0.8.9"
+description = "Pretty-print tabular data"
+category = "main"
+optional = true
+python-versions = "*"
+
+[package.extras]
+widechars = ["wcwidth"]
 
 [[package]]
 name = "threadpoolctl"
@@ -1474,7 +1523,7 @@ ssmat = ["numba", "matplotlib", "scikit-learn", "scipy"]
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.7"
-content-hash = "e3c4d55acb49772bb2fce0fa23712809ad40b3cd5aec90fd25d13c8a0cdf8f74"
+content-hash = "6cb7c8cf61a3d2611999cedb9e7bef1379724c5687528110bd4e7f56e514c071"
 
 [metadata.files]
 appdirs = [
@@ -1528,6 +1577,9 @@ colorama = [
 configargparse = [
     {file = "ConfigArgParse-1.5.3-py3-none-any.whl", hash = "sha256:18f6535a2db9f6e02bd5626cc7455eac3e96b9ab3d969d366f9aafd5c5c00fe7"},
     {file = "ConfigArgParse-1.5.3.tar.gz", hash = "sha256:1b0b3cbf664ab59dada57123c81eff3d9737e0d11d8cf79e3d6eb10823f1739f"},
+]
+connection-pool = [
+    {file = "connection_pool-0.0.3.tar.gz", hash = "sha256:bf429e7aef65921c69b4ed48f3d48d3eac1383b05d2df91884705842d974d0dc"},
 ]
 cycler = [
     {file = "cycler-0.11.0-py3-none-any.whl", hash = "sha256:3a27e95f763a428a739d2add979fa7494c912a32c17c4c38c4d5f082cad165a3"},
@@ -2458,8 +2510,8 @@ rdflib = [
     {file = "rdflib-6.0.2.tar.gz", hash = "sha256:6136ae056001474ee2aff5fc5b956e62a11c3a9c66bb0f3d9c0aaa5fbb56854e"},
 ]
 redis = [
-    {file = "redis-4.0.1-py3-none-any.whl", hash = "sha256:bc6832367d60e1a5f94d75314fc46e8ce6f07fee8e532ee1bfafaf4887f8b4bb"},
-    {file = "redis-4.0.1.tar.gz", hash = "sha256:cc642f70e0ebddce960818ba35776af6a18487cc38f66deace68d55b97e6e3cf"},
+    {file = "redis-4.0.2-py3-none-any.whl", hash = "sha256:c8481cf414474e3497ec7971a1ba9b998c8efad0f0d289a009a5bbef040894f9"},
+    {file = "redis-4.0.2.tar.gz", hash = "sha256:ccf692811f2c1fc7a92b466aa2599e4a6d2d73d5f736a2c70be600657c0da34a"},
 ]
 regex = [
     {file = "regex-2021.11.10-cp310-cp310-macosx_10_9_x86_64.whl", hash = "sha256:9345b6f7ee578bad8e475129ed40123d265464c4cfead6c261fd60fc9de00bcf"},
@@ -2581,12 +2633,16 @@ six = [
     {file = "six-1.16.0.tar.gz", hash = "sha256:1e61c37477a1626458e36f7b1d82aa5c9b094fa4802892072e49de9c60c4c926"},
 ]
 sklearn-ann = []
+smart-open = [
+    {file = "smart_open-5.2.1-py3-none-any.whl", hash = "sha256:71d14489da58b60ce12fc3ecb823facc59a8b23cd1b58edb97175640350d3a62"},
+    {file = "smart_open-5.2.1.tar.gz", hash = "sha256:75abf758717a92a8f53aa96953f0c245c8cedf8e1e4184903db3659b419d4c17"},
+]
 smmap = [
     {file = "smmap-5.0.0-py3-none-any.whl", hash = "sha256:2aba19d6a040e78d8b09de5c57e96207b09ed71d8e55ce0959eeee6c8e190d94"},
     {file = "smmap-5.0.0.tar.gz", hash = "sha256:c840e62059cd3be204b0c9c9f74be2c09d5648eddd4580d9314c3ecde0b30936"},
 ]
 snakemake = [
-    {file = "snakemake-5.32.2.tar.gz", hash = "sha256:ff35f3c5d283c5b38a926b943f18aa732cc8af4bd1f59471907ef3adda1b018c"},
+    {file = "snakemake-6.10.0.tar.gz", hash = "sha256:199a86c8d1fcfdb88c4271a1507b0ab371a15bc407f2dad9b0ab8c43438adff8"},
 ]
 soupsieve = [
     {file = "soupsieve-2.3.1-py3-none-any.whl", hash = "sha256:1a3cca2617c6b38c0343ed661b1fa5de5637f257d4fe22bd9f1338010a1efefb"},
@@ -2598,6 +2654,13 @@ sparqlwrapper = [
     {file = "SPARQLWrapper-1.8.5-py3-none-any.whl", hash = "sha256:c7f9c9d8ebb13428771bc3b6dee54197422507dcc3dea34e30d5dcfc53478dec"},
     {file = "SPARQLWrapper-1.8.5-py3.4.egg", hash = "sha256:8cf6c21126ed76edc85c5c232fd6f77b9f61f8ad1db90a7147cdde2104aff145"},
     {file = "SPARQLWrapper-1.8.5.tar.gz", hash = "sha256:d6a66b5b8cda141660e07aeb00472db077a98d22cb588c973209c7336850fb3c"},
+]
+stopit = [
+    {file = "stopit-1.1.2.tar.gz", hash = "sha256:f7f39c583fd92027bd9d06127b259aee7a5b7945c1f1fa56263811e1e766996d"},
+]
+tabulate = [
+    {file = "tabulate-0.8.9-py3-none-any.whl", hash = "sha256:d7c013fe7abbc5e491394e10fa845f8f32fe54f8dc60c6622c6cf482d25d47e4"},
+    {file = "tabulate-0.8.9.tar.gz", hash = "sha256:eb1d13f25760052e8931f2ef80aaf6045a6cceb47514db8beab24cded16f13a7"},
 ]
 threadpoolctl = [
     {file = "threadpoolctl-3.0.0-py3-none-any.whl", hash = "sha256:4fade5b3b48ae4b1c30f200b28f39180371104fccc642e039e0f2435ec8cc211"},
